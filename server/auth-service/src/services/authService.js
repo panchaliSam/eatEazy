@@ -52,4 +52,19 @@ const login = (email, password, callback) => {
     });
 };
 
-module.exports = { register, login };
+// Get user by ID
+const getById = (id, callback) => {
+    UserModel.findUserById(id, callback);
+};
+
+// Delete user (Admin only)
+const deleteUser = (id, callback) => {
+    UserModel.deleteUserById(id, callback);
+};
+
+// Update user (Any user or Admin)
+const updateUser = (id, userData, callback) => {
+    UserModel.updateUserById(id, userData, callback);
+};
+
+module.exports = { register, login, getById, deleteUser, updateUser };
