@@ -1,10 +1,13 @@
 const express = require('express');
-const { register, login, getAllUsers } = require('../controllers/authController');
+const { register, login, getAllUsers, getUserById, updateUser, deleteUser } = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 router.post('/register', register);
 router.post('/login', login);
-router.get('/users', authenticateToken, getAllUsers); // Only accessible for Admins
+router.get('/users', authenticateToken, getAllUsers);
+router.get('/users/:id', authenticateToken, getUserById);
+router.put('/users/:id', authenticateToken, updateUser);
+router.delete('/users/:id', authenticateToken, deleteUser);
 
 module.exports = router;

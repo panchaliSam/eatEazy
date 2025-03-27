@@ -16,6 +16,14 @@ const UserModel = {
     getAllUsers: (callback) => {
         UserRepository.getAllUsers(callback);
     },
+
+    deleteUserById: (id, callback) => {
+        UserRepository.deleteById(id, callback);
+    },
+
+    updateUserById: (id, userData, callback) => {
+        UserRepository.updateById(id, userData, callback);
+    },
 };
 
 module.exports = UserModel;

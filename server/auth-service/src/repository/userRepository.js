@@ -21,6 +21,17 @@ const UserRepository = {
         const query = 'SELECT UserID, Firstname, Lastname, Email, Phone, Role FROM Users';
         db.query(query, callback);
     },
+
+    deleteById: (id, callback) => {
+        const query = 'DELETE FROM Users WHERE UserID = ?';
+        db.query(query, [id], callback);
+    },
+
+    updateById: (id, userData, callback) => {
+        const { firstname, lastname, email, phone, role } = userData;
+        const query = 'UPDATE Users SET Firstname = ?, Lastname = ?, Email = ?, Phone = ?, Role = ? WHERE UserID = ?';
+        db.query(query, [firstname, lastname, email, phone, role, id], callback);
+    },
 };
 
 module.exports = UserRepository;
