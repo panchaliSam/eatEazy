@@ -1,7 +1,13 @@
 const winston = require('winston');
 const path = require('path');
+const fs = require('fs');
 
-const logFilePath = path.join(__dirname, '../logs/app.log');
+const logDirectory = path.join(__dirname, 'logs');
+const logFilePath = path.join(logDirectory, 'app.log');
+
+if (!fs.existsSync(logDirectory)) {
+    fs.mkdirSync(logDirectory);
+}
 
 const logger = winston.createLogger({
     level: 'info',

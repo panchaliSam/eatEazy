@@ -1,28 +1,28 @@
 const UserRepository = require('../repository/userRepository');
 
 const UserModel = {
-    createUser: (userData, callback) => {
-        UserRepository.create(userData, callback);
+    createUser: async (userData) => {
+        return await UserRepository.create(userData);
     },
 
-    findUserByEmail: (email, callback) => {
-        UserRepository.findByEmail(email, callback);
+    findUserByEmail: async (email) => {
+        return await UserRepository.findByEmail(email);
     },
 
-    findUserById: (id, callback) => {
-        UserRepository.findById(id, callback);
+    findUserById: async (id) => {
+        return await UserRepository.findById(id);
     },
 
-    getAllUsers: (callback) => {
-        UserRepository.getAllUsers(callback);
+    getAllUsers: async () => {
+        return await UserRepository.getAllUsers();
     },
 
-    deleteUserById: (id, callback) => {
-        UserRepository.deleteById(id, callback);
+    deleteUserById: async (id) => {
+        return await UserRepository.deleteById(id);
     },
 
-    updateUserById: (id, userData, callback) => {
-        UserRepository.updateById(id, userData, callback);
+    updateUserById: async (id, userData) => {
+        return await UserRepository.updateById(id, userData);
     },
 };
 
