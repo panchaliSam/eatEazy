@@ -1,36 +1,42 @@
-const db = require('../config/db');
+const pool = require('../config/db');
 
 const UserRepository = {
-    create: (userData, callback) => {
+    create: async (userData) => {
         const { firstname, lastname, email, passwordHash, phone, role } = userData;
         const query = 'INSERT INTO Users (Firstname, Lastname, Email, PasswordHash, Phone, Role) VALUES (?, ?, ?, ?, ?, ?)';
-        db.query(query, [firstname, lastname, email, passwordHash, phone, role], callback);
+        const [result] = await pool.execute(query, [firstname, lastname, email, passwordHash, phone, role]);
+        return result;
     },
 
-    findByEmail: (email, callback) => {
+    findByEmail: async (email) => {
         const query = 'SELECT * FROM Users WHERE Email = ?';
-        db.query(query, [email], callback);
+        const [rows] = await pool.execute(query, [email]);
+        return rows;
     },
 
-    findById: (id, callback) => {
+    findById: async (id) => {
         const query = 'SELECT * FROM Users WHERE UserID = ?';
-        db.query(query, [id], callback);
+        const [rows] = await pool.execute(query, [id]);
+        return rows;
     },
 
-    getAllUsers: (callback) => {
+    getAllUsers: async () => {
         const query = 'SELECT UserID, Firstname, Lastname, Email, Phone, Role FROM Users';
-        db.query(query, callback);
+        const [rows] = await pool.execute(query);
+        return rows;
     },
 
-    deleteById: (id, callback) => {
+    deleteById: async (id) => {
         const query = 'DELETE FROM Users WHERE UserID = ?';
-        db.query(query, [id], callback);
+        const [result] = await pool.execute(query, [id]);
+        return result;
     },
 
-    updateById: (id, userData, callback) => {
+    updateById: async (id, userData) => {
         const { firstname, lastname, email, phone, role } = userData;
         const query = 'UPDATE Users SET Firstname = ?, Lastname = ?, Email = ?, Phone = ?, Role = ? WHERE UserID = ?';
-        db.query(query, [firstname, lastname, email, phone, role, id], callback);
+        const [result] = await pool.execute(query, [firstname, lastname, email, phone, role, id]);
+        return result;
     },
 };
 
