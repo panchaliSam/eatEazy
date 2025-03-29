@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS Restaurants (
     Address TEXT NOT NULL,
     Phone VARCHAR(15),
     Email VARCHAR(255),
-    Availability BOOLEAN DEFAULT TRUE,
+    Availability VARCHAR(255) NOT NULL,
     FOREIGN KEY (OwnerID) REFERENCES Users(UserID) ON DELETE SET NULL
 );
 
