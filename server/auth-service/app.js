@@ -1,8 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const authRoutes = require('./src/routes/authRoutes');
-const { authenticateToken } = require('./src/middleware/authMiddleware');
-const db = require('./src/config/db');
 const { AUTH_SERVICE_PORT } = require('./src/config/env');
 
 

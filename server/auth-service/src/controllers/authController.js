@@ -1,5 +1,6 @@
 const authService = require('../services/authService');
-const UserModel = require('../models/userModel');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config/env');
 
 // Register new user
 const register = async (req, res) => {
@@ -42,7 +43,7 @@ const getAllUsers = async (req, res) => {
     }
 
     try {
-        const users = await UserModel.getAllUsers();
+        const users = await authService.getAllUsers();
         res.status(200).json(users);
     } catch (err) {
         res.status(500).json({ message: 'Failed to fetch users.', error: err.message });
@@ -106,4 +107,21 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { register, login, getAllUsers, getUserById, updateUser, deleteUser };
+//Verify JWT
+const verifyToken = (req, res) => {
+    const { token } = req.body;
+
+    if (!token) {
+        return res.status(400).json({ message: 'Token is required.' });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(403).json({ message: 'Invalid or expired token.' });
+        }
+
+        res.status(200).json({ message: 'Token is valid.', user: decoded });
+    });
+};
+
+module.exports = { register, login, getAllUsers, getUserById, updateUser, deleteUser, verifyToken };
