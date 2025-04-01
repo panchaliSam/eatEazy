@@ -96,8 +96,6 @@ const deleteRestaurantById = async (req, res) => {
     }
 };
 
-
-
 module.exports = {
     registerRestaurant,
     getAllRestaurants,
