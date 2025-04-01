@@ -1,13 +1,10 @@
-// services/paymentService.js
 const PaymentModel = require('../models/paymentModel');
-const axios = require('axios');
+const { PAYHERE_MERCHANT_ID, PAYHERE_MERCHANT_SECRET } = require('../config/env');
+const crypto = require('crypto');
 
-// Initiate a payment for an order
 const initiatePayment = async (OrderID, PaymentMethod) => {
-    // Fetch order details to calculate the payment amount
     const orderDetails = await PaymentModel.getOrderDetails(OrderID);
 
-    // Integrate with the payment gateway (e.g., PayHere, PayPal)
     let paymentResponse;
     switch (PaymentMethod) {
         case 'PayHere':
@@ -17,47 +14,61 @@ const initiatePayment = async (OrderID, PaymentMethod) => {
             throw new Error('Unsupported payment method');
     }
 
-    // Store payment details in the database
     const paymentData = {
-        orderId,
+        OrderID,
         PaymentMethod,
         PaymentStatus: 'Pending',
         TransactionID: paymentResponse.TransactionID,
     };
 
-    const paymentId = await PaymentModel.createPayment(paymentData);
-    return { paymentId, PaymentStatus: 'Pending', TransactionID: paymentResponse.TransactionID };
+    const PaymentID = await PaymentModel.createPayment(paymentData);
+    return { 
+        PaymentID, 
+        redirectUrl: paymentResponse.redirectUrl,
+        PaymentStatus: 'Pending'
+    };
 };
 
-// Helper functions to interact with different payment gateways
 const initiatePayHerePayment = async (orderDetails) => {
-    // Call the PayHere API to initiate a payment (example)
-    const response = await axios.post('https://sandbox.payhere.lk/payments', {
-        amount: orderDetails.totalAmount,
-        currency: 'LKR',
-        return_url: 'http://yourapp.com/payment/success',
-        cancel_url: 'http://yourapp.com/payment/cancel',
+    // Ensure OrderTotal is a valid number
+    const orderTotal = parseFloat(orderDetails.OrderTotal);
+    if (isNaN(orderTotal)) {
+        throw new Error('Invalid OrderTotal value');
+    }
+
+    // Generate temporary transaction ID
+    const tempTransactionId = `TEMP_${Date.now()}`;
+    
+    // Construct PayHere URL
+    const params = new URLSearchParams({
+        merchant_id: PAYHERE_MERCHANT_ID,
+        return_url: 'http://localhost:4010/api/payments/success',
+        cancel_url: 'http://localhost:4010/api/payments/cancel',
+        notify_url: 'http://localhost:4010/api/payments/notify',
         order_id: orderDetails.OrderID,
+        items: `Order #${orderDetails.OrderID}`,
+        amount: orderTotal.toFixed(2),  // Now we are sure it's a number
+        currency: 'LKR',
+        sandbox: '1'
     });
 
-    return response.data;
+    return {
+        TransactionID: tempTransactionId,
+        redirectUrl: `https://sandbox.payhere.lk/pay/checkout?${params.toString()}`
+    };
 };
 
-// const initiateStripePayment = async (orderDetails) => {
-//     // Call the Stripe API to initiate a payment (example)
-//     const response = await axios.post('https://api.stripe.com/v1/charges', {
-//         amount: orderDetails.totalAmount * 100, // Amount in cents
-//         currency: 'lkr',
-//         source: 'tok_visa', // Example token, in real case this comes from frontend
-//         description: `Order #${orderDetails.orderId}`,
-//     });
+// Verify PayHere Payment Notification Hash
+const verifyPaymentHash = (payload) => {
+    const hashString = `${payload.merchant_id}${payload.order_id}${payload.payhere_amount}${payload.payhere_currency}${payload.status_code}${PAYHERE_MERCHANT_SECRET}`;
+    const computedHash = crypto.createHash('md5').update(hashString).digest('hex').toUpperCase();
 
-//     return response.data;
-// };
+    return computedHash === payload.md5sig;
+};
 
 // Update payment status in the database
 const updatePaymentStatus = async (PaymentID, PaymentStatus) => {
     await PaymentModel.updatePaymentStatus(PaymentID, PaymentStatus);
 };
 
-module.exports = { initiatePayment, updatePaymentStatus };
+module.exports = { initiatePayment, updatePaymentStatus, verifyPaymentHash };
