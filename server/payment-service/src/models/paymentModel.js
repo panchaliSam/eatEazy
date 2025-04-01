@@ -1,18 +1,19 @@
-// // models/paymentModel.js
-// const PaymentRepository = require('../repository/paymentRepository');
+// models/paymentModel.js
+const PaymentRepository = require('../repository/paymentRepository');
 
-// const PaymentModel = {
-//     createPayment: async (paymentData) => {
-//         return await PaymentRepository.createPayment(paymentData);
-//     },
+const PaymentModel = {
+    createPayment: async (paymentData) => {
+        return await PaymentRepository.createPayment(paymentData);
+    },
 
-//     getOrderDetails: async (OrderID) => {
-//         return await PaymentRepository.getOrderDetails(OrderID);
-//     },
+    getOrderDetails: async (OrderID) => {
+        const orderDetails = await PaymentRepository.getOrderDetails(OrderID);
+        return orderDetails; 
+    },
 
-//     updatePaymentStatus: async (PaymentID, PaymentStatus) => {
-//         return await PaymentRepository.updatePaymentStatus(PaymentID, PaymentStatus);
-//     }
-// };
+    updatePaymentStatus: async (PaymentID, PaymentStatus) => {
+        return await PaymentRepository.updatePaymentStatus(PaymentID, PaymentStatus);
+    }
+};
 
-// module.exports = PaymentModel;
+module.exports = PaymentModel;
