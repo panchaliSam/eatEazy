@@ -1,5 +1,6 @@
 const PaymentModel = require('../models/paymentModel');
-const { PAYHERE_MERCHANT_ID } = require('../config/env');
+const { PAYHERE_MERCHANT_ID, PAYHERE_MERCHANT_SECRET } = require('../config/env');
+const crypto = require('crypto');
 
 const initiatePayment = async (OrderID, PaymentMethod) => {
     const orderDetails = await PaymentModel.getOrderDetails(OrderID);
@@ -29,6 +30,12 @@ const initiatePayment = async (OrderID, PaymentMethod) => {
 };
 
 const initiatePayHerePayment = async (orderDetails) => {
+    // Ensure OrderTotal is a valid number
+    const orderTotal = parseFloat(orderDetails.OrderTotal);
+    if (isNaN(orderTotal)) {
+        throw new Error('Invalid OrderTotal value');
+    }
+
     // Generate temporary transaction ID
     const tempTransactionId = `TEMP_${Date.now()}`;
     
@@ -40,7 +47,7 @@ const initiatePayHerePayment = async (orderDetails) => {
         notify_url: 'http://localhost:4010/api/payments/notify',
         order_id: orderDetails.OrderID,
         items: `Order #${orderDetails.OrderID}`,
-        amount: orderDetails.OrderTotal.toFixed(2),
+        amount: orderTotal.toFixed(2),  // Now we are sure it's a number
         currency: 'LKR',
         sandbox: '1'
     });
@@ -51,21 +58,17 @@ const initiatePayHerePayment = async (orderDetails) => {
     };
 };
 
-// const initiateStripePayment = async (orderDetails) => {
-//     // Call the Stripe API to initiate a payment (example)
-//     const response = await axios.post('https://api.stripe.com/v1/charges', {
-//         amount: orderDetails.totalAmount * 100, // Amount in cents
-//         currency: 'lkr',
-//         source: 'tok_visa', // Example token, in real case this comes from frontend
-//         description: `Order #${orderDetails.orderId}`,
-//     });
+// Verify PayHere Payment Notification Hash
+const verifyPaymentHash = (payload) => {
+    const hashString = `${payload.merchant_id}${payload.order_id}${payload.payhere_amount}${payload.payhere_currency}${payload.status_code}${PAYHERE_MERCHANT_SECRET}`;
+    const computedHash = crypto.createHash('md5').update(hashString).digest('hex').toUpperCase();
 
-//     return response.data;
-// };
+    return computedHash === payload.md5sig;
+};
 
 // Update payment status in the database
 const updatePaymentStatus = async (PaymentID, PaymentStatus) => {
     await PaymentModel.updatePaymentStatus(PaymentID, PaymentStatus);
 };
 
-module.exports = { initiatePayment, updatePaymentStatus };
+module.exports = { initiatePayment, updatePaymentStatus, verifyPaymentHash };

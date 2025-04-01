@@ -1,9 +1,16 @@
 // controllers/paymentController.js
 const PaymentService = require('../services/paymentService');
+const md5 = require('md5');
+const { PAYHERE_MERCHANT_SECRET } = require('../config/env');
 
 const initiatePayment = async (req, res) => {
     try {
         const { OrderID, PaymentMethod } = req.body;
+
+        if (!OrderID || !PaymentMethod) {
+            return res.status(400).json({ error: 'OrderID and PaymentMethod are required' });
+        }
+
         const paymentDetails = await PaymentService.initiatePayment(OrderID, PaymentMethod);
         
         res.status(201).json({ 
@@ -16,12 +23,14 @@ const initiatePayment = async (req, res) => {
     }
 };
 
-// Handle payment status update
 const updatePaymentStatus = async (req, res) => {
     try {
         const { PaymentID, PaymentStatus } = req.body;
 
-        // Call the service to update the payment status
+        if (!PaymentID || !PaymentStatus) {
+            return res.status(400).json({ error: 'PaymentID and PaymentStatus are required' });
+        }
+
         await PaymentService.updatePaymentStatus(PaymentID, PaymentStatus);
 
         res.status(200).json({ message: 'Payment status updated successfully' });
@@ -41,20 +50,20 @@ const handlePaymentNotification = async (req, res) => {
             payload.order_id,
             payload.payhere_amount,
             payload.payhere_currency,
-            payload.status_code,
-            PAYHERE_MERCHANT_SECRET
+            payload.status_code
         );
 
         if (generatedHash !== payload.md5sig) {
             return res.status(400).json({ error: 'Invalid signature' });
         }
 
-        // Update payment status
-        if (payload.status_code === 2) { // PayHere success code
-            await PaymentService.updatePaymentStatus(
-                payload.order_id, 
-                'Completed'
-            );
+        // Update payment status based on PayHere response
+        if (payload.status_code === 2) {
+            await PaymentService.updatePaymentStatus(payload.order_id, 'Completed');
+        } else if (payload.status_code === 0) {
+            await PaymentService.updatePaymentStatus(payload.order_id, 'Pending');
+        } else if (payload.status_code === -1) {
+            await PaymentService.updatePaymentStatus(payload.order_id, 'Failed');
         }
 
         res.status(200).send('OK');
@@ -64,11 +73,9 @@ const handlePaymentNotification = async (req, res) => {
     }
 };
 
-// Helper function
-const createPaymentHash = (...params) => {
-    const hash = params.slice(0, 5).join('') + 
-                md5(PAYHERE_MERCHANT_SECRET).toUpperCase();
-    return md5(hash).toUpperCase();
+const createPaymentHash = (merchant_id, order_id, amount, currency, status_code) => {
+    const data = `${merchant_id}${order_id}${amount}${currency}${status_code}${PAYHERE_MERCHANT_SECRET}`;
+    return md5(data).toUpperCase();
 };
 
-module.exports = { initiatePayment, updatePaymentStatus, handlePaymentNotification, createPaymentHash };
+module.exports = { initiatePayment, updatePaymentStatus, handlePaymentNotification };
