@@ -15,9 +15,9 @@ const RestaurantRepository = {
     },
 
     findById: async(id) => {
-        const query = 'SELECT * FROM Restaurants WHERE RestaurantId = ?';
+        const query = 'SELECT * FROM Restaurants WHERE RestaurantID = ?';
         const [rows] = await pool.execute(query, [id]);
-        return rows;
+        return rows.length > 0 ? rows[0] : null;
     },
 
     getAllRestaurants: async () => {
@@ -26,16 +26,16 @@ const RestaurantRepository = {
         return rows;
     },
 
-    deleteBuId: async(id, restaurantData) => {
-        const query  = 'DELETE FROM Restaurants WHERE RestaurantId = ?';
+    deleteById: async(id) => {
+        const query  = 'DELETE FROM Restaurants WHERE RestaurantID = ?';
         const [result] = await pool.execute(query, [id]);
         return result;
     },
 
     updateById: async (id, restaurantData) => {
-        const { restaurantName, address, phone, email, avatar } = restaurantData;
-        const query = 'UPDATE Restaurants SET RestaurantName = ?, ADDRESS = ?,  Phone= ?, Email = ?, Availability = ? WHERE RestaurantId = ?';
-        const [result] = await pool.execute(query, [id, restaurantName, address, phone, email, availability]);
+        const { restaurantName, address, phone, email, availability } = restaurantData;
+        const query = 'UPDATE Restaurants SET RestaurantName = ?, ADDRESS = ?,  Phone= ?, Email = ?, Availability = ? WHERE RestaurantID = ?';
+        const [result] = await pool.execute(query, [restaurantName, address, phone, email, availability, id]);
         return result;
     }
 }

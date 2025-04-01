@@ -90,6 +90,15 @@ CREATE TABLE IF NOT EXISTS Delivery (
     FOREIGN KEY (DeliveryPersonID) REFERENCES Users(UserID) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS DeliveryRoutes (
+    RouteID INT AUTO_INCREMENT PRIMARY KEY,
+    DeliveryID INT,
+    StartLocation POINT NOT NULL, -- Pickup location (Restaurant)
+    EndLocation POINT NOT NULL,   -- Drop-off location (Customer)
+    FOREIGN KEY (DeliveryID) REFERENCES Delivery(DeliveryID) ON DELETE CASCADE
+);
+
+
 -- Payments Table
 CREATE TABLE IF NOT EXISTS Payments (
     PaymentID INT AUTO_INCREMENT PRIMARY KEY,
@@ -110,3 +119,4 @@ CREATE TABLE IF NOT EXISTS Notifications (
     IsRead BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
+
