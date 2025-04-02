@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 require('dotenv').config();
 
 module.exports = {
@@ -16,4 +17,24 @@ module.exports = {
     PAYHERE_NOTIFY_URL: process.env.PAYHERE_NOTIFY_URL,
     FRONTEND_SUCCESS_URL: process.env.FRONTEND_SUCCESS_URL,
     FRONTEND_CANCEL_URL: process.env.FRONTEND_CANCEL_URL
+=======
+require('dotenv').config();
+
+module.exports = {
+    DB_HOST: process.env.DB_HOST,
+    DB_USER: process.env.DB_USER,
+    DB_PASSWORD: process.env.DB_PASSWORD,
+    DB_NAME: process.env.DB_NAME,
+    AUTH_SERVICE_PORT: process.env.AUTH_SERVICE_PORT,
+    PAYMENT_SERVICE_PORT: process.env.PAYMENT_SERVICE_PORT,
+    PAYHERE_MERCHANT_ID: process.env.PAYHERE_MERCHANT_ID,
+    PAYHERE_MERCHANT_SECRET: process.env.PAYHERE_MERCHANT_SECRET,
+    PAYHERE_MODE: process.env.PAYHERE_MODE || 'sandbox',
+    PAYHERE_SANDBOX_URL: process.env.PAYHERE_SANDBOX_URL || 'https://sandbox.payhere.lk/pay/checkout',
+    PAYHERE_RETURN_URL: process.env.PAYHERE_RETURN_URL,
+    PAYHERE_CANCEL_URL: process.env.PAYHERE_CANCEL_URL,
+    PAYHERE_NOTIFY_URL: process.env.PAYHERE_NOTIFY_URL,
+    FRONTEND_SUCCESS_URL: process.env.FRONTEND_SUCCESS_URL,
+    FRONTEND_CANCEL_URL: process.env.FRONTEND_CANCEL_URL
+>>>>>>> 3d4f402a39c80d79e1809a4c29ce3c43474529c0
 };
