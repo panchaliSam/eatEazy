@@ -1,42 +1,69 @@
-const pool = require('../config/db');
+const prisma = require('../config/prisma');
 
 const UserRepository = {
     create: async (userData) => {
         const { firstname, lastname, email, passwordHash, phone, role } = userData;
-        const query = 'INSERT INTO Users (Firstname, Lastname, Email, PasswordHash, Phone, Role) VALUES (?, ?, ?, ?, ?, ?)';
-        const [result] = await pool.execute(query, [firstname, lastname, email, passwordHash, phone, role]);
-        return result;
+        const newUser = await prisma.users.create({
+            data: {
+                Firstname: firstname,
+                Lastname: lastname,
+                Email: email,
+                PasswordHash: passwordHash,
+                Phone: phone,
+                Role: role,
+            },
+        });
+        return newUser;
     },
 
     findByEmail: async (email) => {
-        const query = 'SELECT * FROM Users WHERE Email = ?';
-        const [rows] = await pool.execute(query, [email]);
-        return rows;
+        const user = await prisma.users.findUnique({
+            where: { Email: email },
+        });
+        return user;
     },
 
     findById: async (id) => {
-        const query = 'SELECT * FROM Users WHERE UserID = ?';
-        const [rows] = await pool.execute(query, [id]);
-        return rows;
+        const user = await prisma.users.findUnique({
+            where: { UserID: id },
+        });
+        return user;
     },
 
     getAllUsers: async () => {
-        const query = 'SELECT UserID, Firstname, Lastname, Email, Phone, Role FROM Users';
-        const [rows] = await pool.execute(query);
-        return rows;
+        const users = await prisma.users.findMany({
+            select: {
+                UserID: true,
+                Firstname: true,
+                Lastname: true,
+                Email: true,
+                Phone: true,
+                Role: true,
+            },
+        });
+        return users;
     },
 
     deleteById: async (id) => {
-        const query = 'DELETE FROM Users WHERE UserID = ?';
-        const [result] = await pool.execute(query, [id]);
-        return result;
+        const deletedUser = await prisma.users.delete({
+            where: { UserID: id },
+        });
+        return deletedUser;
     },
 
     updateById: async (id, userData) => {
         const { firstname, lastname, email, phone, role } = userData;
-        const query = 'UPDATE Users SET Firstname = ?, Lastname = ?, Email = ?, Phone = ?, Role = ? WHERE UserID = ?';
-        const [result] = await pool.execute(query, [firstname, lastname, email, phone, role, id]);
-        return result;
+        const updatedUser = await prisma.users.update({
+            where: { UserID: id },
+            data: {
+                Firstname: firstname,
+                Lastname: lastname,
+                Email: email,
+                Phone: phone,
+                Role: role,
+            },
+        });
+        return updatedUser;
     },
 };
 

@@ -12,7 +12,7 @@ const authenticateToken = async (req, res, next) => {
 
     try {
         const response = await axios.post(
-            `http://localhost:${AUTH_SERVICE_PORT}/auth/verify`,
+            `http://localhost:${AUTH_SERVICE_PORT}/verify`,
             {
                 token: token
             },

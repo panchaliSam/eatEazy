@@ -6,10 +6,10 @@ const { RESTAURANT_SERVICE_PORT } = require('./src/config/env');
 const app = express();
 app.use(bodyParser.json());
 
-app.use('/restaurants', restaurantRoutes);
+app.use('/', restaurantRoutes);
 
 app.get('/', (req, res) => {
-    res.send('Database connection test is complete!');
+    res.send('Restaurant Service is running!');
 });
 
 app.listen(RESTAURANT_SERVICE_PORT, () => {

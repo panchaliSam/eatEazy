@@ -1,9 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { registerRestaurant } = require('../controllers/restaurantController');
+const menuRoutes = require('./menuRoutes');
 const { authenticateToken, isRestaurant } = require('../middleware/authMiddleware');
+const {
+    registerRestaurant,
+    getAllRestaurants,
+    getRestaurantById,
+    updateRestaurantById,
+    deleteRestaurantById
+} = require('../controllers/restaurantController');
 
-// Register new restaurant
-router.post('/register', authenticateToken, isRestaurant, registerRestaurant);
+// Routes for Restaurants
+router.post('/', authenticateToken, isRestaurant, registerRestaurant);
+router.get('/', getAllRestaurants);
+router.get('/:restaurantId', getRestaurantById);
+router.put('/:restaurantId', authenticateToken, isRestaurant, updateRestaurantById);
+router.delete('/:restaurantId', authenticateToken, isRestaurant, deleteRestaurantById);
+
+// Nest menu routes under restaurants
+router.use('/:restaurantId/menu', menuRoutes);
 
 module.exports = router;

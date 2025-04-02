@@ -1,0 +1,44 @@
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - backend
+
+  restaurant-service:
+    build:
+      context: ./restaurant-service
+      dockerfile: Dockerfile
+    ports:
+      - "4002:4002"
+    environment:
+      - NODE_ENV=production
+      - AUTH_SERVICE_PORT=4001
+    depends_on:
+      - auth-service
+    networks:
+      - backend
+
+  beta-core:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: MySQL*123
+      MYSQL_DATABASE: eatEazy
+    ports:
+      - "3308:3306"
+    networks:
+      - backend
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mysql-data:
