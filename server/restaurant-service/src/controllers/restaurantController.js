@@ -32,7 +32,11 @@ const getAllRestaurants = async (req, res) => {
 // Get restaurant by ID
 const getRestaurantById = async (req, res) => {
     try {
-        const restaurant = await RestaurantService.getRestaurantById(req.params.id);
+        if (!req.params.restaurantId) {
+            return res.status(400).json({ message: "Restaurant ID is required" });
+        }
+
+        const restaurant = await RestaurantService.getRestaurantById(req.params.restaurantId);
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
         }
@@ -43,25 +47,22 @@ const getRestaurantById = async (req, res) => {
     }
 };
 
+
 // Update restaurant by ID
 const updateRestaurantById = async (req, res) => {
     try {
-        const restaurant = await RestaurantService.getRestaurantById(req.params.id);
+        const restaurant = await RestaurantService.getRestaurantById(req.params.restaurantId);
 
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
         }
-
-        // Debugging: Log User ID and Owner ID to check types
-        console.log('User ID:', req.user.id, typeof req.user.id);
-        console.log('Owner ID:', restaurant.OwnerID, typeof restaurant.OwnerID);
 
         // Ensure only the restaurant owner can delete (fix type mismatch)
         if (req.user.role !== 'Restaurant' || Number(req.user.id) !== Number(restaurant.OwnerID)){
             return res.status(403).json({ message: 'Access Denied: You are not the owner of this restaurant' });
         }
 
-        const updatedRestaurant = await RestaurantService.updateRestaurantById(req.params.id, req.body);
+        const updatedRestaurant = await RestaurantService.updateRestaurantById(req.params.restaurantId, req.body);
         res.status(200).json({ message: 'Restaurant updated successfully', updatedRestaurant });
     } catch (err) {
         console.error('Error:', err);
@@ -73,15 +74,11 @@ const updateRestaurantById = async (req, res) => {
 // Delete restaurant by ID
 const deleteRestaurantById = async (req, res) => {
     try {
-        const restaurant = await RestaurantService.getRestaurantById(req.params.id);
+        const restaurant = await RestaurantService.getRestaurantById(req.params.restaurantId);
 
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
         }
-
-        // Debugging: Log User ID and Owner ID to check types
-        console.log('User ID:', req.user.id, typeof req.user.id);
-        console.log('Owner ID:', restaurant.OwnerID, typeof restaurant.OwnerID);
 
         // Ensure only the restaurant owner can delete (fix type mismatch)
         if (req.user.role !== 'Restaurant' || Number(req.user.id) !== Number(restaurant.OwnerID)) {
