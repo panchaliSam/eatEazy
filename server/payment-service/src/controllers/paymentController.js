@@ -1,7 +1,5 @@
-// controllers/paymentController.js
+<<<<<<< HEAD
 const PaymentService = require('../services/paymentService');
-const md5 = require('md5');
-const { PAYHERE_MERCHANT_SECRET } = require('../config/env');
 
 const initiatePayment = async (req, res) => {
     try {
@@ -23,6 +21,34 @@ const initiatePayment = async (req, res) => {
     }
 };
 
+const paymentSuccess = async (req, res) => {
+    // Handle success callback from PayHere
+    console.log('Payment Success:', req.body);
+    res.redirect(process.env.FRONTEND_SUCCESS_URL || 'http://localhost:3000/payment/success');
+};
+
+const paymentCancelled = async (req, res) => {
+    // Handle cancelled payment
+    console.log('Payment Cancelled:', req.body);
+    res.redirect(process.env.FRONTEND_CANCEL_URL || 'http://localhost:3000/payment/cancel');
+};
+
+const paymentNotification = async (req, res) => {
+    try {
+        const notificationData = req.body;
+        console.log('Payment Notification Received:', notificationData);
+        
+        await PaymentService.processPaymentNotification(notificationData);
+        
+        // Always respond with 200 OK to PayHere
+        res.status(200).send('OK');
+    } catch (err) {
+        console.error('Payment Notification Error:', err);
+        // Still send 200 to PayHere to prevent retries
+        res.status(200).send('OK');
+    }
+};
+
 const updatePaymentStatus = async (req, res) => {
     try {
         const { PaymentID, PaymentStatus } = req.body;
@@ -40,42 +66,85 @@ const updatePaymentStatus = async (req, res) => {
     }
 };
 
-const handlePaymentNotification = async (req, res) => {
+module.exports = { 
+    initiatePayment, 
+    updatePaymentStatus, 
+    paymentSuccess,
+    paymentCancelled,
+    paymentNotification
+=======
+const PaymentService = require('../services/paymentService');
+
+const initiatePayment = async (req, res) => {
     try {
-        const payload = req.body;
+        const { OrderID, PaymentMethod } = req.body;
+
+        if (!OrderID || !PaymentMethod) {
+            return res.status(400).json({ error: 'OrderID and PaymentMethod are required' });
+        }
+
+        const paymentDetails = await PaymentService.initiatePayment(OrderID, PaymentMethod);
         
-        // Verify the payment hash
-        const generatedHash = createPaymentHash(
-            payload.merchant_id,
-            payload.order_id,
-            payload.payhere_amount,
-            payload.payhere_currency,
-            payload.status_code
-        );
-
-        if (generatedHash !== payload.md5sig) {
-            return res.status(400).json({ error: 'Invalid signature' });
-        }
-
-        // Update payment status based on PayHere response
-        if (payload.status_code === 2) {
-            await PaymentService.updatePaymentStatus(payload.order_id, 'Completed');
-        } else if (payload.status_code === 0) {
-            await PaymentService.updatePaymentStatus(payload.order_id, 'Pending');
-        } else if (payload.status_code === -1) {
-            await PaymentService.updatePaymentStatus(payload.order_id, 'Failed');
-        }
-
-        res.status(200).send('OK');
+        res.status(201).json({ 
+            message: 'Payment initiated successfully', 
+            paymentDetails 
+        });
     } catch (err) {
-        console.error('IPN Error:', err);
-        res.status(500).send('Error');
+        console.error('Error:', err);
+        res.status(500).json({ message: 'Server Error', error: err.message });
     }
 };
 
-const createPaymentHash = (merchant_id, order_id, amount, currency, status_code) => {
-    const data = `${merchant_id}${order_id}${amount}${currency}${status_code}${PAYHERE_MERCHANT_SECRET}`;
-    return md5(data).toUpperCase();
+const paymentSuccess = async (req, res) => {
+    // Handle success callback from PayHere
+    console.log('Payment Success:', req.body);
+    res.redirect(process.env.FRONTEND_SUCCESS_URL || 'http://localhost:3000/payment/success');
 };
 
-module.exports = { initiatePayment, updatePaymentStatus, handlePaymentNotification };
+const paymentCancelled = async (req, res) => {
+    // Handle cancelled payment
+    console.log('Payment Cancelled:', req.body);
+    res.redirect(process.env.FRONTEND_CANCEL_URL || 'http://localhost:3000/payment/cancel');
+};
+
+const paymentNotification = async (req, res) => {
+    try {
+        const notificationData = req.body;
+        console.log('Payment Notification Received:', notificationData);
+        
+        await PaymentService.processPaymentNotification(notificationData);
+        
+        // Always respond with 200 OK to PayHere
+        res.status(200).send('OK');
+    } catch (err) {
+        console.error('Payment Notification Error:', err);
+        // Still send 200 to PayHere to prevent retries
+        res.status(200).send('OK');
+    }
+};
+
+const updatePaymentStatus = async (req, res) => {
+    try {
+        const { PaymentID, PaymentStatus } = req.body;
+
+        if (!PaymentID || !PaymentStatus) {
+            return res.status(400).json({ error: 'PaymentID and PaymentStatus are required' });
+        }
+
+        await PaymentService.updatePaymentStatus(PaymentID, PaymentStatus);
+
+        res.status(200).json({ message: 'Payment status updated successfully' });
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+};
+
+module.exports = { 
+    initiatePayment, 
+    updatePaymentStatus, 
+    paymentSuccess,
+    paymentCancelled,
+    paymentNotification
+>>>>>>> 3d4f402a39c80d79e1809a4c29ce3c43474529c0
+};
