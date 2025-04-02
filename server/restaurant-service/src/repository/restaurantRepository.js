@@ -14,7 +14,7 @@ const RestaurantRepository = {
         return rows;
     },
 
-    findById: async(id) => {
+    findById: async (id) => {
         const query = 'SELECT * FROM Restaurants WHERE RestaurantID = ?';
         const [rows] = await pool.execute(query, [id]);
         return rows.length > 0 ? rows[0] : null;
