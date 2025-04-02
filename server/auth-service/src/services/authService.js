@@ -14,7 +14,7 @@ const register = async (userData) => {
     }
 
     const existingUser = await UserModel.findUserByEmail(email);
-    if (existingUser.length > 0) {
+    if (existingUser) {
         throw new Error('Email is already registered.');
     }
 
@@ -25,12 +25,11 @@ const register = async (userData) => {
 
 // Login existing user
 const login = async (email, password) => {
-    const results = await UserModel.findUserByEmail(email);
-    if (results.length === 0) {
+    const user = await UserModel.findUserByEmail(email);
+    if (!user) {
         throw new Error('No user found with this email.');
     }
 
-    const user = results[0];
     const isMatch = await bcrypt.compare(password, user.PasswordHash);
     if (!isMatch) {
         throw new Error('Invalid password.');
@@ -40,10 +39,10 @@ const login = async (email, password) => {
     return token;
 };
 
-//Get all users
+// Get all users
 const getAllUsers = async () => {
     return await UserModel.getAllUsers();
-}
+};
 
 // Get user by ID
 const getById = async (id) => {
