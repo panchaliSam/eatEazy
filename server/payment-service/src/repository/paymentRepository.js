@@ -1,4 +1,3 @@
-// repository/paymentRepository.js
 const pool = require('../config/db');
 
 const PaymentRepository = {
@@ -55,6 +54,23 @@ const PaymentRepository = {
         } catch (error) {
             console.error('Database Error - updatePaymentStatus:', error);
             throw new Error('Database error occurred while updating payment status.');
+        }
+    },
+    
+    getPaymentByOrderId: async (OrderID) => {
+        try {
+            if (!OrderID) throw new Error('OrderID is required.');
+
+            const query = 'SELECT * FROM Payments WHERE OrderID = ? ORDER BY PaymentDate DESC LIMIT 1';
+            const [rows] = await pool.execute(query, [OrderID]);
+
+            if (rows.length === 0) {
+                return null;
+            }
+            return rows[0]; 
+        } catch (error) {
+            console.error('Database Error - getPaymentByOrderId:', error);
+            throw new Error('Database error occurred while retrieving payment.');
         }
     }
 };
