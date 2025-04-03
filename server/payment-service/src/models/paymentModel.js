@@ -19,4 +19,3 @@ const PaymentModel = {
 };
 
 module.exports = PaymentModel;
-
