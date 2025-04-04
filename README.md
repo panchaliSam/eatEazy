@@ -7,8 +7,6 @@
 ## 📌 Project Overview
 
 **Title:** Building a Cloud-Native Food Ordering & Delivery System using Microservices  
-**Type:** Group Project (3-4 members)  
-**Weightage:** 25% of final grade
 
 eatEazy allows customers to browse restaurants, place orders, and track deliveries in real-time. Restaurant admins can manage menus and handle orders, while delivery personnel can accept and fulfill delivery requests.
 
@@ -23,7 +21,7 @@ eatEazy allows customers to browse restaurants, place orders, and track deliveri
 - **Container Orchestration:** Kubernetes
 - **Database:** MongoDB / PostgreSQL (depending on microservice)
 - **Authentication:** JWT-based Role Authentication
-- **Payment Integration:** PayHere / Dialog Genie / FriMi / Stripe (Sandbox)
+- **Payment Integration:** PayHere (Sandbox)
 - **Notifications:** Twilio (SMS) & Nodemailer (Email)
 - **Version Control:** GitHub
 
@@ -80,16 +78,14 @@ All services are integrated through an **API Gateway** to centralize communicati
 Integrated with Sri Lankan and global payment services:
 
 - [x] PayHere (Sri Lanka)
-- [x] Dialog Genie / FriMi
-- [x] Stripe / PayPal (Sandbox mode)
 
 ---
 
 ## 📲 Notification System
 
 - Real-time notifications via:
-  - **SMS** (Twilio API)
-  - **Email** (Nodemailer)
+  - **SMS** 
+  - **Email** 
 - Order status updates
 - Delivery assignments
 
