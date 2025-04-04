@@ -11,7 +11,7 @@ const {
 } = require('../controllers/restaurantController');
 
 // Routes for Restaurants
-router.post('/', authenticateToken, isRestaurant, registerRestaurant);
+router.post('/register', authenticateToken, isRestaurant, registerRestaurant);
 router.get('/', getAllRestaurants);
 router.get('/:restaurantId', getRestaurantById);
 router.put('/:restaurantId', authenticateToken, isRestaurant, updateRestaurantById);
