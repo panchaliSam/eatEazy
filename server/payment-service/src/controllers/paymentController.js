@@ -21,13 +21,11 @@ const initiatePayment = async (req, res) => {
 };
 
 const paymentSuccess = async (req, res) => {
-    // Handle success callback from PayHere
     console.log('Payment Success:', req.body);
     res.redirect(process.env.FRONTEND_SUCCESS_URL || 'http://localhost:3000/payment/success');
 };
 
 const paymentCancelled = async (req, res) => {
-    // Handle cancelled payment
     console.log('Payment Cancelled:', req.body);
     res.redirect(process.env.FRONTEND_CANCEL_URL || 'http://localhost:3000/payment/cancel');
 };
@@ -39,12 +37,10 @@ const paymentNotification = async (req, res) => {
         
         await PaymentService.processPaymentNotification(notificationData);
         
-        // Always respond with 200 OK to PayHere
         res.status(200).send('OK');
     } catch (err) {
         console.error('Payment Notification Error:', err);
-        // Still send 200 to PayHere to prevent retries
-        res.status(200).send('OK');
+        res.status(200).send('OK'); // Always respond with 200 to prevent retries
     }
 };
 

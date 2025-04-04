@@ -3,17 +3,17 @@ const pool = require('../config/db');
 const PaymentRepository = {
     createPayment: async (paymentData) => {
         try {
-            const { OrderID, PaymentMethod, PaymentStatus, TransactionID } = paymentData;
+            const { OrderID, Amount, PaymentMethod, PaymentStatus, TransactionID } = paymentData;
 
-            if (!OrderID || !PaymentMethod || !PaymentStatus || !TransactionID) {
+            if (!OrderID || !PaymentMethod || !PaymentStatus || !TransactionID || !Amount) {
                 throw new Error('Missing required payment details.');
             }
 
             const query = `
-                INSERT INTO Payments (OrderID, PaymentMethod, PaymentStatus, TransactionID) 
-                VALUES (?, ?, ?, ?)
+                INSERT INTO Payments (OrderID, Amount, PaymentMethod, PaymentStatus, TransactionID) 
+                VALUES (?, ?, ?, ?, ?)
             `;
-            const [result] = await pool.execute(query, [OrderID, PaymentMethod, PaymentStatus, TransactionID]);
+            const [result] = await pool.execute(query, [OrderID, Amount, PaymentMethod, PaymentStatus, TransactionID]);
             return result.insertId;
         } catch (error) {
             console.error('Database Error - createPayment:', error);
