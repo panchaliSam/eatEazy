@@ -1,7 +1,4 @@
-// controllers/paymentController.js
 const PaymentService = require('../services/paymentService');
-const md5 = require('md5');
-const { PAYHERE_MERCHANT_SECRET } = require('../config/env');
 
 const initiatePayment = async (req, res) => {
     try {
@@ -23,6 +20,30 @@ const initiatePayment = async (req, res) => {
     }
 };
 
+const paymentSuccess = async (req, res) => {
+    console.log('Payment Success:', req.body);
+    res.redirect(process.env.FRONTEND_SUCCESS_URL || 'http://localhost:3000/payment/success');
+};
+
+const paymentCancelled = async (req, res) => {
+    console.log('Payment Cancelled:', req.body);
+    res.redirect(process.env.FRONTEND_CANCEL_URL || 'http://localhost:3000/payment/cancel');
+};
+
+const paymentNotification = async (req, res) => {
+    try {
+        const notificationData = req.body;
+        console.log('Payment Notification Received:', notificationData);
+        
+        await PaymentService.processPaymentNotification(notificationData);
+        
+        res.status(200).send('OK');
+    } catch (err) {
+        console.error('Payment Notification Error:', err);
+        res.status(200).send('OK'); // Always respond with 200 to prevent retries
+    }
+};
+
 const updatePaymentStatus = async (req, res) => {
     try {
         const { PaymentID, PaymentStatus } = req.body;
@@ -40,42 +61,10 @@ const updatePaymentStatus = async (req, res) => {
     }
 };
 
-const handlePaymentNotification = async (req, res) => {
-    try {
-        const payload = req.body;
-        
-        // Verify the payment hash
-        const generatedHash = createPaymentHash(
-            payload.merchant_id,
-            payload.order_id,
-            payload.payhere_amount,
-            payload.payhere_currency,
-            payload.status_code
-        );
-
-        if (generatedHash !== payload.md5sig) {
-            return res.status(400).json({ error: 'Invalid signature' });
-        }
-
-        // Update payment status based on PayHere response
-        if (payload.status_code === 2) {
-            await PaymentService.updatePaymentStatus(payload.order_id, 'Completed');
-        } else if (payload.status_code === 0) {
-            await PaymentService.updatePaymentStatus(payload.order_id, 'Pending');
-        } else if (payload.status_code === -1) {
-            await PaymentService.updatePaymentStatus(payload.order_id, 'Failed');
-        }
-
-        res.status(200).send('OK');
-    } catch (err) {
-        console.error('IPN Error:', err);
-        res.status(500).send('Error');
-    }
+module.exports = { 
+    initiatePayment, 
+    updatePaymentStatus, 
+    paymentSuccess,
+    paymentCancelled,
+    paymentNotification
 };
-
-const createPaymentHash = (merchant_id, order_id, amount, currency, status_code) => {
-    const data = `${merchant_id}${order_id}${amount}${currency}${status_code}${PAYHERE_MERCHANT_SECRET}`;
-    return md5(data).toUpperCase();
-};
-
-module.exports = { initiatePayment, updatePaymentStatus, handlePaymentNotification };

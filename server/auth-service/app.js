@@ -1,18 +1,21 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const authRoutes = require('./src/routes/authRoutes');
-const { AUTH_SERVICE_PORT } = require('./src/config/env');
+const dotenv = require('dotenv');
 
+dotenv.config();
 
 const app = express();
+const PORT = process.env.AUTH_SERVICE_PORT || 4001;
+
 app.use(bodyParser.json());
 
-app.use('/auth', authRoutes);
+app.use('/', authRoutes);
 
 app.get('/', (req, res) => {
-    res.send('Database connection test is complete!');
+    res.send('Auth Service is running!');
 });
 
-app.listen(AUTH_SERVICE_PORT, () => {
-    console.log(`Server is running on port ${AUTH_SERVICE_PORT}`);
+app.listen(PORT, () => {
+    console.log(`Auth Service is running on port ${PORT}`);
 });

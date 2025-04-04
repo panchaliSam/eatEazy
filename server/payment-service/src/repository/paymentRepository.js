@@ -1,20 +1,19 @@
-// repository/paymentRepository.js
 const pool = require('../config/db');
 
 const PaymentRepository = {
     createPayment: async (paymentData) => {
         try {
-            const { OrderID, PaymentMethod, PaymentStatus, TransactionID } = paymentData;
+            const { OrderID, Amount, PaymentMethod, PaymentStatus, TransactionID } = paymentData;
 
-            if (!OrderID || !PaymentMethod || !PaymentStatus || !TransactionID) {
+            if (!OrderID || !PaymentMethod || !PaymentStatus || !TransactionID || !Amount) {
                 throw new Error('Missing required payment details.');
             }
 
             const query = `
-                INSERT INTO Payments (OrderID, PaymentMethod, PaymentStatus, TransactionID) 
-                VALUES (?, ?, ?, ?)
+                INSERT INTO Payments (OrderID, Amount, PaymentMethod, PaymentStatus, TransactionID) 
+                VALUES (?, ?, ?, ?, ?)
             `;
-            const [result] = await pool.execute(query, [OrderID, PaymentMethod, PaymentStatus, TransactionID]);
+            const [result] = await pool.execute(query, [OrderID, Amount, PaymentMethod, PaymentStatus, TransactionID]);
             return result.insertId;
         } catch (error) {
             console.error('Database Error - createPayment:', error);
@@ -55,6 +54,23 @@ const PaymentRepository = {
         } catch (error) {
             console.error('Database Error - updatePaymentStatus:', error);
             throw new Error('Database error occurred while updating payment status.');
+        }
+    },
+    
+    getPaymentByOrderId: async (OrderID) => {
+        try {
+            if (!OrderID) throw new Error('OrderID is required.');
+
+            const query = 'SELECT * FROM Payments WHERE OrderID = ? ORDER BY PaymentDate DESC LIMIT 1';
+            const [rows] = await pool.execute(query, [OrderID]);
+
+            if (rows.length === 0) {
+                return null;
+            }
+            return rows[0]; 
+        } catch (error) {
+            console.error('Database Error - getPaymentByOrderId:', error);
+            throw new Error('Database error occurred while retrieving payment.');
         }
     }
 };

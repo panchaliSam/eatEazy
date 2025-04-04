@@ -1,43 +1,75 @@
-const pool = require('../config/db');
+const prisma = require('../config/prisma');
 
 const RestaurantRepository = {
     create: async (restaurantData) => {
-        const { ownerId, restaurantName, address, phone, email, availability } = restaurantData;
-        const query = 'INSERT INTO Restaurants (OwnerID, RestaurantName, Address, Phone, Email, Availability) VALUES (?, ?, ?, ?, ?, ?)';
-        const [result] = await pool.execute(query, [ownerId, restaurantName, address, phone, email, availability]);
-        return result.insertId;
+        try {
+            const { ownerId, restaurantName, address, phone, email, availability } = restaurantData;
+            const restaurant = await prisma.restaurant.create({
+                data: {
+                    OwnerID: ownerId,
+                    RestaurantName: restaurantName,
+                    Address: address,
+                    Phone: phone,
+                    Email: email,
+                    Availability: availability
+                }
+            });
+            return restaurant.RestaurantID;
+        } catch (error) {
+            console.error('Error in repository create():', error);
+            throw error;
+        }
     },
+
 
     findByRestaurantName: async (restaurantName) => {
-        const query = 'SELECT * FROM Restaurants WHERE RestaurantName = ?';
-        const [rows] = await pool.execute(query, [restaurantName]);
-        return rows;
+        const restaurants = await prisma.restaurant.findMany({
+            where: {
+                RestaurantName: restaurantName
+            }
+        });
+        return restaurants;
     },
 
-    findById: async(id) => {
-        const query = 'SELECT * FROM Restaurants WHERE RestaurantID = ?';
-        const [rows] = await pool.execute(query, [id]);
-        return rows.length > 0 ? rows[0] : null;
+    findById: async (id) => {
+        const restaurant = await prisma.restaurant.findUnique({
+            where: {
+                RestaurantID: parseInt(id)
+            }
+        });
+        return restaurant;
     },
 
     getAllRestaurants: async () => {
-        const query = 'SELECT * FROM Restaurants';
-        const [rows] = await pool.execute(query);
-        return rows;
+        const restaurants = await prisma.restaurant.findMany();
+        return restaurants;
     },
 
-    deleteById: async(id) => {
-        const query  = 'DELETE FROM Restaurants WHERE RestaurantID = ?';
-        const [result] = await pool.execute(query, [id]);
-        return result;
+    deleteById: async (id) => {
+        const deleted = await prisma.restaurant.delete({
+            where: {
+                RestaurantID: id
+            }
+        });
+        return deleted;
     },
 
     updateById: async (id, restaurantData) => {
         const { restaurantName, address, phone, email, availability } = restaurantData;
-        const query = 'UPDATE Restaurants SET RestaurantName = ?, ADDRESS = ?,  Phone= ?, Email = ?, Availability = ? WHERE RestaurantID = ?';
-        const [result] = await pool.execute(query, [restaurantName, address, phone, email, availability, id]);
-        return result;
+        const updated = await prisma.restaurant.update({
+            where: {
+                RestaurantID: id
+            },
+            data: {
+                RestaurantName: restaurantName,
+                Address: address,
+                Phone: phone,
+                Email: email,
+                Availability: availability
+            }
+        });
+        return updated;
     }
-}
+};
 
 module.exports = RestaurantRepository;
