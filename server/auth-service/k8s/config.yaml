@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  namespace: eateazy
+data:
+  DB_HOST: "beta-core"  # Replace with the DB service name in K8s
+  DB_NAME: "eatEazy"
+  AUTH_SERVICE_PORT: "4001"
+  JWT_EXPIRATION: "1h"

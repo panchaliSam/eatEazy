@@ -1,7 +1,7 @@
-const pool = require('../config/db');
+const prisma = require('../config/prisma');
 
 const MenuRepository = {
-    create: async(menuData) => {
+    create: async (menuData) => {
         const { restaurantId, name, description, price, isAvailable } = menuData;
 
         console.log("Received menuData:", menuData); // Debugging line
@@ -11,40 +11,63 @@ const MenuRepository = {
             throw new Error("Missing required fields for menu item creation.");
         }
 
-        const query = 'INSERT INTO MenuItems (RestaurantID, Name, Description, Price, IsAvailable) VALUES (?, ?, ?, ?, ?)';
-        const [result] = await pool.execute(query, [restaurantId, name, description, price, isAvailable]);
-        return result.insertId;
+        const menuItem = await prisma.menuItem.create({
+            data: {
+                RestaurantID: parseInt(restaurantId),
+                Name: name,
+                Description: description,
+                Price: price,
+                IsAvailable: isAvailable
+            }
+        });
+
+        return menuItem.MenuItemID;
     },
 
-    getAllMenuItemsByRestaurantId: async(restaurantId) => {
-        const query = 'SELECT * FROM MenuItems WHERE RestaurantID = ?;';
-        const [rows] = await pool.execute(query, [restaurantId]);
-        return rows;
+    getAllMenuItemsByRestaurantId: async (restaurantId) => {
+        const menuItems = await prisma.menuItem.findMany({
+            where: {
+                RestaurantID: parseInt(restaurantId)
+            }
+        });
+        return menuItems;
     },
 
-    findById: async(id) => {
-        const query = 'SELECT * FROM MenuItems WHERE RestaurantID = ?;';
-        const [rows] = await pool.execute(query, [id]);
-        return rows.length > 0 ? rows[0] : null;
-    },
-
-    findByMenuItemId: async(id) => {
-        const query = 'SELECT * FROM MenuItems WHERE MenuItemID = ?;';
-        const [rows] = await pool.execute(query, [id]);
-        return rows.length > 0 ? rows[0] : null;
+    findByMenuItemId: async (id) => {
+        const menuItem = await prisma.menuItem.findUnique({
+            where: {
+                MenuItemID: id
+            }
+        });
+        return menuItem;
     },
 
     updateById: async (id, menuItemData) => {
         const { name, description, price, isAvailable } = menuItemData;
-        const query = 'UPDATE MenuItems SET Name = ?, Description = ?, Price = ?, IsAvailable = ? WHERE MenuItemID = ?';
-        const [result] = await pool.execute(query, [name, description, price, isAvailable, id]);
-        return result;
+
+        const updatedItem = await prisma.menuItem.update({
+            where: {
+                MenuItemID: id
+            },
+            data: {
+                Name: name,
+                Description: description,
+                Price: price,
+                IsAvailable: isAvailable
+            }
+        });
+
+        return updatedItem;
     },
 
     deleteById: async (id) => {
-        const query = 'DELETE FROM MenuItems WHERE MenuItemID = ?';
-        const [result] = await pool.execute(query, [id]);
-        return result;
+        const deletedItem = await prisma.menuItem.delete({
+            where: {
+                MenuItemID: id
+            }
+        });
+
+        return deletedItem;
     }
 };
 
