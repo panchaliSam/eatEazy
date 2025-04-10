@@ -55,7 +55,7 @@ const getUserById = async (req, res) => {
     const userId = req.params.id;
     const { role, id } = req.user;
 
-    if (role === 'Admin' || id === userId) {
+    if (role === 'Admin' || id === userId || role === 'Restaurant' ) {
         try {
             const user = await authService.getById(userId);
             if (!user) {

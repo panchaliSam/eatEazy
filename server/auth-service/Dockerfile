@@ -4,16 +4,27 @@ FROM node:22.13.1-alpine AS build
 # Set working directory
 WORKDIR /usr/src/auth-service
 
-# Install necessary build dependencies for bcrypt (such as make, gcc, etc.)
-RUN apk add --no-cache --virtual .build-deps build-base python3
+# Install necessary build dependencies for bcrypt and Prisma
+RUN apk add --no-cache --virtual .build-deps build-base python3 openssl
 
-# Copy only package.json and package-lock.json to leverage Docker cache
+# Copy package files first to leverage Docker cache
 COPY package*.json ./
 
 # Install production dependencies only
 RUN npm install --production
 
-# Copy the entire application code
+# Create prisma directory and copy schema
+RUN mkdir -p prisma
+COPY src/prisma/schema.prisma ./prisma/
+
+# Copy .env file from the src directory
+COPY src/.env ./prisma/
+
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy the rest of the application code
 COPY . .
 
 # Rebuild bcrypt (now that the necessary build tools are installed)
