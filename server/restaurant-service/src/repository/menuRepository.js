@@ -11,7 +11,7 @@ const MenuRepository = {
             throw new Error("Missing required fields for menu item creation.");
         }
 
-        const menuItem = await prisma.menuItem.create({
+        const menuItem = await prisma.menuItems.create({
             data: {
                 RestaurantID: parseInt(restaurantId),
                 Name: name,
@@ -25,7 +25,7 @@ const MenuRepository = {
     },
 
     getAllMenuItemsByRestaurantId: async (restaurantId) => {
-        const menuItems = await prisma.menuItem.findMany({
+        const menuItems = await prisma.menuItems.findMany({
             where: {
                 RestaurantID: parseInt(restaurantId)
             }
@@ -34,7 +34,7 @@ const MenuRepository = {
     },
 
     findByMenuItemId: async (id) => {
-        const menuItem = await prisma.menuItem.findUnique({
+        const menuItem = await prisma.menuItems.findUnique({
             where: {
                 MenuItemID: id
             }
@@ -45,7 +45,7 @@ const MenuRepository = {
     updateById: async (id, menuItemData) => {
         const { name, description, price, isAvailable } = menuItemData;
 
-        const updatedItem = await prisma.menuItem.update({
+        const updatedItem = await prisma.menuItems.update({
             where: {
                 MenuItemID: id
             },
@@ -61,7 +61,7 @@ const MenuRepository = {
     },
 
     deleteById: async (id) => {
-        const deletedItem = await prisma.menuItem.delete({
+        const deletedItem = await prisma.menuItems.delete({
             where: {
                 MenuItemID: id
             }
