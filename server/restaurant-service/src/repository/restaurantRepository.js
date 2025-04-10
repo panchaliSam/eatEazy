@@ -1,6 +1,6 @@
 const prisma = require('../config/prisma');
 const axios = require('axios');
-const {API_GATEWAY_AUTH_SERVICE_URL} = require('../config/env');
+const { API_GATEWAY_AUTH_SERVICE_URL } = require('../config/env');
 
 const RestaurantRepository = {
     create: async (restaurantData) => {
@@ -32,51 +32,51 @@ const RestaurantRepository = {
         return restaurants;
     },
 
-    findById: async (id) => {
+    findById: async (restaurantId, token) => {
         try {
             const restaurant = await prisma.restaurants.findUnique({
-                where: {
-                    RestaurantID: parseInt(id)
-                }
+                where: { RestaurantID: parseInt(restaurantId) }
             });
 
-            if (restaurant) {
-                let owner = null;
-                try {
-                    const ownerResponse = await axios.get(`http://localhost:4000/auth/users/${restaurant.OwnerID}`);
-                    owner = ownerResponse.data;
-                } catch (error) {
-                    console.error(`Error fetching owner details for OwnerID: ${restaurant.OwnerID}`, error.message);
-                }
-
-                return {
-                    ...restaurant,
-                    OwnerName: owner ? `${owner.Firstname} ${owner.Lastname}` : 'No Owner'
-                };
+            if (!restaurant) {
+                throw new Error(`Restaurant with ID ${restaurantId} not found`);
             }
 
-            return null;
-        } catch (error) {
-            console.error('Error in repository findById():', error);
-            throw error;
-        }
-    },
-
-    getAllRestaurants: async () => {
-        const restaurants = await prisma.restaurants.findMany();
-
-        return Promise.all(restaurants.map(async (restaurant) => {
             let owner = null;
             try {
-                const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhbWFsUGVyZXJhQGV4YW1wbGUuY29tIiwicm9sZSI6IlJlc3RhdXJhbnQiLCJpYXQiOjE3NDQyOTU4MDYsImV4cCI6MTc0NDI5OTQwNn0.vp_PZamGnZr7IlxQJAfOxVxglj50n6la0r_a1-vuEjI';  // Replace with the actual token
-
                 const ownerResponse = await axios.get(`http://localhost:4000/auth/users/${restaurant.OwnerID}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
                 owner = ownerResponse.data;
-                console.log(owner);
+            } catch (error) {
+                console.error(`Error fetching owner details for OwnerID: ${restaurant.OwnerID}`, error.message);
+            }
+
+            return {
+                ...restaurant,
+                OwnerName: owner ? `${owner.Firstname} ${owner.Lastname}` : 'No Owner'
+            };
+        } catch (error) {
+            console.error(`Error fetching restaurant with ID ${restaurantId}`, error.message);
+            throw error;
+        }
+    },
+
+
+    getAllRestaurants: async (token) => {
+        const restaurants = await prisma.restaurants.findMany();
+
+        return Promise.all(restaurants.map(async (restaurant) => {
+            let owner = null;
+            try {
+                const ownerResponse = await axios.get(`http://localhost:4000/auth/users/${restaurant.OwnerID}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                owner = ownerResponse.data;
             } catch (error) {
                 console.error(`Error fetching owner details for OwnerID: ${restaurant.OwnerID}`, error.message);
             }

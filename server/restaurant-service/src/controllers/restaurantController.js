@@ -20,22 +20,25 @@ const registerRestaurant = async (req, res) => {
 // Get all restaurants
 const getAllRestaurants = async (req, res) => {
     try {
-        const restaurants = await RestaurantRepository.getAllRestaurants();
-        res.status(200).json(restaurants);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).json({ message: 'Server Error', error: err.message });
+        const token = req.header('Authorization').split(' ')[1];
+        const restaurants = await RestaurantRepository.getAllRestaurants(token);
+        res.json(restaurants);
+    } catch (error) {
+        console.error('Error in getAllRestaurants:', error);
+        res.status(500).json({ message: 'Error fetching restaurants' });
     }
 };
 
 // Get restaurant by ID
 const getRestaurantById = async (req, res) => {
     try {
-        if (!req.params.restaurantId) {
+        const token = req.header('Authorization').split(' ')[1];
+        const restaurantId = req.params;
+        if (!restaurantId) {
             return res.status(400).json({ message: "Restaurant ID is required" });
         }
 
-        const restaurant = await RestaurantRepository.findById(req.params.restaurantId);
+        const restaurant = await RestaurantRepository.findById(req.params.restaurantId, token);
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
         }
