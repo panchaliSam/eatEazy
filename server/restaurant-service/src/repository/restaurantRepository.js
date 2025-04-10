@@ -44,7 +44,7 @@ const RestaurantRepository = {
 
             let owner = null;
             try {
-                const ownerResponse = await axios.get(`http://localhost:4000/auth/users/${restaurant.OwnerID}`, {
+                const ownerResponse = await axios.get(`${API_GATEWAY_AUTH_SERVICE_URL}/${restaurant.OwnerID}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -71,7 +71,7 @@ const RestaurantRepository = {
         return Promise.all(restaurants.map(async (restaurant) => {
             let owner = null;
             try {
-                const ownerResponse = await axios.get(`http://localhost:4000/auth/users/${restaurant.OwnerID}`, {
+                const ownerResponse = await axios.get(`${API_GATEWAY_AUTH_SERVICE_URL}/${restaurant.OwnerID}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
