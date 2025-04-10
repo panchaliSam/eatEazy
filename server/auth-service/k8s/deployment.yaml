@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: your-docker-hub-username/auth-service:latest  # Replace with your actual image
+          image: auth-service:latest  # Replace with your actual image
           ports:
             - containerPort: 4001
           envFrom:
@@ -27,8 +27,8 @@ spec:
                 name: auth-service-secret
           resources:
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "80Mi"
+              cpu: "200m"
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: "80Mi"
+              cpu: "100m"

@@ -25,7 +25,7 @@ const UserRepository = {
 
     findById: async (id) => {
         const user = await prisma.users.findUnique({
-            where: { UserID: id },
+            where: { UserID: parseInt(id) },
         });
         return user;
     },
@@ -46,7 +46,7 @@ const UserRepository = {
 
     deleteById: async (id) => {
         const deletedUser = await prisma.users.delete({
-            where: { UserID: id },
+            where: { UserID: parseInt(id) },
         });
         return deletedUser;
     },
@@ -54,7 +54,7 @@ const UserRepository = {
     updateById: async (id, userData) => {
         const { firstname, lastname, email, phone, role } = userData;
         const updatedUser = await prisma.users.update({
-            where: { UserID: id },
+            where: { UserID: parseInt(id) },
             data: {
                 Firstname: firstname,
                 Lastname: lastname,

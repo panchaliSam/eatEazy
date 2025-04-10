@@ -7,4 +7,5 @@ module.exports = {
     DB_NAME: process.env.DB_NAME,
     AUTH_SERVICE_PORT: process.env.AUTH_SERVICE_PORT,
     RESTAURANT_SERVICE_PORT: process.env.RESTAURANT_SERVICE_PORT,
+    API_GATEWAY_AUTH_SERVICE_URL: process.env.API_GATEWAY_AUTH_SERVICE_URL,
 };
