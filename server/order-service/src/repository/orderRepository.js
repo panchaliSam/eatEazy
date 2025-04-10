@@ -4,21 +4,21 @@ const prisma = new PrismaClient();
 const OrderRepository = {
     // Add item to cart
     addToCart: async (userId, menuItemId, quantity) => {
-        let cart = await prisma.cart.findFirst({
+        let cart = await prisma.carts.findFirst({
             where: { userId },
         });
 
         if (!cart) {
-            cart = await prisma.cart.create({
+            cart = await prisma.carts.create({
                 data: {
                     userId,
                 },
             });
         }
 
-        await prisma.cartItem.create({
+        await prisma.cartitems.create({
             data: {
-                cartId: cart.cartId,
+                cartId: carts.cartId,
                 menuItemId,
                 quantity,
             },
@@ -29,7 +29,7 @@ const OrderRepository = {
 
     // Checkout from cart
     checkout: async (userId, restaurantId) => {
-        const cart = await prisma.cart.findFirst({
+        const cart = await prisma.carts.findFirst({
             where: { userId },
             include: {
                 items: {
@@ -46,7 +46,7 @@ const OrderRepository = {
             return sum + item.quantity * item.menuItem.price;
         }, 0);
 
-        const order = await prisma.order.create({
+        const order = await prisma.orders.create({
             data: {
                 customerId: userId,
                 restaurantId,
