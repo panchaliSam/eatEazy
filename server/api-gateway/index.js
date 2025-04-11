@@ -10,6 +10,8 @@ app.use(cors());
 app.use(helmet());
 app.disable("x-powered-by");
 
+app.use(express.urlencoded({ extended: true }));
+
 const services = {
     auth: process.env.AUTH_SERVICE_URL,
     restaurant: process.env.RESTAURANT_SERVICE_URL,

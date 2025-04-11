@@ -23,14 +23,17 @@ const RefreshRepository = {
 
     findById: async (token) => {
       const refreshToken = await prisma.refreshTokens.findUnique({
-          where: {token},
+          where: {Token: token},
       })
         return refreshToken;
     },
 
     deleteByToken: async (token, userId) => {
         const refreshToken = await prisma.refreshTokens.findUnique({
-            where: { token },
+            where: {
+                Token: token,
+                UserID: userId,
+            },
         });
 
         if (!refreshToken || refreshToken.userId !== userId) {
@@ -38,7 +41,10 @@ const RefreshRepository = {
         }
 
         const deletedToken = await prisma.refreshTokens.delete({
-            where: { token },
+            where: {
+                Token: token,
+                UserID: userId,
+            },
         });
 
         return deletedToken;

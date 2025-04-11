@@ -6,9 +6,11 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+
 const PORT = process.env.AUTH_SERVICE_PORT || 4001;
 
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/', authRoutes);
 

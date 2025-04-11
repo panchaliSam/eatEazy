@@ -35,36 +35,36 @@ const login = async (req, res) => {
 };
 
 // Refresh access token
-const refreshAccessToken = async (req, res) => {
-    const { refreshToken } = req.body;
-
+const refreshAccessToken = async (refreshToken) => {
     if (!refreshToken) {
-        return res.status(400).json({ message: 'Refresh token is required.' });
+        throw new Error('Refresh token is required.');
     }
 
     try {
         const newAccessToken = await authService.refreshAccessToken(refreshToken);
-        res.status(200).json({ accessToken: newAccessToken });
+        return newAccessToken;
     } catch (err) {
-        res.status(403).json({ message: 'Token refresh failed.', error: err.message });
+        throw new Error('Token refresh failed: ' + err.message);
     }
 };
+
 
 // Logout user
-const logout = async (req, res) => {
-    const { refreshToken } = req.body;
-
+const logout = async (refreshToken) => {
     if (!refreshToken) {
-        return res.status(400).json({ message: 'Refresh token is required for logout.' });
+        throw new Error('Refresh token is required.');
     }
-
     try {
+        await refreshAccessToken(refreshToken);
+
         await authService.logout(refreshToken);
-        res.status(200).json({ message: 'Logout successful.' });
+
+        return { success: true, message: 'Logout successful.' };
     } catch (err) {
-        res.status(500).json({ message: 'Logout failed.', error: err.message });
+        throw new Error('Logout failed: ' + err.message);
     }
 };
+
 
 // Get all users (only for Admin)
 const getAllUsers = async (req, res) => {
