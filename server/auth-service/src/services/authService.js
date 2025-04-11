@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/userModel');
-const { JWT_SECRET, JWT_EXPIRATION } = require('../config/env');
+const RefreshTokenModel = require('../models/refreshTokenModel');
+const { JWT_SECRET, JWT_EXPIRATION, REFRESH_TOKEN_EXPIRATION } = require('../config/env');
 
 const ALLOWED_ROLES = ['Admin', 'Restaurant', 'Customer', 'DeliveryPerson'];
 
@@ -35,8 +36,52 @@ const login = async (email, password) => {
         throw new Error('Invalid password.');
     }
 
-    const token = jwt.sign({ id: user.UserID, email: user.Email, role: user.Role }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
-    return token;
+    const accessToken = jwt.sign(
+        { id: user.UserID, email: user.Email, role: user.Role },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRATION }
+    );
+
+    const refreshToken = jwt.sign(
+        { id: user.UserID },
+        JWT_SECRET,
+        { expiresIn: REFRESH_TOKEN_EXPIRATION }
+    );
+
+    const expiresInMilliseconds = 7 * 24 * 60 * 60 * 1000;
+    const expiresAt = new Date(Date.now() + expiresInMilliseconds);
+
+    await RefreshTokenModel.createToken({
+        token: refreshToken,
+        userId: user.UserID,
+        expiresAt: expiresAt,
+    });
+
+    return { accessToken, refreshToken };
+};
+
+// Refresh access token
+const refreshAccessToken = async (refreshToken) => {
+    const tokenData = await RefreshTokenModel.findByTokenId(refreshToken);
+
+    if (!tokenData || new Date() > new Date(tokenData.expiresAt)) {
+        throw new Error('Invalid or expired refresh token.');
+    }
+
+    const payload = jwt.verify(refreshToken, JWT_SECRET);
+
+    const accessToken = jwt.sign(
+        { id: payload.id, email: payload.email, role: payload.role },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRATION }
+    );
+
+    return { accessToken };
+};
+
+// Logout
+const logout = async (refreshToken) => {
+    await RefreshTokenModel.deleteByToken(refreshToken);
 };
 
 // Get all users
@@ -59,4 +104,4 @@ const updateUser = async (id, userData) => {
     return await UserModel.updateUserById(id, userData);
 };
 
-module.exports = { register, login, getAllUsers, getById, deleteUser, updateUser };
+module.exports = { register, login, refreshAccessToken, logout, getAllUsers, getById, deleteUser, updateUser };

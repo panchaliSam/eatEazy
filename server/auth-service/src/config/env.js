@@ -7,5 +7,6 @@ module.exports = {
     DB_NAME: process.env.DB_NAME,
     JWT_SECRET: process.env.JWT_SECRET,
     JWT_EXPIRATION: process.env.JWT_EXPIRATION,
+    REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION,
     AUTH_SERVICE_PORT: process.env.AUTH_SERVICE_PORT,
 };
