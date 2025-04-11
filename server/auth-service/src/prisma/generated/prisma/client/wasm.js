@@ -117,6 +117,15 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.RefreshTokensScalarFieldEnum = {
+  TokenID: 'TokenID',
+  Token: 'Token',
+  UserID: 'UserID',
+  ExpiresAt: 'ExpiresAt',
+  CreatedAt: 'CreatedAt',
+  UpdatedAt: 'UpdatedAt'
+};
+
 exports.Prisma.UsersScalarFieldEnum = {
   UserID: 'UserID',
   Firstname: 'Firstname',
@@ -130,6 +139,10 @@ exports.Prisma.UsersScalarFieldEnum = {
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.RefreshTokensOrderByRelevanceFieldEnum = {
+  Token: 'Token'
 };
 
 exports.Prisma.NullsOrder = {
@@ -152,6 +165,7 @@ exports.Users_Role = exports.$Enums.Users_Role = {
 };
 
 exports.Prisma.ModelName = {
+  RefreshTokens: 'RefreshTokens',
   Users: 'Users'
 };
 
