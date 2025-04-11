@@ -27,12 +27,44 @@ const login = async (req, res) => {
     }
 
     try {
-        const token = await authService.login(email, password);
-        res.status(200).json({ message: 'Login successful.', token });
+        const { accessToken, refreshToken } = await authService.login(email, password);
+        res.status(200).json({ message: 'Login successful.', accessToken, refreshToken });
     } catch (err) {
         res.status(401).json({ message: err.message });
     }
 };
+
+// Refresh access token
+const refreshAccessToken = async (refreshToken) => {
+    if (!refreshToken) {
+        throw new Error('Refresh token is required.');
+    }
+
+    try {
+        const newAccessToken = await authService.refreshAccessToken(refreshToken);
+        return newAccessToken;
+    } catch (err) {
+        throw new Error('Token refresh failed: ' + err.message);
+    }
+};
+
+
+// Logout user
+const logout = async (refreshToken) => {
+    if (!refreshToken) {
+        throw new Error('Refresh token is required.');
+    }
+    try {
+        await refreshAccessToken(refreshToken);
+
+        await authService.logout(refreshToken);
+
+        return { success: true, message: 'Logout successful.' };
+    } catch (err) {
+        throw new Error('Logout failed: ' + err.message);
+    }
+};
+
 
 // Get all users (only for Admin)
 const getAllUsers = async (req, res) => {
@@ -55,7 +87,7 @@ const getUserById = async (req, res) => {
     const userId = req.params.id;
     const { role, id } = req.user;
 
-    if (role === 'Admin' || id === userId || role === 'Restaurant' ) {
+    if (role === 'Admin' || id === userId) {
         try {
             const user = await authService.getById(userId);
             if (!user) {
@@ -66,31 +98,28 @@ const getUserById = async (req, res) => {
             res.status(500).json({ message: 'Error retrieving user.', error: err.message });
         }
     } else {
-        res.status(403).json({ message: 'Access denied. Admin role or user own data required.' });
+        res.status(403).json({ message: 'Access denied.' });
     }
 };
 
-// Update user (any user or Admin)
+// Update user
 const updateUser = async (req, res) => {
     const userId = req.params.id;
-    const { role, id, email } = req.user;
+    const { role, id } = req.user;
 
-    const { firstname, lastname, email: newEmail, phone, role: newRole } = req.body;
-    const userData = { firstname, lastname, email: newEmail, phone, role: newRole };
-
-    if (role === 'Admin' || (role !== 'Admin' && email === newEmail)) {
+    if (role === 'Admin' || id === userId) {
         try {
-            await authService.updateUser(userId, userData);
+            await authService.updateUser(userId, req.body);
             res.status(200).json({ message: 'User updated successfully.' });
         } catch (err) {
             res.status(500).json({ message: 'Failed to update user.', error: err.message });
         }
     } else {
-        res.status(403).json({ message: 'Access denied. You can only edit your own details or Admin can edit all.' });
+        res.status(403).json({ message: 'Access denied.' });
     }
 };
 
-// Delete user (Admin only)
+// Delete user
 const deleteUser = async (req, res) => {
     const userId = req.params.id;
     const { role } = req.user;
@@ -103,11 +132,11 @@ const deleteUser = async (req, res) => {
             res.status(500).json({ message: 'Failed to delete user.', error: err.message });
         }
     } else {
-        res.status(403).json({ message: 'Access denied. Admin role required.' });
+        res.status(403).json({ message: 'Access denied.' });
     }
 };
 
-//Verify JWT
+// Verify JWT token
 const verifyToken = (req, res) => {
     const { token } = req.body;
 
@@ -117,11 +146,23 @@ const verifyToken = (req, res) => {
 
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
         if (err) {
-            return res.status(403).json({ message: 'Invalid or expired token.' });
+            console.error('Token verification error:', err.message);
+            return res.status(403).json({ message: 'Invalid or expired token.', error: err.message });
         }
 
         res.status(200).json({ message: 'Token is valid.', user: decoded });
     });
 };
 
-module.exports = { register, login, getAllUsers, getUserById, updateUser, deleteUser, verifyToken };
+
+module.exports = {
+    register,
+    login,
+    refreshAccessToken,
+    logout,
+    getAllUsers,
+    getUserById,
+    updateUser,
+    deleteUser,
+    verifyToken,
+};
