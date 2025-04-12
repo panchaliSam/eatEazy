@@ -1,16 +1,16 @@
 import React from 'react';
 import  ResponsiveAppBar from '../common/Navbar'
 import { CssBaseline } from '@mui/material';
-import HeroSection from '../components/HeroSection'
+import LoginSection from '../components/LoginSection'
 
-const Home: React.FC = () => {
+const Login: React.FC = () => {
     return (
         <div>
             <CssBaseline />
             <ResponsiveAppBar />
-            <HeroSection />
+            <LoginSection />
         </div>
     )
 };
 
-export default Home;
+export default Login;

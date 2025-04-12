@@ -37,8 +37,8 @@ function ResponsiveAppBar() {
     };
 
     const handleSetActivePage = (page: string) => {
-        setActivePage(page); // Update active page
-        handleCloseNavMenu(); // Close menu if open (for mobile)
+        setActivePage(page);
+        handleCloseNavMenu();
     };
 
     return (
@@ -84,7 +84,7 @@ function ResponsiveAppBar() {
                                 <Typography
                                     sx={{
                                         textAlign: 'center',
-                                        color: activePage === page ? 'orange' : 'black', // Highlight active page
+                                        color: activePage === page ? 'orange' : 'black',
                                     }}
                                 >
                                     {page}
@@ -135,9 +135,9 @@ function ResponsiveAppBar() {
                             onClick={handleOpenUserMenu}
                             sx={{
                                 p: 0,
-                                outline: 'none', // Remove focus outline
+                                outline: 'none',
                                 '&:focus': {
-                                    outline: 'none', // Ensure no border on focus
+                                    outline: 'none',
                                 },
                             }}
                         >

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
+import {useNavigate} from 'react-router-dom'
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import RamenDiningIcon from '@mui/icons-material/RamenDining';
 import LunchDiningIcon from '@mui/icons-material/LunchDining';
@@ -27,6 +28,12 @@ const rotate = keyframes`
 `;
 
 const HeroSection: React.FC = () => {
+    const navigate = useNavigate();
+
+    const handleOrderNowClick = () => {
+        navigate('/login');
+    }
+
     return (
         <Box
             sx={{
@@ -47,7 +54,23 @@ const HeroSection: React.FC = () => {
                 <Typography variant="subtitle1" sx={{ color: 'gray', mb: 3 }}>
                     Imagine you don’t need a diet because we provide healthy and delicious food for you!
                 </Typography>
-                <Button variant="contained" sx={{  background: '#EA7300', mb: 2,  padding: '1rem', fontSize: '18px', fontWeight: 'lighter',borderRadius: '30px', textTransform: 'none', width: '200px', }}>
+                <Button
+                    variant="contained"
+                    onClick={handleOrderNowClick}
+                    sx={{
+                        background: '#EA7300',
+                        mb: 2,
+                        padding: '1rem',
+                        fontSize: '18px',
+                        fontWeight: 'lighter',
+                        borderRadius: '30px',
+                        textTransform: 'none',
+                        width: '200px',
+                        outline: 'none',
+                        '&:focus': {
+                            outline: 'none',
+                        },
+                    }}>
                     Order Now
                 </Button>
             </Box>
