@@ -7,7 +7,7 @@ class DeliveryController {
       const driver = await DeliveryService.assignDelivery(orderId);
       res.json({ success: true, message: "Driver assigned", driver });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ success: false, message: error.message });
     }
   }
 
@@ -20,7 +20,7 @@ class DeliveryController {
 
       res.json(delivery);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ success: false, message: error.message });
     }
   }
 
@@ -32,7 +32,7 @@ class DeliveryController {
       await DeliveryService.updateStatus(deliveryId, status);
       res.json({ success: true, message: "Delivery status updated" });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ success: false, message: error.message });
     }
   }
 
@@ -44,6 +44,24 @@ class DeliveryController {
         return res.status(404).json({ message: "Delivery route not found" });
 
       res.json(route);
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  static async addDeliveryRoute(req, res) {
+    try {
+      const { deliveryId } = req.params;
+      const { startLat, startLng, endLat, endLng } = req.body;
+
+      const result = await DeliveryService.addRoute(deliveryId, {
+        startLat,
+        startLng,
+        endLat,
+        endLng,
+      });
+
+      res.json({ success: true, route: result });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
