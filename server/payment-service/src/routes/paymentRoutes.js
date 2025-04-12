@@ -1,17 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const PaymentController = require('../controllers/paymentController');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 // Route to initiate payment
-router.post('/initiate', PaymentController.initiatePayment);
+router.post('/initiate', authenticateToken,PaymentController.initiatePayment);
 
 // Routes for PayHere callbacks
-router.post('/success', PaymentController.paymentSuccess);
-router.post('/cancel', PaymentController.paymentCancelled);
-router.post('/notify', PaymentController.paymentNotification);
+router.post('/notify', PaymentController.handlePayHereNotify);
 
 // Route to manually update payment status (admin)
-router.put('/status', PaymentController.updatePaymentStatus);
+router.put('/status',authenticateToken, PaymentController.updatePaymentStatus);
 
 module.exports = router;
 
