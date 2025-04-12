@@ -1,46 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma/client"
+  binaryTargets = ["windows", "darwin-arm64"]
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-model Restaurant {
-  RestaurantID   Int     @id @default(autoincrement())
+model Restaurants {
+  RestaurantID   Int         @id @default(autoincrement())
   OwnerID        Int?
-  RestaurantName String  @db.VarChar(255)
-  Address        String
-  Phone          String? @db.VarChar(15)
-  Email          String? @db.VarChar(255)
-  Availability   String  @db.VarChar(255)
-
-  Owner          User?   @relation(fields: [OwnerID], references: [UserID], onDelete: SetNull)
-  MenuItems      MenuItem[] // One to many relationship: A restaurant can have many menu items
-
-  @@map("Restaurants")
+  RestaurantName String      @db.VarChar(255)
+  Address        String      @db.Text
+  Phone          String?     @db.VarChar(15)
+  Email          String?     @db.VarChar(255)
+  Availability   String      @db.VarChar(255)
+  MenuItems      MenuItems[]
 }
 
-model User {
-  UserID    Int     @id
-  Firstname String  @db.VarChar(255)
-  Lastname  String  @db.VarChar(255)
-  Email     String  @db.VarChar(255)
+model MenuItems {
+  MenuItemID   Int          @id @default(autoincrement())
+  RestaurantID Int?
+  Name         String       @db.VarChar(255)
+  Description  String?      @db.Text
+  Price        Decimal      @db.Decimal(10, 2)
+  IsAvailable  Boolean?     @default(true)
+  Restaurants  Restaurants? @relation(fields: [RestaurantID], references: [RestaurantID], onDelete: Cascade, onUpdate: NoAction, map: "menuitems_ibfk_1")
 
-  @@map("Users")
-  Restaurant Restaurant[] // One to many relationship: Single user can have multiple restaurants
-}
-
-model MenuItem {
-  MenuItemID   Int        @id @default(autoincrement())
-  RestaurantID Int
-  Name         String     @db.VarChar(255)
-  Description  String?
-  Price        Decimal    @db.Decimal(10, 2)
-  IsAvailable  Boolean    @default(true)
-
-  Restaurant   Restaurant @relation(fields: [RestaurantID], references: [RestaurantID], onDelete: Cascade)
-
-  @@map("MenuItems")
+  @@index([RestaurantID], map: "RestaurantID")
 }
