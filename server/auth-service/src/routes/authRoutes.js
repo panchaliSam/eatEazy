@@ -3,7 +3,6 @@ const { register, login, refreshAccessToken, logout, getAllUsers, getUserById, u
 const { authenticateToken } = require('../middleware/authMiddleware');
 const router = express.Router();
 
-
 router.post('/register', register);
 router.post('/login', login);
 router.post('/refresh', async (req, res) => {
