@@ -1,16 +1,63 @@
-import React from 'react';
+import React, {ChangeEvent} from 'react';
 import {useState} from "react";
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, TextField, Button, IconButton, InputAdornment } from '@mui/material';
-import LoginIcon from '@mui/icons-material/Login';
+import {
+    Box,
+    Typography,
+    TextField,
+    Button,
+    IconButton,
+    InputAdornment
+} from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import logo from '../assets/LoginImage.png';
+import UserApi from '../utils/api/UserApi';
+
+interface FormData {
+    email: string;
+    password: string;
+}
 
 const LoginSection: React.FC = () => {
 
     const [showPassword, setShowPassword] = useState<boolean>(true);
+    const [formData, setFormData] = useState<FormData>({
+        email: '',
+        password: '',
+    });
+    const[loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
     const navigate = useNavigate();
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = event.target;
+        setFormData(prevData=>({
+            ...prevData,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async () => {
+        setLoading(true);
+        setError(null);
+        try{
+            await UserApi.login({
+                email: formData.email,
+                password: formData.password,
+            });
+            navigate('/');
+        }catch(err: unknown){
+            if(err instanceof Error){
+                setError(err.message || 'Failed to register');
+            }else{
+                setError('Failed to register');
+            }
+        }finally{
+            setLoading(false);
+        }
+    }
 
     const togglePasswordVisibility = () => {
         setShowPassword((prevState) => !prevState);
@@ -48,8 +95,19 @@ const LoginSection: React.FC = () => {
                 <Typography variant="subtitle1" sx={{ color: 'gray', mb: 3 }}>
                     Please login to your account to continue.
                 </Typography>
+
+                {error && (
+                    <Typography color="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Typography>
+                )}
+
+
                 <TextField
                     label="Email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
                     variant="outlined"
                     fullWidth
                     sx={{
@@ -71,6 +129,9 @@ const LoginSection: React.FC = () => {
                 />
                 <TextField
                     label="Password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
                     type={showPassword ? 'text' : 'password'}
                     variant="outlined"
                     fullWidth
@@ -111,7 +172,7 @@ const LoginSection: React.FC = () => {
                 />
                 <Button
                     variant="contained"
-                    startIcon={<LoginIcon />}
+                    onClick={handleSubmit}
                     sx={{
                         background: '#EA7300',
                         padding: '0.8rem',
@@ -125,8 +186,10 @@ const LoginSection: React.FC = () => {
                         },
                     }}
                 >
-                    Login
+                    {loading ? 'Login' : 'Login'}
                 </Button>
+
+
                 <Typography variant="subtitle1" sx={{ color: 'gray', mt: 6, mb: 3 }}>
                     Don't have an account?{' '}
                     <span

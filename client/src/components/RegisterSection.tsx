@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState, ChangeEvent} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -16,19 +16,77 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import logo from '../assets/LoginImage.png';
+import UserApi from '../utils/api/UserApi';
+
+interface FormData {
+    firstname: string;
+    lastname: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    phone: string;
+}
 
 const RegisterSection: React.FC = () => {
-    const [showPassword, setShowPassword] = useState<boolean>(true);
+    const [showPassword, setShowPassword] = useState<boolean>(false);
     const [role, setRole] = useState<string>('');
+    const [formData, setFormData] = useState<FormData>({
+        firstname: '',
+        lastname: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        phone: '',
+    });
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+
     const navigate = useNavigate();
 
-    const togglePasswordVisibility = () => {
-        setShowPassword((prevState) => !prevState);
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        setFormData(prevData => ({
+            ...prevData,
+            [name]: value
+        }));
     };
 
-  const handleRoleChange = (event: SelectChangeEvent<string>) => {
-      setRole(event.target.value);
-  }
+    const handleSubmit = async () => {
+        if(formData.password !== formData.confirmPassword){
+            setError('Passwords don\'t match');
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        try{
+            await UserApi.register({
+                firstname: formData.firstname,
+                lastname: formData.lastname,
+                email: formData.email,
+                password: formData.password,
+                phone: formData.phone,
+                role,
+            });
+            navigate('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message || 'Failed to register');
+            } else {
+                setError('Failed to register');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(prevState => !prevState);
+    };
+
+    const handleRoleChange = (event: SelectChangeEvent) => {
+        setRole(event.target.value);
+    }
 
     const handleLoginClick = () => {
         navigate('/login');
@@ -62,8 +120,17 @@ const RegisterSection: React.FC = () => {
                     Register
                 </Typography>
 
+                {error && (
+                    <Typography color="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Typography>
+                )}
+
                 <TextField
                     label="First Name"
+                    name="firstname"
+                    value={formData.firstname}
+                    onChange={handleChange}
                     variant="outlined"
                     fullWidth
                     sx={{
@@ -85,6 +152,9 @@ const RegisterSection: React.FC = () => {
                 />
                 <TextField
                     label="Last Name"
+                    name="lastname"
+                    value={formData.lastname}
+                    onChange={handleChange}
                     variant="outlined"
                     fullWidth
                     sx={{
@@ -106,6 +176,9 @@ const RegisterSection: React.FC = () => {
                 />
                 <TextField
                     label="Email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
                     variant="outlined"
                     fullWidth
                     sx={{
@@ -127,6 +200,9 @@ const RegisterSection: React.FC = () => {
                 />
                 <TextField
                     label="Phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
                     variant="outlined"
                     fullWidth
                     sx={{
@@ -148,6 +224,9 @@ const RegisterSection: React.FC = () => {
                 />
                 <TextField
                     label="Password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
                     type={showPassword ? 'text' : 'password'}
                     variant="outlined"
                     fullWidth
@@ -188,6 +267,9 @@ const RegisterSection: React.FC = () => {
                 />
                 <TextField
                     label="Confirm Password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
                     type={showPassword ? 'text' : 'password'}
                     variant="outlined"
                     fullWidth
@@ -229,20 +311,20 @@ const RegisterSection: React.FC = () => {
                 <FormControl fullWidth sx={{
                     mb: 2,
                     '& .MuiOutlinedInput-root': {
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: '#EA7300',
-                            },
-                            '&.Mui-focused': {
-                                color: '#EA7300',
-                             },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#EA7300',
                         },
-                        '& .MuiInputLabel-root': {
-                            '&.Mui-focused': {
-                                color: '#EA7300',
-                            },
+                        '&.Mui-focused': {
+                            color: '#EA7300',
                         },
-                    }}
-                    >
+                    },
+                    '& .MuiInputLabel-root': {
+                        '&.Mui-focused': {
+                            color: '#EA7300',
+                        },
+                    },
+                }}
+                >
                     <InputLabel>Role</InputLabel>
                     <Select
                         value={role}
@@ -273,6 +355,8 @@ const RegisterSection: React.FC = () => {
                 </FormControl>
                 <Button
                     variant="contained"
+                    disabled={loading}
+                    onClick={handleSubmit}
                     sx={{
                         background: '#EA7300',
                         padding: '0.8rem',
@@ -286,7 +370,7 @@ const RegisterSection: React.FC = () => {
                         },
                     }}
                 >
-                    Register
+                    {loading ? 'Registering...' : 'Register'}
                 </Button>
                 <Typography variant="subtitle1" sx={{ color: 'gray', mt: 3, mb: 3 }}>
                     Already have an account?{' '}
