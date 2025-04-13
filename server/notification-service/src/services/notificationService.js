@@ -1,11 +1,14 @@
 const NotificationModel = require("../models/notificationModel");
 const nodemailer = require("nodemailer");
-const axios = require("axios");
-require("dotenv").config();
 const twilio = require("twilio");
+const templates = require("./notificationTemplates");
+require("dotenv").config();
 
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
-// Email setup (Gmail via Nodemailer)
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -14,39 +17,40 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Create a Twilio client using environment credentials
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
 const NotificationService = {
-  sendEmail: async (email, subject, message) => {
+  sendEmail: async (email, type, data) => {
+    const { subject, text } = templates.emailTemplates[type](data);
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
-      subject: subject,
-      text: message,
+      subject,
+      text,
     });
+    await NotificationModel.createNotification(data.userId, text, "Email", type);
   },
 
-  sendSMS: async (phone, message) => {
+  sendSMS: async (phone, type, data) => {
+    const text = templates.smsTemplates[type](data);
     try {
       const response = await twilioClient.messages.create({
-        body: message,
-        from: process.env.TWILIO_MESSAGING_SERVICE_SID,  // Use your Twilio phone number from .env
-        to: phone,  // Ensure this is in E.164 format (e.g., +94768501850)
+        body: text,
+        messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+        to: phone,
       });
-      console.log("SMS sent successfully! SID:", response.sid);
+      await NotificationModel.createNotification(data.userId, text, "SMS", type);
     } catch (error) {
       console.error("Error sending SMS via Twilio:", error);
       throw new Error("Failed to send SMS");
     }
   },
 
-  createNotification: async (userId, message) => {
-    return await NotificationModel.createNotification(userId, message);
+  createNotification: async (userId, message, channel = 'InApp', type = null) => {
+    return await NotificationModel.createNotification(userId, message, channel, type);
   },
+
+  getNotificationsByUserId: async (userId) => {
+    return await NotificationModel.getNotificationsByUserId(userId);
+  }
 };
 
 module.exports = NotificationService;
