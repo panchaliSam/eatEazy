@@ -1,14 +1,10 @@
 const NotificationModel = require("../models/notificationModel");
 const nodemailer = require("nodemailer");
-const twilio = require("twilio");
+const axios = require("axios");
 const templates = require("./notificationTemplates");
 require("dotenv").config();
 
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
+// Nodemailer transporter setup
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -18,6 +14,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const NotificationService = {
+  // Email notification
   sendEmail: async (email, type, data) => {
     const { subject, text } = templates.emailTemplates[type](data);
     await transporter.sendMail({
@@ -29,25 +26,34 @@ const NotificationService = {
     await NotificationModel.createNotification(data.userId, text, "Email", type);
   },
 
+  // SMS notification using Text.lk
   sendSMS: async (phone, type, data) => {
     const text = templates.smsTemplates[type](data);
     try {
-      const response = await twilioClient.messages.create({
-        body: text,
-        messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+      const response = await axios.post('https://textlk.com/api/v3/send-sms', {
+        api_key: process.env.TEXTLK_API_KEY,
+        sender_id: process.env.TEXTLK_SENDER_ID,
+        message: text,
         to: phone,
       });
+
+      if (response.data.status !== 'SUCCESS') {
+        throw new Error(`Text.lk Error: ${response.data.message}`);
+      }
+
       await NotificationModel.createNotification(data.userId, text, "SMS", type);
     } catch (error) {
-      console.error("Error sending SMS via Twilio:", error);
+      console.error("Error sending SMS via Text.lk:", error.message || error);
       throw new Error("Failed to send SMS");
     }
   },
 
+  // In-app or other notifications
   createNotification: async (userId, message, channel = 'InApp', type = null) => {
     return await NotificationModel.createNotification(userId, message, channel, type);
   },
 
+  // Fetch notifications by user
   getNotificationsByUserId: async (userId) => {
     return await NotificationModel.getNotificationsByUserId(userId);
   }
