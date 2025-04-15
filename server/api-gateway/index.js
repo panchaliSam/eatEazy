@@ -15,6 +15,9 @@ app.use(express.urlencoded({ extended: true }));
 const services = {
     auth: process.env.AUTH_SERVICE_URL,
     restaurant: process.env.RESTAURANT_SERVICE_URL,
+    orders: process.env.ORDER_SERVICE_URL,
+    notifications: process.env.NOTIFICATION_SERVICE_URL,
+    payments: process.env.RESTAURANT_PAYMENT_SERVICE_URL,
 };
 
 app.use("/auth", createProxyMiddleware({
@@ -24,6 +27,21 @@ app.use("/auth", createProxyMiddleware({
 
 app.use("/restaurants", createProxyMiddleware({
     target: services.restaurant,
+    changeOrigin: true,
+}));
+
+app.use("/orders", createProxyMiddleware({
+    target: services.orders,
+    changeOrigin: true,
+}));
+
+app.use("/notifications", createProxyMiddleware({
+    target: services.notifications,
+    changeOrigin: true,
+}))
+
+app.use("/payments", createProxyMiddleware({
+    target: services.payments,
     changeOrigin: true,
 }));
 

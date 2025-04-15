@@ -29,6 +29,9 @@ const UserApi = {
                 email: userData.email,
                 password: userData.password
             });
+            const {accessToken, refreshToken} = response.data;
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
             return response.data;
         }catch (error: unknown) {
             if (axios.isAxiosError(error) && error.response) {
@@ -36,7 +39,27 @@ const UserApi = {
             }
             throw new Error('An unexpected error occurred.');
         }
-    }
+    },
+
+    logout:async() => {
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        if(!refreshToken){
+            throw new Error('No refresh token found.');
+        }
+
+        try{
+            const response = await axios.post(`${API_URL}/auth/logout`, {refreshToken: refreshToken});
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            return response.data;
+        }catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response) {
+                throw error.response.data;
+            }
+            throw new Error('An unexpected error occurred.');
+        }
+    },
 }
 
 export default UserApi;
