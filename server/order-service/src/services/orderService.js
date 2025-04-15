@@ -31,10 +31,9 @@ const getMenuItemPrice = async (restaurantId, menuItemId) => {
   return item?.Price;
 };
 
-const processOrder = async (token, items) => {
+const processOrder = async (token, items, restaurantId) => {
   const user = await verifyToken(token);
   const userId = user.id;
-  const restaurantId = 1;
 
   const cart = await orderRepo.createCart(userId, restaurantId, "ACTIVE");
 
