@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/admin/Dashboard";
+import ProtectedRoute from "./routes/ProtectedRoutes";
 
 const theme = createTheme({
   palette: {
@@ -21,10 +22,13 @@ const App: React.FC = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/logout" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/logout" element={<Home />} />
+          <Route
+            path="/dashboard"
+            element={<ProtectedRoute element={<Dashboard />} />}
+          />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
