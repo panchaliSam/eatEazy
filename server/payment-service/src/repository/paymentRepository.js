@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const axios = require('axios');
 
 const PaymentRepository = {
   createPayment: async (paymentData) => {
