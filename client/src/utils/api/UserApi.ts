@@ -1,5 +1,12 @@
 import axios from "axios";
 import { API_URL } from "./ApiURL";
+import { getAuthHeaders } from "../helper/AuthHelper";
+import {
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+  clearTokens,
+} from "../helper/TokenHelper";
 
 interface UserData {
   firstname?: string;
@@ -30,8 +37,7 @@ const UserApi = {
         password: userData.password,
       });
       const { accessToken, refreshToken } = response.data;
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      setTokens(accessToken, refreshToken); // Use the helper function here
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
@@ -42,8 +48,8 @@ const UserApi = {
   },
 
   logout: async () => {
-    const refreshToken = localStorage.getItem("refreshToken");
-    const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = getRefreshToken(); // Use the helper function
+    const accessToken = getAccessToken(); // Use the helper function
 
     if (!refreshToken) {
       throw new Error("No refresh token found.");
@@ -60,13 +66,10 @@ const UserApi = {
           refreshToken: refreshToken,
         },
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      clearTokens(); // Use the helper function to clear tokens
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {

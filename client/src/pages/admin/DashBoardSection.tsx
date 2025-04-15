@@ -18,6 +18,7 @@ import { useDemoRouter } from "@toolpad/core/internal";
 import logo from "@app_assets/logo/png/logo-transparent.png";
 import { orange } from "@mui/material/colors";
 import UserApi from "../../utils/api/UserApi";
+import { getRefreshToken } from "../../utils/helper/TokenHelper";
 import { DashboardContent } from "../../components/admin/DashBoardContent";
 
 const theme = createTheme({
@@ -69,7 +70,7 @@ export default function DashboardLayoutBasic(props: DemoProps) {
   const handleLogout = async () => {
     try {
       console.log("Logging out...");
-      const refreshToken = localStorage.getItem("refreshToken");
+      const refreshToken = getRefreshToken();
       if (!refreshToken) {
         console.warn("No refresh token found. Redirecting to login.");
         navigate("/");
