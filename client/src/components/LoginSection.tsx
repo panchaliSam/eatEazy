@@ -47,7 +47,7 @@ const LoginSection: React.FC = () => {
                 email: formData.email,
                 password: formData.password,
             });
-            navigate('/');
+            navigate('/dashboard');
         }catch(err: unknown){
             if(err instanceof Error){
                 setError(err.message || 'Failed to register');
