@@ -17,7 +17,7 @@
       "@app_routes/*": ["src/routes/*"],
       "@app_services/*": ["src/services/*"],
       "@app_theme/*": ["src/theme/*"],
-      "@app_utils/*": ["src/utils/*"]
+      "@app_utils/*": ["src/utils/api*"]
     }
   },
   "include": ["src"],
