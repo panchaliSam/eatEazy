@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import React, { lazy, Suspense } from "react";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -18,9 +17,8 @@ import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
 import logo from "@app_assets/logo/png/logo-transparent.png";
 import { orange } from "@mui/material/colors";
-import { TextField } from "@mui/material";
-import Button from "@mui/material/Button";
-import UserApi from "../../utils/api/UserApi.ts";
+import UserApi from "../../utils/api/UserApi";
+import { DashboardContent } from "../../components/admin/DashBoardContent";
 
 const theme = createTheme({
   palette: {
@@ -59,130 +57,6 @@ const demoTheme = createTheme(theme, {
     },
   },
 });
-
-const DemoPageContent = () => (
-  <Box
-    sx={{
-      py: 4,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      textAlign: "center",
-      ml: 2,
-      mr: 2,
-    }}
-  >
-    <Typography
-      sx={{
-        alignSelf: "flex-start",
-        fontSize: 24,
-      }}
-    >
-      Profile
-    </Typography>
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        textAlign: "center",
-        border: "1px solid",
-        borderColor: "rgba(128, 128, 128, 0.5)",
-        width: "100%",
-        mt: 4,
-        borderRadius: 2,
-        padding: "1rem",
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          borderColor: "rgba(128, 128, 128, 0.5)",
-          width: "100%",
-          borderRadius: 2,
-          padding: "1rem",
-        }}
-      >
-        <Typography
-          sx={{
-            alignSelf: "flex-start",
-            fontSize: 20,
-          }}
-        >
-          Account Details
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            mt: 4,
-            padding: "1rem",
-          }}
-        >
-          {/* Row 1: First Name and Last Name */}
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              width: "100%",
-              mb: 2,
-            }}
-          >
-            <TextField label="First Name" name="firstName" fullWidth />
-            <TextField label="Last Name" name="lastName" fullWidth />
-          </Box>
-
-          {/* Row 2: Email and Phone */}
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              width: "100%",
-              mb: 2,
-            }}
-          >
-            <TextField label="Email" name="email" fullWidth />
-            <TextField label="Phone" name="phone" fullWidth />
-          </Box>
-
-          {/* Save Changes Button */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              width: "100%",
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#EA7300",
-                color: "#fff",
-                padding: "1rem",
-                borderRadius: "30px",
-                textTransform: "none",
-                width: "200px",
-                mt: 2,
-                fontWeight: "bold",
-                "&:hover": {
-                  backgroundColor: "#D66A00",
-                },
-              }}
-            >
-              Save Changes
-            </Button>
-          </Box>
-        </Box>
-      </Box>
-    </Box>
-  </Box>
-);
 
 interface DemoProps {
   window?: () => Window;
@@ -286,9 +160,9 @@ export default function DashboardLayoutBasic(props: DemoProps) {
   const renderContent = () => {
     switch (router.pathname) {
       case "/dashboard":
-        return <DemoPageContent />;
+        return <DashboardContent />;
       case "/people":
-        return <DashboardLayoutBasic />;
+        return <Typography>Page Not Found</Typography>;
       default:
         return <Typography>Page Not Found</Typography>;
     }
