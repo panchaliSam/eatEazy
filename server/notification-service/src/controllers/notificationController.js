@@ -34,19 +34,19 @@ const sendSMSNotification = async (req, res) => {
     }
 };
 
-// const getMyNotifications = async (req, res) => {
-//     try {
-//         const userId = req.user.userId; // comes from JWT
-//         const notifications = await NotificationService.getNotificationsByUserId(userId);
-//         res.status(200).json(notifications);
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
+const getMyNotifications = async (req, res) => {
+    try {
+        const userId = req.user.userId; // comes from JWT
+        const notifications = await NotificationService.getNotificationsByUserId(userId);
+        res.status(200).json(notifications);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 module.exports = {
     createNotification,
     sendEmailNotification,
     sendSMSNotification,
-    // getMyNotifications
+    getMyNotifications
 };
