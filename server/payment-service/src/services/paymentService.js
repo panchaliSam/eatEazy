@@ -22,11 +22,11 @@ const initiatePayment = async (OrderID, PaymentMethod) => {
     if (!orderDetails) throw new Error(`Order #${OrderID} not found`);
   
     // Check if OrderTotal is a valid number and convert it if necessary
-    let orderTotal = orderDetails.OrderTotal;
+    let orderTotal = orderDetails.TotalAmount;
     if (typeof orderTotal !== 'number') {
       orderTotal = parseFloat(orderTotal);
       if (isNaN(orderTotal)) {
-        throw new Error('Invalid OrderTotal value');
+        throw new Error('Invalid TotalAmount value');
       }
     }
   
