@@ -69,6 +69,12 @@ export default function DashboardLayoutBasic(props: DemoProps) {
   const handleLogout = async () => {
     try {
       console.log("Logging out...");
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (!refreshToken) {
+        console.warn("No refresh token found. Redirecting to login.");
+        navigate("/");
+        return;
+      }
       await UserApi.logout();
       navigate("/");
     } catch (error) {
