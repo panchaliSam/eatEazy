@@ -8,7 +8,7 @@ const {
     deleteOrder
 } = require("../controllers/orderController");
 
-router.post("/addOrder", addOrder);
+router.post("/addOrder/:restaurantId", addOrder);
 router.get("/getOrder/:id", getOrder);
 router.put("/updateOrder/:id", updateOrder);
 router.delete("/deleteOrder/:id", deleteOrder);
