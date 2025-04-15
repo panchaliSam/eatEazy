@@ -17,7 +17,7 @@ const services = {
     restaurant: process.env.RESTAURANT_SERVICE_URL,
     orders: process.env.ORDER_SERVICE_URL,
     notifications: process.env.NOTIFICATION_SERVICE_URL,
-    payments: process.env.RESTAURANT_PAYMENT_SERVICE_URL,
+    payments: process.env.PAYMENT_SERVICE_URL,
 };
 
 app.use("/auth", createProxyMiddleware({
