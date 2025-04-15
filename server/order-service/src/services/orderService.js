@@ -1,125 +1,114 @@
-const orderModel = require("../models/orderModel");
+const axios = require("axios");
+const orderRepo = require("../repository/orderRepository");
+const { API_GATEWAY_PORT} = require('../config/env');
 
-// Add item to cart
-const addToCart = async (userId, menuItemId, quantity) => {
-    try {
-        const result = await orderModel.addToCart(userId, menuItemId, quantity);
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to add to cart: ${error.message}`);
+const verifyToken = async (token) => {
+    if (!token) {
+        console.error("No token provided!");
+        throw new Error("Token is required.");
+      }
+    
+      //console.log("Verifying token:", token);
+
+  const response = await axios.post(
+    `http://localhost:4000/auth/verify`,
+    { token }, 
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
+  );
+  return response.data.user;
 };
 
-// Checkout cart
-const checkout = async (userId, restaurantId) => {
-    try {
-        const result = await orderModel.checkout(userId, restaurantId);
-        return result;
-    } catch (error) {
-        throw new Error(`Checkout failed: ${error.message}`);
+const getMenuItemPrice = async (restaurantId, menuItemId) => {
+  const response = await axios.get(
+    `http://localhost:4000/restaurants/${restaurantId}/menu`
+  );
+  const menuItems = response.data;
+  const item = menuItems.find((m) => m.MenuItemID === menuItemId);
+  return item?.Price;
+};
+
+const processOrder = async (token, items) => {
+  const user = await verifyToken(token);
+  const userId = user.id;
+  const restaurantId = 1;
+
+  const cart = await orderRepo.createCart(userId, restaurantId, "ACTIVE");
+
+  const cartItems = [];
+
+  for (const item of items) {
+    const price = await getMenuItemPrice(restaurantId, item.menuItemId);
+    if (!price) throw new Error(`Invalid menu item: ${item.menuItemId}`);
+
+    const cartItem = await orderRepo.createCartItem({
+      CartID: cart.CartID,
+      MenuItemID: item.menuItemId,
+      Quantity: item.quantity,
+      Price: parseFloat(price),
+    });
+
+    cartItems.push(cartItem);
+  }
+
+  const total = cartItems.reduce(
+    (sum, item) => sum + item.Price * item.Quantity,
+    0
+  );
+
+  const order = await orderRepo.createOrder({
+    UserID: userId,
+    RestaurantID: restaurantId,
+    CartID: cart.CartID,
+    TotalAmount: total,
+    Items: {
+      create: cartItems.map((item) => ({
+        MenuItemID: item.MenuItemID,
+        Quantity: item.Quantity,
+        Price: item.Price,
+      })),
+    },
+  });
+
+  await orderRepo.updateCartStatus(cart.CartID, "COMPLETED");
+
+  return order;
+};
+
+const updateOrder = async (orderId, updatedData) => {
+    const existingOrder = await orderRepo.getOrderById(orderId);
+    if (!existingOrder) {
+      throw new Error(`Order with ID ${orderId} not found.`);
     }
-};
-
-// Update cart item
-const updateCart = async (userId, menuItemId, quantity) => {
-    try {
-        const result = await orderModel.updateCart(userId, menuItemId, quantity);
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to update cart: ${error.message}`);
+  
+    const updatedOrder = await orderRepo.updateOrder(orderId, updatedData);
+    return updatedOrder;
+  };
+  
+  const deleteOrder = async (orderId) => {
+    const existingOrder = await orderRepo.getOrderById(orderId);
+    if (!existingOrder) {
+      throw new Error(`Order with ID ${orderId} not found.`);
     }
-};
+  
+    await orderRepo.deleteOrder(orderId);
+    return { message: `Order ${orderId} deleted successfully.` };
+  };
 
-// Delete item from cart
-const deleteCartItem = async (userId, menuItemId) => {
-    try {
-        const result = await orderModel.deleteCartItem(userId, menuItemId);
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to delete item from cart: ${error.message}`);
-    }
-};
-
-// Get cart items
-const getCart = async (userId) => {
-    try {
-        const result = await orderModel.getCart(userId);
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to get cart: ${error.message}`);
-    }
-};
-
-// Get orders by customer
-const findByCustomerId = async (customerId) => {
-    try {
-        const result = await orderModel.findByCustomerId(customerId);
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to fetch orders: ${error.message}`);
-    }
-};
-
-// Get order by ID
-const findById = async (orderId) => {
-    try {
-        const result = await orderModel.findById(orderId);
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to fetch order: ${error.message}`);
-    }
-};
-
-// Get all orders
-const getAllOrders = async () => {
-    try {
-        const result = await orderModel.getAllOrders();
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to get orders: ${error.message}`);
-    }
-};
-
-// Update order status
-const updateStatus = async (orderId, newStatus) => {
-    try {
-        const result = await orderModel.updateStatus(orderId, newStatus);
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to update status: ${error.message}`);
-    }
-};
-
-// Get order details
-const getOrderDetails = async (orderId) => {
-    try {
-        const result = await orderModel.getOrderDetails(orderId);
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to get order details: ${error.message}`);
-    }
-};
-
-// Get order status
-const getOrderStatus = async (orderId) => {
-    try {
-        const result = await orderModel.getOrderStatus(orderId);
-        return result;
-    } catch (error) {
-        throw new Error(`Failed to get order status: ${error.message}`);
-    }
-};
-
-module.exports = {
-    addToCart,
-    checkout,
-    updateCart,
-    deleteCartItem,
-    getCart,
-    findByCustomerId,
-    findById,
-    getAllOrders,
-    updateStatus,
-    getOrderDetails,
-    getOrderStatus
-};
+  
+const getOrderById = async (id) => {
+    const order = await orderRepo.getOrderById(id);
+    if (!order) throw new Error("Order not found");
+    return order;
+  };
+  
+  module.exports = {
+    processOrder,
+    updateOrder,
+    deleteOrder,
+    getOrderById
+  };
+  

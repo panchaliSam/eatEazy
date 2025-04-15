@@ -1,115 +1,70 @@
 const orderService = require("../services/orderService");
+const OrderRepository = require('../repository/orderRepository');
 
-class OrderController {
-    static async addToCart(req, res) {
-        try {
-            const { userId, menuItemId, quantity } = req.body;
-            const result = await orderService.addToCart(userId, menuItemId, quantity);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+const addOrder = async (req, res) => {
+  const authHeader = req.headers.authorization;
 
-    static async checkout(req, res) {
-        try {
-            const { userId, restaurantId } = req.body;
-            const result = await orderService.checkout(userId, restaurantId);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Unauthorized: No token provided" });
+  }
 
-    static async updateCart(req, res) {
-        try {
-            const { userId, menuItemId, quantity } = req.body;
-            const result = await orderService.updateCart(userId, menuItemId, quantity);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+  const token = authHeader.split(" ")[1];
+  const { items } = req.body;
 
-    static async deleteCartItem(req, res) {
-        try {
-            const { userId, menuItemId } = req.params;
-            const result = await orderService.deleteCartItem(userId, menuItemId);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+  try {
+    const order = await orderService.processOrder(token, items);
+    res.status(201).json(order);
+  }catch (error) {
+    console.error("Order creation failed:", {
+      message: error.message,
+      responseData: error.response?.data,
+      stack: error.stack
+    });
+    res.status(500).json({ message: error.message });
+  }
+  
+};
+const getOrder = async (req, res) => {
+  try {
+    const order = await orderService.getOrderById(parseInt(req.params.id));
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-    static async getCart(req, res) {
-        try {
-            const { userId } = req.params;
-            const result = await orderService.getCart(userId);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+const updateOrder = async (req, res) => {
+  const { orderId } = req.params;  // Order ID from the URL
+  const { items } = req.body;  // Items with updated quantities and prices
 
-    static async findByCustomerId(req, res) {
-        try {
-            const { customerId } = req.params;
-            const result = await orderService.findByCustomerId(customerId);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+  try {
+    // Update cart items first
+    await OrderRepository.updateCartItems(orderId, items);
 
-    static async findById(req, res) {
-        try {
-            const { orderId } = req.params;
-            const result = await orderService.findById(orderId);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+    // Now, update the order and its items
+    const updatedOrder = await OrderRepository.updateOrder(orderId, items);
 
-    static async getAllOrders(req, res) {
-        try {
-            const result = await orderService.getAllOrders();
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+    res.status(200).json({ message: 'Order updated successfully', updatedOrder });
+  } catch (error) {
+    console.error("Order update failed:", error);
+    res.status(500).json({ message: 'Order update failed', error: error.message });
+  }
+};
 
-    static async updateStatus(req, res) {
-        try {
-            const { orderId } = req.params;
-            const { newStatus } = req.body;
-            const result = await orderService.updateStatus(orderId, newStatus);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+const deleteOrder = async (req, res) => {
+  try {
+    const orderId = parseInt(req.params.id);
+    const result = await orderService.deleteOrder(orderId);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-    static async getOrderDetails(req, res) {
-        try {
-            const { orderId } = req.params;
-            const result = await orderService.getOrderDetails(orderId);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    static async getOrderStatus(req, res) {
-        try {
-            const { orderId } = req.params;
-            const result = await orderService.getOrderStatus(orderId);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
-}
-
-module.exports = OrderController;
+module.exports = {
+  addOrder,
+  getOrder,
+  updateOrder,
+  deleteOrder,
+};

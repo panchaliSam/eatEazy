@@ -1,214 +1,150 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-const OrderRepository = {
-    // Add item to cart
-    addToCart: async (userId, menuItemId, quantity) => {
-        let cart = await prisma.carts.findFirst({
-            where: { userId },
-        });
-
-        if (!cart) {
-            cart = await prisma.carts.create({
-                data: {
-                    userId,
-                },
-            });
-        }
-
-        await prisma.cartitems.create({
-            data: {
-                cartId: carts.cartId,
-                menuItemId,
-                quantity,
-            },
-        });
-
-        return { message: 'Item added to cart successfully' };
-    },
-
-    // Checkout from cart
-    checkout: async (userId, restaurantId) => {
-        const cart = await prisma.carts.findFirst({
-            where: { userId },
-            include: {
-                items: {
-                    include: { menuItem: true },
-                },
-            },
-        });
-
-        if (!cart || cart.items.length === 0) {
-            throw new Error('Cart is empty!');
-        }
-
-        const orderTotal = cart.items.reduce((sum, item) => {
-            return sum + item.quantity * item.menuItem.price;
-        }, 0);
-
-        const order = await prisma.orders.create({
-            data: {
-                customerId: userId,
-                restaurantId,
-                orderStatus: 'Pending',
-                orderTotal,
-                orderDetails: {
-                    create: cart.items.map((item) => ({
-                        menuItemId: item.menuItemId,
-                        quantity: item.quantity,
-                        itemPrice: item.menuItem.price,
-                    })),
-                },
-            },
-        });
-
-        // Clear the cart
-        await prisma.cartItem.deleteMany({
-            where: { cartId: cart.cartId },
-        });
-
-        return { message: 'Order placed successfully', orderId: order.orderId };
-    },
-
-    // Update cart
-    updateCart: async (userId, menuItemId, quantity) => {
-        let cart = await prisma.cart.findFirst({
-            where: { userId },
-        });
-
-        if (!cart) {
-            cart = await prisma.cart.create({ data: { userId } });
-        }
-
-        const existingItem = await prisma.cartItem.findFirst({
-            where: {
-                cartId: cart.cartId,
-                menuItemId,
-            },
-        });
-
-        if (existingItem) {
-            return await prisma.cartItem.update({
-                where: {
-                    cartId_menuItemId: {
-                        cartId: cart.cartId,
-                        menuItemId,
-                    },
-                },
-                data: { quantity },
-            });
-        } else {
-            return await prisma.cartItem.create({
-                data: {
-                    cartId: cart.cartId,
-                    menuItemId,
-                    quantity,
-                },
-            });
-        }
-    },
-
-    // Delete item from cart
-    deleteCartItem: async (userId, menuItemId) => {
-        const cart = await prisma.cart.findFirst({
-            where: { userId },
-        });
-
-        if (!cart) throw new Error('Cart not found for the user');
-
-        const deleted = await prisma.cartItem.delete({
-            where: {
-                cartId_menuItemId: {
-                    cartId: cart.cartId,
-                    menuItemId,
-                },
-            },
-        });
-
-        const remainingItems = await prisma.cartItem.findMany({
-            where: { cartId: cart.cartId },
-        });
-
-        if (remainingItems.length === 0) {
-            await prisma.cart.delete({
-                where: { cartId: cart.cartId },
-            });
-        }
-
-        return deleted;
-    },
-
-    // Get cart items
-    getCart: async (userId) => {
-        const cart = await prisma.cart.findFirst({
-            where: { userId },
-            include: {
-                items: {
-                    include: {
-                        menuItem: true,
-                    },
-                },
-            },
-        });
-
-        return cart?.items.map(item => ({
-            cartId: item.cartId,
-            menuItemId: item.menuItemId,
-            quantity: item.quantity,
-            menuItemName: item.menuItem.name,
-            price: item.menuItem.price,
-        })) || [];
-    },
-
-    // Get all orders
-    getAllOrders: async () => {
-        return await prisma.order.findMany();
-    },
-
-    // Find orders by customer
-    findByCustomerId: async (customerId) => {
-        return await prisma.order.findMany({
-            where: { customerId },
-        });
-    },
-
-    // Find order by ID
-    findById: async (orderId) => {
-        return await prisma.order.findUnique({
-            where: { orderId },
-        });
-    },
-
-    // Get order details with items
-    getOrderDetails: async (orderId) => {
-        return await prisma.order.findUnique({
-            where: { orderId },
-            include: {
-                orderDetails: {
-                    include: {
-                        menuItem: true,
-                    },
-                },
-            },
-        });
-    },
-
-    // Get order status
-    getOrderStatus: async (orderId) => {
-        const order = await prisma.order.findUnique({
-            where: { orderId },
-            select: { orderStatus: true },
-        });
-        return order || { message: 'Order not found' };
-    },
-
-    // Update order status
-    updateStatus: async (orderId, newStatus) => {
-        return await prisma.order.update({
-            where: { orderId },
-            data: { orderStatus: newStatus },
-        });
-    },
+const createCart = (userId, restaurantId, status) => {
+  return prisma.carts.create({
+    data: { UserID: userId, RestaurantID: restaurantId, Status: status },
+  });
 };
 
-module.exports = OrderRepository;
+const updateCartStatus = (cartId, status) => {
+  return prisma.carts.update({
+    where: { CartID: cartId },
+    data: { Status: status },
+  });
+};
+
+const createCartItem = (data) => {
+  return prisma.cartItems.create({ data });
+};
+
+const createOrder = (data) => {
+  return prisma.orders.create({ data, include: { Items: true } });
+};
+
+const getOrderById = async (orderId) => {
+  return await prisma.orders.findUnique({
+    where: { OrderID: orderId },
+  });
+};
+
+const updateCartItems = async (cartId, items) => {
+  // First, update the cart items (quantity or price changes)
+  for (const item of items) {
+    await prisma.cartItems.update({
+      where: { CartItemsID: item.CartItemsID },
+      data: {
+        Quantity: item.Quantity,
+      },
+    });
+  }
+
+  const updatedCartItems = await prisma.cartItems.findMany({
+    where: { CartID: cartId },
+  });
+
+  const totalAmount = updatedCartItems.reduce((sum, item) => {
+    return sum + item.Price * item.Quantity;
+  }, 0);
+
+  // Update the cart with the new total amount
+  return await prisma.carts.update({
+    where: { CartID: cartId },
+    data: { TotalAmount: totalAmount },
+  });
+};
+
+// orderRepository.js
+const updateOrder = async (orderId, items) => {
+  // First, update the order items
+  for (const item of items) {
+    await prisma.orderItems.update({
+      where: { OrderItemID: item.OrderItemID },
+      data: {
+        Quantity: item.Quantity
+      },
+    });
+  }
+
+  // Now, recalculate the total for the order
+  const updatedOrderItems = await prisma.orderItems.findMany({
+    where: { OrderID: orderId },
+  });
+
+  const totalAmount = updatedOrderItems.reduce((sum, item) => {
+    return sum + item.Price * item.Quantity;
+  }, 0);
+
+  // Update the order with the new total amount
+  return await prisma.orders.update({
+    where: { OrderID: orderId },
+    data: { TotalAmount: totalAmount },
+  });
+};
+
+const deleteOrder = async (orderId) => {
+  await prisma.orderItems.deleteMany({
+    where: { OrderID: orderId },
+  });
+
+  return await prisma.orders.delete({
+    where: { OrderID: orderId },
+  });
+};
+const deleteCartItems = async (orderId) => {
+    return await prisma.cartItems.deleteMany({
+      where: { CartID: orderId },
+    });
+  };
+
+const deleteCart = async (cartId) => {
+    return await prisma.carts.delete({
+      where: { CartID: cartId },
+    });
+  };
+  
+  const updateCartTotal = async (cartId, items) => {
+    const updatedCartItems = await prisma.cartItems.findMany({
+      where: { CartID: cartId },
+    });
+  
+    const totalAmount = updatedCartItems.reduce((sum, item) => {
+      return sum + item.Price * item.Quantity;
+    }, 0);
+  
+    return await prisma.carts.update({
+      where: { CartID: cartId },
+      data: { TotalAmount: totalAmount },
+    });
+  };
+  
+  // Update total for order
+  const updateOrderTotal = async (orderId, items) => {
+    const updatedOrderItems = await prisma.orderItems.findMany({
+      where: { OrderID: orderId },
+    });
+  
+    const totalAmount = updatedOrderItems.reduce((sum, item) => {
+      return sum + item.Price * item.Quantity;
+    }, 0);
+  
+    return await prisma.orders.update({
+      where: { OrderID: orderId },
+      data: { TotalAmount: totalAmount },
+    });
+  };
+  
+module.exports = {
+  createCart,
+  createCartItem,
+  createOrder,
+  updateCartStatus,
+  updateCartItems,
+  getOrderById,
+  updateOrder,
+  deleteOrder,
+  deleteCartItems,
+  deleteCart,
+  updateCartTotal,
+  updateOrderTotal
+};
