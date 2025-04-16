@@ -31,12 +31,11 @@ const OrderModel = {
       await OrderRepository.updateOrder(orderId, updatedData.items);
 
       // Recalculate the total for the cart and order
-      const updatedCart = await OrderRepository.updateCartTotal(orderId, updatedData.items);
+      //const updatedCart = await OrderRepository.updateCartTotal(orderId, updatedData.items);
       const updatedOrder = await OrderRepository.updateOrderTotal(orderId, updatedData.items);
 
       return {
-        updatedCart,
-        updatedOrder,
+        updatedOrder
       };
     } catch (error) {
       throw new Error("Error while updating the order: " + error.message);

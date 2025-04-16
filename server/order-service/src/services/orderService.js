@@ -82,18 +82,70 @@ const processOrder = async (token, items, restaurantId) => {
   return order;
 };
 
-const updateOrder = async (orderId, updatedData, userId) => {
-  const existingOrder = await orderRepo.getOrderById(orderId);
-  if (!existingOrder) {
-    throw new Error(`Order with ID ${orderId} not found.`);
+const updateCartAndOrder = async (cartId,items) => {
+  const cartIdInt = parseInt(cartId);
+
+  //update cart items first
+  for(const item of items){
+    if(!item.CartItemsID){
+      throw new Error("CartItemID is required to update a cart item");
+    }
+    await prisma.cartItems.update({
+      where:{
+        CartItemsID: item.CartItemsID,
+      },
+      data:{
+        Quantity: item.Quantity,
+      },
+    });
   }
 
-  // 🔐 Authorization check (optional, if not done in controller)
-  if (existingOrder.userId !== userId) {
-    throw new Error('You are not authorized to update this order.');
+  //get related order id by cart id
+  const order = await prisma.orders.findFirst({
+    where: {CartID: cartIdInt},
+  });
+
+  if(!order){
+    throw new Error("Order not found for the given CartID");
   }
 
-  const updatedOrder = await orderRepo.updateOrder(orderId, updatedData);
+  const orderId=order.orderID;
+
+  //update order items quantity
+  for(const item of items){
+    const cartItem=await prisma.cartItems.findUnique({
+      where:{CartItemsID:item.CartItemsID},
+    });
+
+    if(!cartItem) continue;
+
+    await prisma.orderItems.updateMany({
+      where:{
+        OrderID: orderId,
+        MenuItemID: cartItem.MenuItemID,
+      },
+      data:{
+        Quantity: item.Quantity,
+      },
+    });
+  }
+
+  //re calulate total amount
+  const updatedOrderItems = await prisma.orderItems.findMany({
+    where:{OrderID: orderId},
+  });
+
+  const totalAmount=updatedOrderItems.reduce((sum,item) =>{
+    return sum + item.Price * item.Quantity;
+  },0);
+
+  //update order total amount
+  const updatedOrder = await prisma.orders.update({
+    where:{OrderID:orderId},
+    data:{
+      TotalAmount: totalAmount,
+    },
+  });
   return updatedOrder;
 };
 
@@ -103,8 +155,14 @@ const getOrderById = async (id) => {
     if (!order) throw new Error("Order not found");
     return order;
   };
+
+const getOrderByUserId=async(id)=>{
+  const order=await orderRepo.getOrderByUserId(id);
+  if(!order) throw new Error("No orders for user");
+  return order;
+}  
    
-  const deleteOrder = async (orderId) => {
+const deleteOrder = async (orderId) => {
     const existingOrder = await orderRepo.getOrderById(orderId);
     if (!existingOrder) {
       throw new Error(`Order with ID ${orderId} not found.`);
@@ -113,11 +171,19 @@ const getOrderById = async (id) => {
     await orderRepo.deleteOrder(orderId);
     return { message: `Order ${orderId} deleted successfully.` };
   };
+
+const getAllOrderbyRestaurantId=async(id)=>{
+  const order=await orderRepo.getAllOrderbyRestaurantId(id);
+  if(!order) throw new Error("No orders for restaurant");
+  return order;
+}  
   
   module.exports = {
     processOrder,
-    updateOrder,
+    updateCartAndOrder,
     getOrderById,
+    getOrderByUserId,
+    getAllOrderbyRestaurantId,
     deleteOrder
   };
   

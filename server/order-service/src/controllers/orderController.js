@@ -39,31 +39,54 @@ const getOrder = async (req, res) => {
   }
 };
 
-const updateOrder = async (req, res) => {
-  const { id: orderId } = req.params;
+const getOrderByUserId=async(req,res)=>{
+  try{
+    const order=await orderService.getOrderByUserId(parseInt(req.params.id));
+    if(!order) return res.status(404).json({message: "No orders for user"});
+    res.json(order);
+
+  }catch(error){
+   res.status(500).json({message: error.message});
+  }
+
+};
+
+const getAllOrderbyRestaurantId=async(req,res)=>{
+  try{
+
+    const order=await orderService.getAllOrderbyRestaurantId(parseInt(req.params.id));
+    if(!order) return res.status(404).json({message:"No orders for restaurant"});
+    res.json(order);
+  }catch(error){
+    res.status(500).json({message: error.message});
+
+  }
+};
+
+const updateCartByCartId = async (req, res) => {
+  const { cartId } = req.params;
   const { items } = req.body;
-  const user = req.user;
+
+  console.log("🔧 [updateCartByCartId] Incoming request to update cartId:", cartId);
+  console.log("📦 Items to update:", JSON.stringify(items, null, 2));
 
   try {
-    // Fetch existing order
-    const existingOrder = await OrderRepository.getOrderById(orderId);
-    if (!existingOrder) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
+    const updatedOrder = await orderService.updateCartAndOrder(cartId, items);
 
-    // Check if the order belongs to the authenticated user
-    if (existingOrder.UserID !== user.id) {
-      return res.status(403).json({ message: 'You are not authorized to update this order' });
-    }
+    console.log("✅ Cart and Order updated successfully:", updatedOrder);
 
-    //update
-    await OrderRepository.updateCartItems(orderId, items);
-    const updatedOrder = await orderService.updateOrder(orderId, items, req.user.id);
+    res.status(200).json({
+      message: "Cart and Order updated successfully",
+      order: updatedOrder,
+    });
 
-    res.status(200).json({ message: 'Order updated successfully', updatedOrder });
   } catch (error) {
-    console.error("Order update failed:", error);
-    res.status(500).json({ message: 'Order update failed', error: error.message });
+    console.error("❌ Failed to update cart or order:", error.message);
+
+    res.status(500).json({
+      message: "Failed to update cart or order",
+      error: error.message,
+    });
   }
 };
 
@@ -81,6 +104,8 @@ const deleteOrder = async (req, res) => {
 module.exports = {
   addOrder,
   getOrder,
-  updateOrder,
+  getOrderByUserId,
+  getAllOrderbyRestaurantId,
+  updateCartByCartId,
   deleteOrder,
 };

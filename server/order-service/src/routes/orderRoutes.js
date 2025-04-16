@@ -5,13 +5,17 @@ const { authenticateToken, isRestaurant } = require("../middleware/authMiddlewar
 const {
     addOrder,
     getOrder,
-    updateOrder,
+    getOrderByUserId,
+    getAllOrderbyRestaurantId,
+    updateCartByCartId,
     deleteOrder
 } = require("../controllers/orderController");
 
 router.post("/addOrder/:restaurantId", addOrder);
-router.get("/getOrder/:id", authenticateToken,getOrder);
-router.put("/updateOrder/:id", authenticateToken, updateOrder);
-router.delete("/deleteOrder/:id", authenticateToken, deleteOrder);
+router.get("/getOrderByOrderId/:id", authenticateToken,getOrder);
+router.get("/getOrderByUserId/:id", authenticateToken,getOrderByUserId);
+router.get("/getAllOrderbyRestaurantId/:id", authenticateToken,isRestaurant,getAllOrderbyRestaurantId);
+router.put("/updateCartByCartId/:cartId", authenticateToken, updateCartByCartId);
+router.delete("/deleteOrderByOrderId/:id", authenticateToken, deleteOrder);
 
 module.exports = router;
