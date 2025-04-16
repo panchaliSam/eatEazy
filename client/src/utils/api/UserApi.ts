@@ -48,8 +48,8 @@ const UserApi = {
   },
 
   logout: async () => {
-    const refreshToken = getRefreshToken(); // Use the helper function
-    const accessToken = getAccessToken(); // Use the helper function
+    const refreshToken = getRefreshToken();
+    const accessToken = getAccessToken();
 
     if (!refreshToken) {
       throw new Error("No refresh token found.");
@@ -69,11 +69,50 @@ const UserApi = {
           headers: getAuthHeaders(),
         }
       );
-      clearTokens(); // Use the helper function to clear tokens
+      clearTokens();
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
         throw error.response.data;
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
+
+  getUserById: async () => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+    try {
+      const verifyResponse = await axios.post(
+        `${API_URL}/auth/verify`,
+        {
+          accessToken: accessToken,
+        },
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+      const { user } = verifyResponse.data;
+      if (!user || user.id) {
+        throw new Error("Invalid response from token verification.");
+      }
+      const userId = user.id;
+      const userDetailsResponse = await axios.get(
+        `${API_URL}/users/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      return userDetailsResponse.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          error.response.data.message || "Failed to fetch user details."
+        );
       }
       throw new Error("An unexpected error occurred.");
     }
