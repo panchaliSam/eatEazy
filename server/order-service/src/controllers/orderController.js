@@ -10,9 +10,14 @@ const addOrder = async (req, res) => {
 
   const token = authHeader.split(" ")[1];
   const { items } = req.body;
+  const restaurantId = parseInt(req.params.restaurantId); 
+
+  if (isNaN(restaurantId)) {
+    return res.status(400).json({ message: "Invalid restaurant ID" });
+  }
 
   try {
-    const order = await orderService.processOrder(token, items);
+    const order = await orderService.processOrder(token, items,restaurantId);
     res.status(201).json(order);
   }catch (error) {
     console.error("Order creation failed:", {

@@ -4,7 +4,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/admin/Dashboard";
+import { AdminDashboard } from "./pages/admin/Dashboard";
+import { RestaurantDashboard } from "./pages/restaurant/Dashboard";
+import { CustomerDashboard } from "./pages/customer/Dashboard";
+import { DeliveryPersonDashboard } from "./pages/deliveryPerson/Dashboard";
+import ProtectedRoute from "./routes/ProtectedRoutes";
 
 const theme = createTheme({
   palette: {
@@ -21,10 +25,45 @@ const App: React.FC = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/logout" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/logout" element={<Home />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute
+                element={<AdminDashboard />}
+                allowedRoles={["Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/restaurant"
+            element={
+              <ProtectedRoute
+                element={<RestaurantDashboard />}
+                allowedRoles={["Restaurant"]}
+              />
+            }
+          />
+          <Route
+            path="/customer"
+            element={
+              <ProtectedRoute
+                element={<CustomerDashboard />}
+                allowedRoles={["Customer"]}
+              />
+            }
+          />
+          <Route
+            path="/delivery"
+            element={
+              <ProtectedRoute
+                element={<DeliveryPersonDashboard />}
+                allowedRoles={["DeliveryPerson"]}
+              />
+            }
+          />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
