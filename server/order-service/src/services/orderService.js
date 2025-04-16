@@ -22,9 +22,14 @@ const verifyToken = async (token) => {
   return response.data.user;
 };
 
-const getMenuItemPrice = async (restaurantId, menuItemId) => {
+const getMenuItemPrice = async (restaurantId, menuItemId, token) => {
   const response = await axios.get(
-    `http://localhost:4000/restaurants/${restaurantId}/menu`
+    `http://localhost:4000/restaurants/${restaurantId}/menu`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
   const menuItems = response.data;
   const item = menuItems.find((m) => m.MenuItemID === menuItemId);
@@ -40,7 +45,7 @@ const processOrder = async (token, items, restaurantId) => {
   const cartItems = [];
 
   for (const item of items) {
-    const price = await getMenuItemPrice(restaurantId, item.menuItemId);
+    const price = await getMenuItemPrice(restaurantId, item.menuItemId,token);
     if (!price) throw new Error(`Invalid menu item: ${item.menuItemId}`);
 
     const cartItem = await orderRepo.createCartItem({
@@ -77,16 +82,28 @@ const processOrder = async (token, items, restaurantId) => {
   return order;
 };
 
-const updateOrder = async (orderId, updatedData) => {
-    const existingOrder = await orderRepo.getOrderById(orderId);
-    if (!existingOrder) {
-      throw new Error(`Order with ID ${orderId} not found.`);
-    }
+const updateOrder = async (orderId, updatedData, userId) => {
+  const existingOrder = await orderRepo.getOrderById(orderId);
+  if (!existingOrder) {
+    throw new Error(`Order with ID ${orderId} not found.`);
+  }
+
+  // 🔐 Authorization check (optional, if not done in controller)
+  if (existingOrder.userId !== userId) {
+    throw new Error('You are not authorized to update this order.');
+  }
+
+  const updatedOrder = await orderRepo.updateOrder(orderId, updatedData);
+  return updatedOrder;
+};
+
   
-    const updatedOrder = await orderRepo.updateOrder(orderId, updatedData);
-    return updatedOrder;
+const getOrderById = async (id) => {
+    const order = await orderRepo.getOrderById(id);
+    if (!order) throw new Error("Order not found");
+    return order;
   };
-  
+   
   const deleteOrder = async (orderId) => {
     const existingOrder = await orderRepo.getOrderById(orderId);
     if (!existingOrder) {
@@ -96,18 +113,11 @@ const updateOrder = async (orderId, updatedData) => {
     await orderRepo.deleteOrder(orderId);
     return { message: `Order ${orderId} deleted successfully.` };
   };
-
-  
-const getOrderById = async (id) => {
-    const order = await orderRepo.getOrderById(id);
-    if (!order) throw new Error("Order not found");
-    return order;
-  };
   
   module.exports = {
     processOrder,
     updateOrder,
-    deleteOrder,
-    getOrderById
+    getOrderById,
+    deleteOrder
   };
   

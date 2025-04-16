@@ -23,36 +23,61 @@ const createOrder = (data) => {
 };
 
 const getOrderById = async (orderId) => {
+  // Ensure orderId is an integer
+  const orderIdInt = parseInt(orderId, 10);
+
+  // Check if orderId is a valid integer
+  if (isNaN(orderIdInt)) {
+    throw new Error("Invalid order ID");
+  }
+
+  // Use the integer orderId in the query
   return await prisma.orders.findUnique({
-    where: { OrderID: orderId },
+    where: {
+      OrderID: orderIdInt
+    }
   });
 };
 
-const updateCartItems = async (cartId, items) => {
+
+const updateCartItems = async (orderId, cartId, items) => {
   // First, update the cart items (quantity or price changes)
   for (const item of items) {
+    if (!item.CartItemsID) {
+      throw new Error("CartItemsID is required to update a cart item.");
+    }
+
     await prisma.cartItems.update({
-      where: { CartItemsID: item.CartItemsID },
+      where: {
+        CartItemsID: item.CartItemsID, // Ensure this is valid
+      },
       data: {
-        Quantity: item.Quantity,
+        Quantity: item.Quantity, // Assuming you want to update quantity
       },
     });
   }
 
+  // Fetch the updated cart items
   const updatedCartItems = await prisma.cartItems.findMany({
-    where: { CartID: cartId },
+    where: { CartID: parseInt(cartId) },
   });
 
+  // Recalculate the total amount
   const totalAmount = updatedCartItems.reduce((sum, item) => {
     return sum + item.Price * item.Quantity;
   }, 0);
 
   // Update the cart with the new total amount
-  return await prisma.carts.update({
-    where: { CartID: cartId },
-    data: { TotalAmount: totalAmount },
+  await prisma.orders.update({
+    where: {
+      OrderID: orderId  // make sure this is an integer
+    },
+    data: {
+      TotalAmount: totalAmount
+    }
   });
 };
+
 
 // orderRepository.js
 const updateOrder = async (orderId, items) => {

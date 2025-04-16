@@ -40,15 +40,25 @@ const getOrder = async (req, res) => {
 };
 
 const updateOrder = async (req, res) => {
-  const { orderId } = req.params;  // Order ID from the URL
-  const { items } = req.body;  // Items with updated quantities and prices
+  const { id: orderId } = req.params;
+  const { items } = req.body;
+  const user = req.user;
 
   try {
-    // Update cart items first
-    await OrderRepository.updateCartItems(orderId, items);
+    // Fetch existing order
+    const existingOrder = await OrderRepository.getOrderById(orderId);
+    if (!existingOrder) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
 
-    // Now, update the order and its items
-    const updatedOrder = await OrderRepository.updateOrder(orderId, items);
+    // Check if the order belongs to the authenticated user
+    if (existingOrder.UserID !== user.id) {
+      return res.status(403).json({ message: 'You are not authorized to update this order' });
+    }
+
+    //update
+    await OrderRepository.updateCartItems(orderId, items);
+    const updatedOrder = await orderService.updateOrder(orderId, items, req.user.id);
 
     res.status(200).json({ message: 'Order updated successfully', updatedOrder });
   } catch (error) {
@@ -56,6 +66,7 @@ const updateOrder = async (req, res) => {
     res.status(500).json({ message: 'Order update failed', error: error.message });
   }
 };
+
 
 const deleteOrder = async (req, res) => {
   try {
