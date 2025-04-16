@@ -171,7 +171,7 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       case "/people":
         return <Typography>Page Not Found</Typography>;
       default:
-        return <Typography>Page Not Found</Typography>;
+        return <CustomerDashboardContent />;
     }
   };
 

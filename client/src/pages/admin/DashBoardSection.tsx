@@ -166,12 +166,12 @@ export default function DashboardLayoutBasic(props: DemoProps) {
 
   const renderContent = () => {
     switch (router.pathname) {
-      case "/admin":
+      case "/dashboard":
         return <AdminDashboardContent />;
       case "/people":
-        return <Typography>Page Not Found</Typography>;
+        return <AdminDashboardContent />;
       default:
-        return <Typography>Page Not Found</Typography>;
+        return <AdminDashboardContent />;
     }
   };
 

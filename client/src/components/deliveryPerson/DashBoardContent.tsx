@@ -44,6 +44,24 @@ export const DeliveryPersonDashboardContent = () => {
     fetchUserData();
   }, []);
 
+  const handleSaveChanges = async () => {
+    setLoading(true);
+    try {
+      await UserApi.updateUserById({
+        firstname: userData.firstName,
+        lastname: userData.lastName,
+        email: userData.email,
+        phone: userData.phone,
+      });
+      alert("User details updated successfully!");
+    } catch (error) {
+      console.error("Error updating user details:", error);
+      alert("Failed to update user details. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserData((prevData) => ({
@@ -165,6 +183,7 @@ export const DeliveryPersonDashboardContent = () => {
           >
             <Button
               variant="contained"
+              onClick={handleSaveChanges}
               sx={{
                 backgroundColor: "#EA7300",
                 color: "#fff",
