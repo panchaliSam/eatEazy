@@ -58,7 +58,7 @@ const UserRepository = {
                 data: {
                     Firstname: userData.firstname,
                     Lastname: userData.lastname,
-                    Email: userData.email,
+                    //Email: userData.email,
                     Phone: userData.phone,
                     //Role: userData.role,
                 },
