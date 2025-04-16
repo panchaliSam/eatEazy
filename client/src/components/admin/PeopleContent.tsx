@@ -106,10 +106,29 @@ export const PeopleContent = () => {
     setDeleteUser({});
   };
 
-  const confirmDelete = () => {
-    console.log(`Deleted user: ${deleteUser.Firstname} ${deleteUser.Lastname}`);
-    setOpenDelete(false);
-    // Optionally: refresh the list or call delete API here
+  const confirmDelete = async () => {
+    if (!deleteUser.UserID) {
+      alert("No user selected for deletion.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await UserApi.deleteUserById(deleteUser.UserID);
+      alert(
+        `User ${deleteUser.Firstname} ${deleteUser.Lastname} deleted successfully.`
+      );
+      setUsers((prevUsers) =>
+        prevUsers.filter((user) => user.UserID !== deleteUser.UserID)
+      );
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert("Failed to delete user. Please try again.");
+    } finally {
+      setLoading(false);
+      setOpenDelete(false);
+      setDeleteUser({});
+    }
   };
 
   if (loading) {
