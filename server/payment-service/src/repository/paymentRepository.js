@@ -12,10 +12,8 @@ const PaymentRepository = {
     return result.insertId;
   },
   getOrderDetails: async (OrderID) => {
-    const query = 'SELECT * FROM Orders WHERE OrderID = ?';
-    const [rows] = await pool.execute(query, [OrderID]);
-    if (rows.length === 0) throw new Error('Order not found.');
-    return rows[0];
+    const response = await axios.get(`http://localhost:5006/getOrder/${OrderID}`);
+    return response.data;
   },
   updatePaymentStatus: async (PaymentID, PaymentStatus) => {
     const query = 'UPDATE Payments SET PaymentStatus = ? WHERE PaymentID = ?';
