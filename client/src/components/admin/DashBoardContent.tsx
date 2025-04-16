@@ -50,7 +50,6 @@ export const AdminDashboardContent = () => {
       await UserApi.updateUserById({
         firstname: userData.firstName,
         lastname: userData.lastName,
-        email: userData.email,
         phone: userData.phone,
       });
       alert("User details updated successfully!");
