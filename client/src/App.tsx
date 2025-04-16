@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/admin/Dashboard";
+import ProtectedRoute from "./routes/ProtectedRoutes";
 
 const theme = createTheme({
   palette: {
@@ -21,10 +22,45 @@ const App: React.FC = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/logout" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/logout" element={<Home />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute
+                element={<Dashboard />}
+                allowedRoles={["Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/restaurant"
+            element={
+              <ProtectedRoute
+                element={<Dashboard />}
+                allowedRoles={["Restaurant"]}
+              />
+            }
+          />
+          <Route
+            path="/customer"
+            element={
+              <ProtectedRoute
+                element={<Dashboard />}
+                allowedRoles={["Customer"]}
+              />
+            }
+          />
+          <Route
+            path="/delivery"
+            element={
+              <ProtectedRoute
+                element={<Dashboard />}
+                allowedRoles={["DeliveryPerson"]}
+              />
+            }
+          />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

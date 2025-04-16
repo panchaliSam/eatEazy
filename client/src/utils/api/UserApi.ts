@@ -1,5 +1,12 @@
 import axios from "axios";
 import { API_URL } from "./ApiURL";
+import { getAuthHeaders } from "../helper/AuthHelper";
+import {
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+  clearTokens,
+} from "../helper/TokenHelper";
 
 interface UserData {
   firstname?: string;
@@ -30,8 +37,7 @@ const UserApi = {
         password: userData.password,
       });
       const { accessToken, refreshToken } = response.data;
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      setTokens(accessToken, refreshToken);
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
@@ -42,8 +48,8 @@ const UserApi = {
   },
 
   logout: async () => {
-    const refreshToken = localStorage.getItem("refreshToken");
-    const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = getRefreshToken();
+    const accessToken = getAccessToken();
 
     if (!refreshToken) {
       throw new Error("No refresh token found.");
@@ -60,14 +66,74 @@ const UserApi = {
           refreshToken: refreshToken,
         },
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      clearTokens();
       return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw error.response.data;
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
+
+  getUserById: async () => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+    try {
+      const verifyResponse = await axios.post(
+        `${API_URL}/auth/verify`,
+        {
+          token: accessToken,
+        },
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+      const { user } = verifyResponse.data;
+
+      if (!user || !user.id) {
+        throw new Error("Invalid response from token verification.");
+      }
+
+      const userId = user.id;
+      const userDetailsResponse = await axios.get(
+        `${API_URL}/auth/users/${userId}`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+      return userDetailsResponse.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          error.response.data.message || "Failed to fetch user details."
+        );
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
+
+  verifyToken: async () => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+    try {
+      const response = await axios.post(
+        `${API_URL}/auth/verify`,
+        {
+          token: accessToken,
+        },
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+      return response.data.user;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
         throw error.response.data;

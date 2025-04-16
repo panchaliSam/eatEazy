@@ -1,50 +1,87 @@
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { TextField } from "@mui/material";
 import Button from "@mui/material/Button";
+import UserApi from "../../utils/api/UserApi";
+import { getAccessToken } from "../../utils/helper/TokenHelper";
 
-export const DashboardContent = () => (
-  <Box
-    sx={{
-      py: 4,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      textAlign: "center",
-      ml: 2,
-      mr: 2,
-    }}
-  >
-    <Typography
-      sx={{
-        alignSelf: "flex-start",
-        fontSize: 24,
-      }}
-    >
-      Profile
-    </Typography>
+export const DashboardContent = () => {
+  const [userData, setUserData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const accessToken = getAccessToken();
+
+      if (!accessToken) {
+        console.error("Access token not found.");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const data = await UserApi.getUserById();
+        setUserData({
+          firstName: data.Firstname || "",
+          lastName: data.Lastname || "",
+          email: data.Email || "",
+          phone: data.Phone || "",
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUserData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  return (
     <Box
       sx={{
+        py: 4,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         textAlign: "center",
-        border: "1px solid",
-        borderColor: "rgba(128, 128, 128, 0.5)",
-        width: "100%",
-        mt: 4,
-        borderRadius: 2,
-        padding: "1rem",
+        ml: 2,
+        mr: 2,
       }}
     >
+      <Typography
+        sx={{
+          alignSelf: "flex-start",
+          fontSize: 24,
+        }}
+      >
+        Profile
+      </Typography>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           textAlign: "center",
+          border: "1px solid",
           borderColor: "rgba(128, 128, 128, 0.5)",
           width: "100%",
+          mt: 4,
           borderRadius: 2,
           padding: "1rem",
         }}
@@ -77,8 +114,20 @@ export const DashboardContent = () => (
               mb: 2,
             }}
           >
-            <TextField label="First Name" name="firstName" fullWidth />
-            <TextField label="Last Name" name="lastName" fullWidth />
+            <TextField
+              label="First Name"
+              name="firstName"
+              value={userData.firstName}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            <TextField
+              label="Last Name"
+              name="lastName"
+              value={userData.lastName}
+              onChange={handleInputChange}
+              fullWidth
+            />
           </Box>
 
           {/* Row 2: Email and Phone */}
@@ -90,8 +139,20 @@ export const DashboardContent = () => (
               mb: 2,
             }}
           >
-            <TextField label="Email" name="email" fullWidth />
-            <TextField label="Phone" name="phone" fullWidth />
+            <TextField
+              label="Email"
+              name="email"
+              value={userData.email}
+              onChange={handleInputChange}
+              fullWidth
+            />
+            <TextField
+              label="Phone"
+              name="phone"
+              value={userData.phone}
+              onChange={handleInputChange}
+              fullWidth
+            />
           </Box>
 
           {/* Save Changes Button */}
@@ -124,5 +185,5 @@ export const DashboardContent = () => (
         </Box>
       </Box>
     </Box>
-  </Box>
-);
+  );
+};
