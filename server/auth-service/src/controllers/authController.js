@@ -87,7 +87,7 @@ const getUserById = async (req, res) => {
     const userId = req.params.id;
     const { role, id } = req.user;
 
-    if (role === 'Admin' || id === userId) {
+    if (role === 'Admin' || Number(id) === Number(userId)) {
         try {
             const user = await authService.getById(userId);
             if (!user) {
@@ -107,7 +107,7 @@ const updateUser = async (req, res) => {
     const userId = req.params.id;
     const { role, id } = req.user;
 
-    if (role === 'Admin' || id === userId) {
+    if (role === 'Admin' || Number(id) === Number(userId)) {
         try {
             await authService.updateUser(userId, req.body);
             res.status(200).json({ message: 'User updated successfully.' });
