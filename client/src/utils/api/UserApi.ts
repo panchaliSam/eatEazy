@@ -141,6 +141,36 @@ const UserApi = {
       throw new Error("An unexpected error occurred.");
     }
   },
+
+  updateUserById: async (updateData: Partial<UserData>) => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+
+    try {
+      const user = await UserApi.verifyToken();
+      const userId = user.id;
+
+      if (!userId) {
+        throw new Error("User ID not found.");
+      }
+
+      const response = await axios.put(
+        `${API_URL}/auth/users/${userId}`,
+        updateData,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw error.response.data;
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
 };
 
 export default UserApi;
