@@ -13,6 +13,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import logo from "@app_assets/LoginImage.png";
 import UserApi from "../utils/api/UserApi";
+import { setTokens } from "../utils/helper/TokenHelper";
 
 interface FormData {
   email: string;
@@ -42,16 +43,42 @@ const LoginSection: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      await UserApi.login({
+      // Step 1: Login and get tokens
+      const response = await UserApi.login({
         email: formData.email,
         password: formData.password,
       });
-      navigate("/dashboard");
+      const { accessToken, refreshToken } = response;
+
+      setTokens(accessToken, refreshToken);
+
+      const user = await UserApi.verifyToken();
+
+      if (!user || !user.role) {
+        throw new Error("Failed to fetch user details.");
+      }
+
+      switch (user.role) {
+        case "Admin":
+          navigate("/admin");
+          break;
+        case "Restaurant":
+          navigate("/restaurant");
+          break;
+        case "Customer":
+          navigate("/customer");
+          break;
+        case "DeliveryPerson":
+          navigate("/delivery");
+          break;
+        default:
+          navigate("/404");
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message || "Failed to register");
+        setError(err.message || "Failed to login");
       } else {
-        setError("Failed to register");
+        setError("Failed to login");
       }
     } finally {
       setLoading(false);

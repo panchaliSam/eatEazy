@@ -161,12 +161,12 @@ export default function DashboardLayoutBasic(props: DemoProps) {
     },
   ];
 
-  const router = useDemoRouter("/dashboard");
+  const router = useDemoRouter("/admin");
   const demoWindow = window !== undefined ? window() : undefined;
 
   const renderContent = () => {
     switch (router.pathname) {
-      case "/dashboard":
+      case "/admin":
         return <DashboardContent />;
       case "/people":
         return <Typography>Page Not Found</Typography>;

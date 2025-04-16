@@ -26,8 +26,40 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
-            path="/dashboard"
-            element={<ProtectedRoute element={<Dashboard />} />}
+            path="/admin"
+            element={
+              <ProtectedRoute
+                element={<Dashboard />}
+                allowedRoles={["Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/restaurant"
+            element={
+              <ProtectedRoute
+                element={<Dashboard />}
+                allowedRoles={["Restaurant"]}
+              />
+            }
+          />
+          <Route
+            path="/customer"
+            element={
+              <ProtectedRoute
+                element={<Dashboard />}
+                allowedRoles={["Customer"]}
+              />
+            }
+          />
+          <Route
+            path="/delivery"
+            element={
+              <ProtectedRoute
+                element={<Dashboard />}
+                allowedRoles={["DeliveryPerson"]}
+              />
+            }
           />
         </Routes>
       </BrowserRouter>

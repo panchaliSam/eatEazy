@@ -117,6 +117,30 @@ const UserApi = {
       throw new Error("An unexpected error occurred.");
     }
   },
+
+  verifyToken: async () => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+    try {
+      const response = await axios.post(
+        `${API_URL}/auth/verify`,
+        {
+          token: accessToken,
+        },
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+      return response.data.user;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw error.response.data;
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
 };
 
 export default UserApi;
