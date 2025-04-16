@@ -19,7 +19,7 @@ import logo from "@app_assets/logo/png/logo-transparent.png";
 import { orange } from "@mui/material/colors";
 import UserApi from "../../utils/api/UserApi";
 import { getRefreshToken } from "../../utils/helper/TokenHelper";
-import { AdminDashboardContent } from "../../components/admin/DashBoardContent";
+import { DeliveryPersonDashboardContent } from "../../components/deliveryPerson/DashBoardContent";
 
 const theme = createTheme({
   palette: {
@@ -167,7 +167,7 @@ export default function DashboardLayoutBasic(props: DemoProps) {
   const renderContent = () => {
     switch (router.pathname) {
       case "/admin":
-        return <AdminDashboardContent />;
+        return <DeliveryPersonDashboardContent />;
       case "/people":
         return <Typography>Page Not Found</Typography>;
       default:
