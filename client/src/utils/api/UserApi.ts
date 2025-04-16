@@ -37,7 +37,7 @@ const UserApi = {
         password: userData.password,
       });
       const { accessToken, refreshToken } = response.data;
-      setTokens(accessToken, refreshToken); // Use the helper function here
+      setTokens(accessToken, refreshToken);
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
@@ -88,23 +88,23 @@ const UserApi = {
       const verifyResponse = await axios.post(
         `${API_URL}/auth/verify`,
         {
-          accessToken: accessToken,
+          token: accessToken,
         },
         {
           headers: getAuthHeaders(),
         }
       );
       const { user } = verifyResponse.data;
-      if (!user || user.id) {
+
+      if (!user || !user.id) {
         throw new Error("Invalid response from token verification.");
       }
+
       const userId = user.id;
       const userDetailsResponse = await axios.get(
-        `${API_URL}/users/${userId}`,
+        `${API_URL}/auth/users/${userId}`,
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
       return userDetailsResponse.data;
