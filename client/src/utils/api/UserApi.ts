@@ -171,6 +171,42 @@ const UserApi = {
       throw new Error("An unexpected error occurred.");
     }
   },
+
+  getAllUser: async () => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+    try {
+      const response = await axios.get(`${API_URL}/auth/users`, {
+        headers: getAuthHeaders(),
+      });
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw error.response.data;
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
+
+  deleteUserById: async (userId: string) => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+    try {
+      const response = await axios.delete(`${API_URL}/auth/users/${userId}`, {
+        headers: getAuthHeaders(),
+      });
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw error.response.data;
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
 };
 
 export default UserApi;

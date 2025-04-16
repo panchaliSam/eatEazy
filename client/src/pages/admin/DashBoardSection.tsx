@@ -20,6 +20,7 @@ import { orange } from "@mui/material/colors";
 import UserApi from "../../utils/api/UserApi";
 import { getRefreshToken } from "../../utils/helper/TokenHelper";
 import { AdminDashboardContent } from "../../components/admin/DashBoardContent";
+import { PeopleContent } from "../../components/admin/PeopleContent";
 
 const theme = createTheme({
   palette: {
@@ -169,7 +170,7 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       case "/dashboard":
         return <AdminDashboardContent />;
       case "/people":
-        return <AdminDashboardContent />;
+        return <PeopleContent />;
       default:
         return <AdminDashboardContent />;
     }
