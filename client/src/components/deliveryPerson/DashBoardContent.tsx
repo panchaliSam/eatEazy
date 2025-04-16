@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import UserApi from "../../utils/api/UserApi";
 import { getAccessToken } from "../../utils/helper/TokenHelper";
 
-export const AdminDashboardContent = () => {
+export const DeliveryPersonDashboardContent = () => {
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",

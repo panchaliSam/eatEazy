@@ -2,7 +2,7 @@ import React from "react";
 import { CssBaseline } from "@mui/material";
 import DashboardLayoutBasic from "./DashBoardSection";
 
-export const AdminDashboard: React.FC = () => {
+export const RestaurantDashboard: React.FC = () => {
   return (
     <div>
       <CssBaseline />

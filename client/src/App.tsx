@@ -4,7 +4,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/admin/Dashboard";
+import { AdminDashboard } from "./pages/admin/Dashboard";
+import { RestaurantDashboard } from "./pages/restaurant/Dashboard";
+import { CustomerDashboard } from "./pages/customer/Dashboard";
+import { DeliveryPersonDashboard } from "./pages/deliveryPerson/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoutes";
 
 const theme = createTheme({
@@ -29,7 +32,7 @@ const App: React.FC = () => {
             path="/admin"
             element={
               <ProtectedRoute
-                element={<Dashboard />}
+                element={<AdminDashboard />}
                 allowedRoles={["Admin"]}
               />
             }
@@ -38,7 +41,7 @@ const App: React.FC = () => {
             path="/restaurant"
             element={
               <ProtectedRoute
-                element={<Dashboard />}
+                element={<RestaurantDashboard />}
                 allowedRoles={["Restaurant"]}
               />
             }
@@ -47,7 +50,7 @@ const App: React.FC = () => {
             path="/customer"
             element={
               <ProtectedRoute
-                element={<Dashboard />}
+                element={<CustomerDashboard />}
                 allowedRoles={["Customer"]}
               />
             }
@@ -56,7 +59,7 @@ const App: React.FC = () => {
             path="/delivery"
             element={
               <ProtectedRoute
-                element={<Dashboard />}
+                element={<DeliveryPersonDashboard />}
                 allowedRoles={["DeliveryPerson"]}
               />
             }

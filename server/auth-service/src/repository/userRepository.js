@@ -60,7 +60,7 @@ const UserRepository = {
                     Lastname: userData.lastname,
                     Email: userData.email,
                     Phone: userData.phone,
-                    Role: userData.role,
+                    //Role: userData.role,
                 },
             });
             console.log(updatedUser);
