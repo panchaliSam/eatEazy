@@ -7,6 +7,7 @@ import {
   setTokens,
   clearTokens,
 } from "../helper/TokenHelper";
+import { get } from "http";
 
 interface RestaurantData {
   restaurantName?: string;
@@ -57,6 +58,32 @@ const RestaurantApi = {
       if (axios.isAxiosError(error) && error.response) {
         throw new Error(
           error.response.data.message || "Failed to fetch restaurants."
+        );
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
+
+  getRestaurantById: async (restaurantId: string) => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+    try {
+      const response = await axios.get(
+        `${API_URL}/restaurants/${restaurantId}`,
+        {
+          headers: {
+            ...getAuthHeaders(),
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          error.response.data.message || "Failed to fetch restaurant."
         );
       }
       throw new Error("An unexpected error occurred.");
