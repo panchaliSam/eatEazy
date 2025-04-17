@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { AUTH_SERVICE_PORT } = require('../config/env');
+//const { AUTH_SERVICE_PORT } = require('../config/env');
 
 const authenticateToken = async (req, res, next) => {
     const authHeader = req.header('Authorization');
@@ -12,7 +12,7 @@ const authenticateToken = async (req, res, next) => {
 
     try {
         const response = await axios.post(
-            `http://localhost:${AUTH_SERVICE_PORT}/auth/verify`,
+            `http://localhost:4000/auth/verify`,
             {
                 token: token
             },
@@ -44,4 +44,16 @@ const authenticateToken = async (req, res, next) => {
     }
 };
 
-module.exports = { authenticateToken};
+const isRestaurant = async (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    if (req.user.role !== 'Restaurant') {
+        return res.status(403).json({ message: 'Access Denied: Restaurant role required' });
+    }
+
+    next();
+};
+
+module.exports = { authenticateToken,isRestaurant};

@@ -1,0 +1,11 @@
+# Ignore local dev files
+node_modules
+.git
+*.log
+Dockerfile
+README.md
+.env
+
+# Ignore Kubernetes secrets and config files
+*.secret.yaml
+*.config.yaml

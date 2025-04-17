@@ -52,19 +52,24 @@ const UserRepository = {
     },
 
     updateById: async (id, userData) => {
-        const { firstname, lastname, email, phone, role } = userData;
-        const updatedUser = await prisma.users.update({
-            where: { UserID: parseInt(id) },
-            data: {
-                Firstname: firstname,
-                Lastname: lastname,
-                Email: email,
-                Phone: phone,
-                Role: role,
-            },
-        });
-        return updatedUser;
-    },
+        try {
+            const updatedUser = await prisma.users.update({
+                where: {UserID: parseInt(id)},
+                data: {
+                    Firstname: userData.firstname,
+                    Lastname: userData.lastname,
+                    //Email: userData.email,
+                    Phone: userData.phone,
+                    //Role: userData.role,
+                },
+            });
+            console.log(updatedUser);
+            return updatedUser;
+        } catch (error) {
+            console.error('Error updating user:', error);
+            throw new Error('Database update failed.');
+        }
+    }
 };
 
 module.exports = UserRepository;

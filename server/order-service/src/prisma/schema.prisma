@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Carts {
+  CartID       Int      @id @default(autoincrement())
+  UserID       Int      
+  RestaurantID Int      
+  CartItems    CartItems[]
+  Status       CartStatus  @default(ACTIVE)
+  CreatedAt    DateTime    @default(now())
+  UpdatedAt    DateTime    @updatedAt
+}
+
+model CartItems {
+  CartItemsID Int   @id @default(autoincrement())
+  CartID      Int
+  Cart        Carts     @relation(fields: [CartID], references: [CartID])
+  MenuItemID  Int   
+  Quantity    Int      @default(1)
+  Price Float
+}
+
+model Orders {
+  OrderID      Int      @id @default(autoincrement())
+  UserID       Int      
+  RestaurantID Int      
+  CartID       Int    
+  Items        OrderItems[] 
+  TotalAmount  Float
+  Status       OrderStatus @default(PENDING)
+  CreatedAt    DateTime    @default(now())
+  UpdatedAt    DateTime    @updatedAt
+}
+
+model OrderItems {
+  OrderItemsID Int   @id @default(autoincrement())
+  OrderID    Int
+  Order       Orders    @relation(fields: [OrderID], references: [OrderID])
+  MenuItemID  Int   
+  Quantity    Int
+  Price       Float   
+}
+
+enum CartStatus {
+  ACTIVE      
+  COMPLETED 
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY_FOR_PICKUP
+  CANCELLED
+}

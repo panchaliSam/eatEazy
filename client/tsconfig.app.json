@@ -22,24 +22,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
-  },
-
-  "baseUrl": "./",
-
-  /* Paths */
-  "paths": {
-    "@assets/*": ["src/assets/*"],
-    "@components/*": ["src/components/*"],
-    "@common/*": ["src/common/*"],
-    "@contexts/*": ["src/contexts/*"],
-    "@helper/*": ["src/helper/*"],
-    "@hooks/*": ["src/hooks/*"],
-    "@pages/*": ["src/pages/*"],
-    "@redux/*": ["src/redux/*"],
-    "@routes/*":["src/routes/*"],
-    "@services/*":["src/services/*"],
-    "@theme/*":["src/theme/*"],
-    "@utils/*": ["src/utils/*"],
-  },
-  "include": ["src"]
+  }
 }
