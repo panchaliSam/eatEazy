@@ -1,9 +1,10 @@
 const NotificationModel = require("../models/notificationModel");
 const nodemailer = require("nodemailer");
 const axios = require("axios");
+const templates = require("./notificationTemplates");
 require("dotenv").config();
 
-// Email setup (Gmail via Nodemailer)
+// Nodemailer transporter setup
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -13,44 +14,49 @@ const transporter = nodemailer.createTransport({
 });
 
 const NotificationService = {
-  sendEmail: async (email, subject, message) => {
+  // Email notification
+  sendEmail: async (email, type, data) => {
+    const { subject, text } = templates.emailTemplates[type](data);
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
-      subject: subject,
-      text: message,
+      subject,
+      text,
     });
+    await NotificationModel.createNotification(data.userId, text, "Email", type);
   },
 
-  sendSMS: async (phone, message) => {
-    const url = `${process.env.INFOBIP_BASE_URL}/sms/2/text/advanced`;
-    const headers = {
-      "Authorization": `App ${process.env.INFOBIP_API_KEY}`,
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    };
-
-    const data = {
-      messages: [
-        {
-          from: process.env.INFOBIP_SENDER || "INFOBIP", // Use your configured sender ID here
-          to: phone, // Ensure this is in E.164 format (e.g., +94768501850)
-          text: message,
-        },
-      ],
-    };
-
+  // SMS notification using Text.lk
+  sendSMS: async (phone, type, data) => {
+    const text = templates.smsTemplates[type](data);
     try {
-      const response = await axios.post(url, data, { headers });
-      console.log("SMS sent successfully:", response.data);
+      const response = await axios.post('https://textlk.com/api/v3/send-sms', {
+        api_key: process.env.TEXTLK_API_KEY,
+        sender_id: process.env.TEXTLK_SENDER_ID,
+        message: text,
+        to: phone,
+      });
+
+      if (response.data.status !== 'SUCCESS') {
+        throw new Error(`Text.lk Error: ${response.data.message}`);
+      }
+
+      await NotificationModel.createNotification(data.userId, text, "SMS", type);
     } catch (error) {
-      console.error("Error sending SMS:", error.response ? error.response.data : error.message);
+      console.error("Error sending SMS via Text.lk:", error.message || error);
+      throw new Error("Failed to send SMS");
     }
   },
 
-  createNotification: async (userId, message) => {
-    return await NotificationModel.createNotification(userId, message);
+  // In-app or other notifications
+  createNotification: async (userId, message, channel = 'InApp', type = null) => {
+    return await NotificationModel.createNotification(userId, message, channel, type);
   },
+
+  // Fetch notifications by user
+  getNotificationsByUserId: async (userId) => {
+    return await NotificationModel.getNotificationsByUserId(userId);
+  }
 };
 
 module.exports = NotificationService;
