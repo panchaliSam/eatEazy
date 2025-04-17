@@ -159,18 +159,7 @@ const processPayHereNotification = async (data) => {
       };
       paymentID = await PaymentModel.createPayment(paymentData);
     }
-  } else {
-    // Create new payment record
-    const paymentData = {
-      OrderID: order_id,
-      TransactionID: payment_id,
-      PaymentMethod: 'PayHere',
-      PaymentStatus: paymentStatus,
-      Amount: payhere_amount
-    };
-    paymentID = await PaymentModel.createPayment(paymentData);
   }
-
   // Notify order service about payment status
   try {
     await updateOrderPaymentStatus(order_id, paymentStatus);
