@@ -1,9 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const NotificationController = require('../controllers/notificationController');
+const {
+    createNotification,
+    sendEmailNotification,
+    sendSMSNotification,
+    getMyNotifications
+  } = require('../controllers/notificationController');
+  const { authenticateToken } = require('../middleware/authMiddleware');
 
-router.post('/create', NotificationController.createNotification);
-router.post('/send-email', NotificationController.sendEmailNotification);
-router.post('/send-sms', NotificationController.sendSMSNotification);
+router.post('/create', createNotification);
+router.post('/send-email', sendEmailNotification);
+router.post('/send-sms', sendSMSNotification);
+router.get('/myNotifications',authenticateToken, getMyNotifications);
 
 module.exports = router;

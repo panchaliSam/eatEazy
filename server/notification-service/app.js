@@ -8,7 +8,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use('/notifications', notificationRoutes);
+// Routes
+app.use('/api/notifications', notificationRoutes);
 
 // Root Route
 app.get('/', (req, res) => {
