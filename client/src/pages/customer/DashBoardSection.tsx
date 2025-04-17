@@ -20,6 +20,7 @@ import { orange } from "@mui/material/colors";
 import UserApi from "../../utils/api/UserApi";
 import { getRefreshToken } from "../../utils/helper/TokenHelper";
 import { CustomerDashboardContent } from "../../components/customer/DashBoardContent";
+import { RestaurantView } from "../../components/admin/RestaurantContent";
 
 const theme = createTheme({
   palette: {
@@ -104,11 +105,6 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       icon: <RestaurantMenuIcon />,
     },
     {
-      segment: "people",
-      title: "People",
-      icon: <PeopleIcon />,
-    },
-    {
       segment: "payments",
       title: "Payments",
       icon: <PaymentIcon />,
@@ -168,8 +164,10 @@ export default function DashboardLayoutBasic(props: DemoProps) {
     switch (router.pathname) {
       case "/admin":
         return <CustomerDashboardContent />;
-      case "/people":
+      case "/orders":
         return <Typography>Page Not Found</Typography>;
+      case "/restaurants":
+        return <RestaurantView />;
       default:
         return <CustomerDashboardContent />;
     }
