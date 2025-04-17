@@ -42,6 +42,26 @@ const RestaurantApi = {
       throw new Error("An unexpected error occurred.");
     }
   },
+
+  getAllRestaurants: async () => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found.");
+    }
+    try {
+      const response = await axios.get(`${API_URL}/restaurants`, {
+        headers: getAuthHeaders(),
+      });
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          error.response.data.message || "Failed to fetch restaurants."
+        );
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
 };
 
 export default RestaurantApi;
