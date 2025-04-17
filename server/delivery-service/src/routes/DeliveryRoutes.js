@@ -10,5 +10,5 @@ router.patch(
   DeliveryController.updateDeliveryStatus
 );
 router.get("/delivery-route/:deliveryId", DeliveryController.getDeliveryRoute);
-
+router.post("/delivery/:deliveryId/route", DeliveryController.addDeliveryRoute);
 module.exports = router;

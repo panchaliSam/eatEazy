@@ -1,19 +1,22 @@
 const DeliveryRepository = require("../repository/DeliveryRepository");
+const prisma = require("../config/prisma");
 
 class DeliveryService {
-  static async assignDelivery(orderid) {
-    const [drivers] = await db.query(
-      "SELECT UserID FROM Users WHERE Role = 'DeliveryPerson' ORDER BY RAND() LIMIT 1"
-    );
-    if (drivers.length === 0) {
+  static async assignDelivery(orderId) {
+    const drivers = await prisma.users.findMany({
+      where: {
+        Role: "DeliveryPerson",
+      },
+    });
+
+    if (!drivers.length) {
       throw new Error("No delivery drivers available");
     }
-    await DeliveryRepository.assignDeliveryPerson(orderid, drivers[0].UserID);
-    return drivers[0];
-  }
 
-  static async trackDelivery(orderId) {
-    return await DeliveryRepository.getDeliveryStatus(orderId);
+    const randomDriver = drivers[Math.floor(Math.random() * drivers.length)];
+
+    await DeliveryRepository.assignDeliveryPerson(orderId, randomDriver.UserID);
+    return randomDriver;
   }
 
   static async updateStatus(deliveryId, status) {
@@ -25,6 +28,10 @@ class DeliveryService {
     }
 
     return await DeliveryRepository.updateDeliveryStatus(deliveryId, status);
+  }
+
+  static async trackDelivery(orderId) {
+    return await DeliveryRepository.getDeliveryStatus(orderId);
   }
 
   static async getRoute(deliveryId) {
