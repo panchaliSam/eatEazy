@@ -1,6 +1,7 @@
 import React from "react";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./routes/ProtectedRoutes";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -8,7 +9,7 @@ import { AdminDashboard } from "./pages/admin/Dashboard";
 import { RestaurantDashboard } from "./pages/restaurant/Dashboard";
 import { CustomerDashboard } from "./pages/customer/Dashboard";
 import { DeliveryPersonDashboard } from "./pages/deliveryPerson/Dashboard";
-import ProtectedRoute from "./routes/ProtectedRoutes";
+import { MenuScreen } from "./pages/customer/Menu";
 
 const theme = createTheme({
   palette: {
@@ -51,6 +52,15 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute
                 element={<CustomerDashboard />}
+                allowedRoles={["Customer"]}
+              />
+            }
+          />
+          <Route
+            path="/menu"
+            element={
+              <ProtectedRoute
+                element={<MenuScreen />}
                 allowedRoles={["Customer"]}
               />
             }

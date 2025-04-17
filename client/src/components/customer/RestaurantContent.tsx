@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -66,6 +67,12 @@ export const RestaurantView = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+
+  const handleOrderSubmit = () => {
+    navigate("/menu");
+  };
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -177,6 +184,7 @@ export const RestaurantView = () => {
               </Button>
               <Button
                 variant="outlined"
+                onClick={handleOrderSubmit}
                 sx={{
                   backgroundColor: "#EA7300",
                   color: "white",

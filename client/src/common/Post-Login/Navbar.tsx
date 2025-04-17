@@ -1,0 +1,251 @@
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Menu from "@mui/material/Menu";
+import MenuIcon from "@mui/icons-material/Menu";
+import Tooltip from "@mui/material/Tooltip";
+import MenuItem from "@mui/material/MenuItem";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import logo from "@app_assets/logo/png/logo-transparent.png";
+
+const settings = ["Home", "Logout"];
+
+function ResponsiveAppBar() {
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
+    null
+  );
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
+    null
+  );
+
+  const navigate = useNavigate();
+
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElNav(event.currentTarget);
+  };
+
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
+  return (
+    <>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: "100%",
+          backgroundColor: "white",
+          color: "black",
+          boxShadow: "none",
+        }}
+      >
+        <Toolbar disableGutters>
+          {/* Logo */}
+          <img
+            src={logo}
+            alt="Logo"
+            style={{
+              display: "flex",
+              height: "80px",
+              marginRight: "30px",
+              marginLeft: "30px",
+            }}
+          />
+
+          {/* Mobile Menu Icon */}
+          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElNav}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
+              sx={{ display: { xs: "block", md: "none" } }}
+            ></Menu>
+          </Box>
+
+          {/* Search Bar */}
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <TextField
+              placeholder="Search..."
+              variant="outlined"
+              size="small"
+              sx={{
+                width: "50%",
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "gray",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "gray",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "gray",
+                  },
+                },
+              }}
+            />
+          </Box>
+
+          {/* Centered Navigation Items (Desktop View) */}
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: { xs: "none", md: "flex" },
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          ></Box>
+
+          {/* User Avatar and Settings */}
+          <Box sx={{ flexGrow: 0, marginRight: "50px", display: "flex" }}>
+            <Tooltip title="Open settings">
+              <IconButton
+                sx={{
+                  p: 0,
+                  outline: "none",
+                  "&:focus": {
+                    outline: "none",
+                  },
+                }}
+              >
+                <ShoppingCartOutlinedIcon
+                  sx={{
+                    color: "grey",
+                    fontSize: "30px",
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Box sx={{ flexGrow: 0, marginRight: "50px", display: "flex" }}>
+            <Tooltip title="Open settings">
+              <IconButton
+                sx={{
+                  p: 0,
+                  outline: "none",
+                  "&:focus": {
+                    outline: "none",
+                  },
+                }}
+              >
+                <NotificationsNoneOutlinedIcon
+                  sx={{
+                    color: "grey",
+                    fontSize: "30px",
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          {/* User Avatar and Settings */}
+          <Box sx={{ flexGrow: 0, marginRight: "50px", display: "flex" }}>
+            <Tooltip title="Open settings">
+              <IconButton
+                onClick={handleOpenUserMenu}
+                sx={{
+                  p: 0,
+                  outline: "none",
+                  "&:focus": {
+                    outline: "none",
+                  },
+                }}
+              >
+                <PersonOutlineIcon
+                  sx={{
+                    color: "grey",
+                    fontSize: "30px",
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              {settings.map((setting) => (
+                <MenuItem
+                  key={setting}
+                  onClick={() => {
+                    handleCloseUserMenu();
+                    if (setting === "SignIn") {
+                      navigate("/login");
+                    } else if (setting === "SignUp") {
+                      navigate("/register");
+                    }
+                  }}
+                  sx={{
+                    textAlign: "center",
+                    outline: "none",
+                    "&:focus": {
+                      outline: "none",
+                    },
+                  }}
+                >
+                  <Typography>{setting}</Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      {/* Add space below the AppBar */}
+      <Box sx={{ marginTop: "120px" }}>{/* Main content goes here */}</Box>
+    </>
+  );
+}
+
+export default ResponsiveAppBar;
