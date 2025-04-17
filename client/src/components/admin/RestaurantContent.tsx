@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -7,15 +7,30 @@ import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Collapse from "@mui/material/Collapse";
-import Avatar from "@mui/material/Avatar";
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { red } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import Image from "@app_assets/HeroSectionFood.jpg";
+import RestaurantApi from "../../utils/api/RestaurantApi";
+import { getAccessToken } from "../../utils/helper/TokenHelper";
+import Image1 from "@app_assets/restaurants/Restaurant1.jpg";
+import Image2 from "@app_assets/restaurants/Restaurant2.jpg";
+import Image3 from "@app_assets/restaurants/Restaurant3.jpg";
+import Image4 from "@app_assets/restaurants/Restaurant4.jpg";
+import Image5 from "@app_assets/restaurants/Restaurant5.jpg";
+import Image6 from "@app_assets/restaurants/Restaurant6.jpg";
+
+// List of images to randomly assign to restaurants
+const imageList = [
+  { src: Image1, alt: "Restaurant 1" },
+  { src: Image2, alt: "Restaurant 2" },
+  { src: Image3, alt: "Restaurant 3" },
+  { src: Image4, alt: "Restaurant 4" },
+  { src: Image5, alt: "Restaurant 5" },
+  { src: Image6, alt: "Restaurant 6" },
+];
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -46,11 +61,46 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 }));
 
 export const RestaurantView = () => {
-  const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const token = getAccessToken();
+        if (!token) {
+          throw new Error("No access token found.");
+        }
+        const data = await RestaurantApi.getAllRestaurants();
+        // Add a random image property to each restaurant
+        const restaurantsWithImages = data.map((restaurant: any) => ({
+          ...restaurant,
+          randomImage: imageList[Math.floor(Math.random() * imageList.length)],
+        }));
+        setRestaurants(restaurantsWithImages);
+        console.log("Fetched restaurants:", restaurantsWithImages);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch restaurants");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRestaurants();
+  }, []);
+
+  const handleExpandClick = (index: number) => {
+    setExpanded(expanded === index ? null : index);
   };
+
+  if (loading) {
+    return <Typography>Loading...</Typography>;
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
 
   return (
     <Box
@@ -67,83 +117,70 @@ export const RestaurantView = () => {
       <Typography sx={{ alignSelf: "flex-start", fontSize: 24 }}>
         Restaurants
       </Typography>
-      <Card sx={{ maxWidth: 345, alignSelf: "flex-start", mt: 4 }}>
-        <CardHeader
-          avatar={
-            <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-              R
-            </Avatar>
-          }
-          action={
-            <IconButton aria-label="settings">
-              <MoreVertIcon />
-            </IconButton>
-          }
-          title="Shrimp and Chorizo Paella"
-          subheader="September 14, 2016"
-        />
-        <CardMedia
-          component="img"
-          height="194"
-          image={Image}
-          alt="Paella dish"
-        />
-        <CardContent>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            This impressive paella is a perfect party dish and a fun meal to
-            cook together with your guests. Add 1 cup of frozen peas along with
-            the mussels, if you like.
-          </Typography>
-        </CardContent>
-        <CardActions disableSpacing>
-          <IconButton aria-label="add to favorites">
-            <FavoriteIcon />
-          </IconButton>
-          <IconButton aria-label="share">
-            <ShareIcon />
-          </IconButton>
-          <ExpandMore
-            expand={expanded}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <ExpandMoreIcon />
-          </ExpandMore>
-        </CardActions>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <Typography sx={{ marginBottom: 2 }}>Method:</Typography>
-            <Typography sx={{ marginBottom: 2 }}>
-              Heat 1/2 cup of the broth in a pot until simmering, add saffron
-              and set aside for 10 minutes.
-            </Typography>
-            <Typography sx={{ marginBottom: 2 }}>
-              Heat oil in a (14- to 16-inch) paella pan or a large, deep skillet
-              over medium-high heat. Add chicken, shrimp and chorizo, and cook,
-              stirring occasionally until lightly browned, 6 to 8 minutes.
-              Transfer shrimp to a large plate and set aside, leaving chicken
-              and chorizo in the pan. Add pimentón, bay leaves, garlic,
-              tomatoes, onion, salt and pepper, and cook, stirring often until
-              thickened and fragrant, about 10 minutes. Add saffron broth and
-              remaining 4 1/2 cups chicken broth; bring to a boil.
-            </Typography>
-            <Typography sx={{ marginBottom: 2 }}>
-              Add rice and stir very gently to distribute. Top with artichokes
-              and peppers, and cook without stirring, until most of the liquid
-              is absorbed, 15 to 18 minutes. Reduce heat to medium-low, add
-              reserved shrimp and mussels, tucking them down into the rice, and
-              cook again without stirring, until mussels have opened and rice is
-              just tender, 5 to 7 minutes more. (Discard any mussels that
-              don&apos;t open.)
-            </Typography>
-            <Typography>
-              Set aside off of the heat to let rest for 10 minutes, and then
-              serve.
-            </Typography>
-          </CardContent>
-        </Collapse>
-      </Card>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: 2,
+          mt: 4,
+        }}
+      >
+        {restaurants.map((restaurant, index) => (
+          <Card key={restaurant.RestaurantID} sx={{ maxWidth: 345 }}>
+            <CardHeader
+              action={
+                <IconButton aria-label="settings">
+                  <MoreVertIcon />
+                </IconButton>
+              }
+              title={restaurant.RestaurantName}
+              subheader={restaurant.Address || "No address provided"}
+            />
+            <CardMedia
+              component="img"
+              height="194"
+              sx={{
+                width: 300,
+                height: 200,
+                objectFit: "cover",
+              }}
+              image={restaurant.randomImage.src}
+              alt={restaurant.RestaurantName}
+            />
+            <CardContent>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                {restaurant.Availability ||
+                  "No availability information provided"}{" "}
+              </Typography>
+            </CardContent>
+            <CardActions disableSpacing>
+              <IconButton aria-label="add to favorites">
+                <FavoriteIcon />
+              </IconButton>
+              <IconButton aria-label="share">
+                <ShareIcon />
+              </IconButton>
+              <ExpandMore
+                expand={expanded === index}
+                onClick={() => handleExpandClick(index)}
+                aria-expanded={expanded === index}
+                aria-label="show more"
+              >
+                <ExpandMoreIcon />
+              </ExpandMore>
+            </CardActions>
+            <Collapse in={expanded === index} timeout="auto" unmountOnExit>
+              <CardContent>
+                <Typography sx={{ marginBottom: 2 }}>Details:</Typography>
+                <Typography>
+                  {restaurant.Email || "No email provided"}
+                </Typography>
+              </CardContent>
+            </Collapse>
+          </Card>
+        ))}
+      </Box>
     </Box>
   );
 };
