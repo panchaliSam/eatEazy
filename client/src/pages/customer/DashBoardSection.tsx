@@ -5,10 +5,6 @@ import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import DescriptionIcon from "@mui/icons-material/Description";
-import LayersIcon from "@mui/icons-material/Layers";
-import PeopleIcon from "@mui/icons-material/People";
 import PaymentIcon from "@mui/icons-material/Payment";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -20,6 +16,7 @@ import { orange } from "@mui/material/colors";
 import UserApi from "../../utils/api/UserApi";
 import { getRefreshToken } from "../../utils/helper/TokenHelper";
 import { CustomerDashboardContent } from "../../components/customer/DashBoardContent";
+import { RestaurantView } from "../../components/customer/RestaurantContent";
 
 const theme = createTheme({
   palette: {
@@ -104,11 +101,6 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       icon: <RestaurantMenuIcon />,
     },
     {
-      segment: "people",
-      title: "People",
-      icon: <PeopleIcon />,
-    },
-    {
       segment: "payments",
       title: "Payments",
       icon: <PaymentIcon />,
@@ -117,35 +109,6 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       segment: "notifications",
       title: "Notifications",
       icon: <NotificationsIcon />,
-    },
-    {
-      kind: "divider",
-    },
-    {
-      kind: "header",
-      title: "Analytics",
-    },
-    {
-      segment: "reports",
-      title: "Reports",
-      icon: <BarChartIcon />,
-      children: [
-        {
-          segment: "sales",
-          title: "Sales",
-          icon: <DescriptionIcon />,
-        },
-        {
-          segment: "traffic",
-          title: "Traffic",
-          icon: <DescriptionIcon />,
-        },
-      ],
-    },
-    {
-      segment: "integrations",
-      title: "Integrations",
-      icon: <LayersIcon />,
     },
     {
       kind: "divider",
@@ -168,8 +131,10 @@ export default function DashboardLayoutBasic(props: DemoProps) {
     switch (router.pathname) {
       case "/admin":
         return <CustomerDashboardContent />;
-      case "/people":
+      case "/orders":
         return <Typography>Page Not Found</Typography>;
+      case "/restaurants":
+        return <RestaurantView />;
       default:
         return <CustomerDashboardContent />;
     }
