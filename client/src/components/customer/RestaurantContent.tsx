@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -10,9 +11,9 @@ import Collapse from "@mui/material/Collapse";
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
-import PersonIcon from "@mui/icons-material/Person";
 import Typography from "@mui/material/Typography";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import RestaurantApi from "../../utils/api/RestaurantApi";
@@ -66,6 +67,12 @@ export const RestaurantView = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+
+  const handleOrderSubmit = () => {
+    navigate("/menu");
+  };
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -155,7 +162,10 @@ export const RestaurantView = () => {
                   "No availability information provided"}{" "}
               </Typography>
             </CardContent>
-            <CardActions disableSpacing>
+            <CardActions
+              disableSpacing
+              sx={{ justifyContent: "space-between" }}
+            >
               <Button
                 variant="outlined"
                 onClick={() => handleExpandClick(index)}
@@ -172,6 +182,22 @@ export const RestaurantView = () => {
               >
                 View
               </Button>
+              <Button
+                variant="outlined"
+                onClick={handleOrderSubmit}
+                sx={{
+                  backgroundColor: "#EA7300",
+                  color: "white",
+                  border: "none",
+                  outline: "none",
+                  "&:focus": {
+                    outline: "none",
+                  },
+                }}
+                startIcon={<ShoppingCartIcon />}
+              >
+                Order
+              </Button>
             </CardActions>
             <Collapse in={expanded === index} timeout="auto" unmountOnExit>
               <CardContent>
@@ -185,12 +211,6 @@ export const RestaurantView = () => {
                   <EmailIcon sx={{ color: "orange" }} />
                   <Typography variant="body1">
                     {restaurant.Email || "No email provided"}
-                  </Typography>
-                </Box>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <PersonIcon sx={{ color: "orange" }} />
-                  <Typography variant="body1">
-                    {restaurant.OwnerName || "No owner provided"}
                   </Typography>
                 </Box>
               </CardContent>
