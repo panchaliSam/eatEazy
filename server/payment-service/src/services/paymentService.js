@@ -1,182 +1,232 @@
-const PaymentModel = require('../models/paymentModel');
-const { 
-    PAYHERE_MERCHANT_ID, 
-    PAYHERE_MERCHANT_SECRET,
-    PAYHERE_SANDBOX_URL,
-    PAYHERE_RETURN_URL,
-    PAYHERE_CANCEL_URL,
-    PAYHERE_NOTIFY_URL,
-    PAYHERE_MODE
-} = require('../config/env');
 const crypto = require('crypto');
+const axios = require('axios');
+const PaymentModel = require('../models/paymentModel');
+const {
+  PAYHERE_MERCHANT_SECRET,
+  PAYHERE_MERCHANT_ID,
+  PAYHERE_RETURN_URL,
+  PAYHERE_CANCEL_URL,
+  PAYHERE_NOTIFY_URL,
+  SERVICE_API_KEY
+} = require('../config/env');
 
+// Helper: Generate PayHere Signature
+const generateSignature = (orderDetails, merchantSecret) => {
+  const stringToHash = `${orderDetails.merchant_id}${orderDetails.order_id}${orderDetails.amount}${orderDetails.currency}${merchantSecret}`;
+  return crypto.createHash('md5').update(stringToHash).digest('hex').toUpperCase();
+};
+
+// Helper: Update order service payment status (with retry)
+const sendOrderPaymentUpdate = async (orderID, paymentStatus) => {
+  const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || 'http://localhost:5006';
+
+  return axios.put(`${ORDER_SERVICE_URL}/orders/${orderID}/payment-status`, {
+    paymentStatus
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SERVICE_API_KEY}`
+    },
+    timeout: 5000
+  });
+};
+
+const updateOrderPaymentStatus = async (orderID, paymentStatus) => {
+  try {
+    const response = await sendOrderPaymentUpdate(orderID, paymentStatus);
+    console.log(`Order #${orderID} payment status updated to ${paymentStatus}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Initial update failed for order #${orderID}:`, error.response?.data || error.message);
+
+    try {
+      console.log(`Retrying update for order #${orderID}...`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const retryResponse = await sendOrderPaymentUpdate(orderID, paymentStatus);
+      console.log(`Retry successful: Order #${orderID} payment status updated to ${paymentStatus}`);
+      return retryResponse.data;
+    } catch (retryError) {
+      console.error(`Retry failed for order #${orderID}:`, retryError.message);
+      throw new Error(`Failed to update order payment status: ${retryError.message}`);
+    }
+  }
+};
+
+// Helper: Send Notification
+const sendPaymentNotification = async (orderID, paymentStatus, amount) => {
+  try {
+    const NOTIFICATION_SERVICE_URL = process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:4010';
+
+    const response = await axios.post(`${NOTIFICATION_SERVICE_URL}/notifications`, {
+      type: 'PAYMENT_STATUS_CHANGE',
+      orderID,
+      paymentStatus,
+      amount,
+      timestamp: new Date().toISOString()
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SERVICE_API_KEY}`
+      },
+      timeout: 5000
+    });
+
+    console.log(`Payment notification sent for order #${orderID}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to send notification for order #${orderID}:`, error.response?.data || error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+// Payment initiation
 const initiatePayment = async (OrderID, PaymentMethod) => {
-    try {
-        const orderDetails = await PaymentModel.getOrderDetails(OrderID);
+  const orderDetails = await PaymentModel.getOrderDetails(OrderID);
+  if (!orderDetails) throw new Error(`Order #${OrderID} not found`);
 
-        if (!orderDetails) {
-            throw new Error(`Order #${OrderID} not found`);
-        }
+  let orderTotal = typeof orderDetails.TotalAmount === 'number'
+    ? orderDetails.TotalAmount
+    : parseFloat(orderDetails.TotalAmount);
 
-        let paymentResponse;
-        switch (PaymentMethod) {
-            case 'PayHere':
-                paymentResponse = await initiatePayHerePayment(orderDetails);
-                break;
-            default:
-                throw new Error('Unsupported payment method');
-        }
+  if (isNaN(orderTotal)) {
+    throw new Error('Invalid TotalAmount value');
+  }
 
-        const paymentData = {
-            OrderID,
-            PaymentMethod,
-            PaymentStatus: 'Pending',
-            TransactionID: paymentResponse.TransactionID,
-        };
+  const TransactionID = `TEMP_${Date.now()}`;
+  const paymentData = {
+    OrderID,
+    TransactionID,
+    PaymentMethod,
+    PaymentStatus: 'Pending',
+    Amount: orderTotal
+  };
 
-        const PaymentID = await PaymentModel.createPayment(paymentData);
-        return { 
-            PaymentID, 
-            redirectUrl: paymentResponse.redirectUrl,
-            PaymentStatus: 'Pending'
-        };
-    } catch (error) {
-        console.error('Payment initiation error:', error);
-        throw error;
-    }
+  const PaymentID = await PaymentModel.createPayment(paymentData);
+  let redirectUrl = '';
+
+  if (PaymentMethod === 'PayHere') {
+    const baseUrl = process.env.PAYHERE_BASE_URL || 'https://sandbox.payhere.lk/pay/checkout';
+    const hash = generateSignature({
+      merchant_id: PAYHERE_MERCHANT_ID,
+      order_id: OrderID.toString(),
+      amount: orderTotal.toFixed(2),
+      currency: 'LKR'
+    }, PAYHERE_MERCHANT_SECRET);
+
+    const queryParams = new URLSearchParams({
+      merchant_id: PAYHERE_MERCHANT_ID,
+      return_url: PAYHERE_RETURN_URL,
+      cancel_url: PAYHERE_CANCEL_URL,
+      notify_url: PAYHERE_NOTIFY_URL,
+      order_id: OrderID.toString(),
+      items: `Order #${OrderID}`,
+      amount: orderTotal.toFixed(2),
+      currency: 'LKR',
+      hash
+    }).toString();
+
+    redirectUrl = `${baseUrl}?${queryParams}`;
+  } else {
+    redirectUrl = 'Not implemented yet';
+  }
+
+  try {
+    await updateOrderPaymentStatus(OrderID, 'Pending');
+  } catch (err) {
+    console.error(`Order update failed during payment initiation:`, err.message);
+  }
+
+  return {
+    PaymentID,
+    redirectUrl,
+    PaymentStatus: 'Pending'
+  };
 };
 
-const initiatePayHerePayment = async (orderDetails) => {
-    try {
-        // Ensure OrderTotal is a valid number
-        const orderTotal = parseFloat(orderDetails.OrderTotal);
-        if (isNaN(orderTotal)) {
-            throw new Error('Invalid OrderTotal value');
-        }
+// Process PayHere Notification
+const processPayHereNotification = async (data) => {
+  const {
+    merchant_id,
+    order_id,
+    payment_id,
+    payhere_amount,
+    payhere_currency,
+    status_code,
+    md5sig
+  } = data;
 
-        // Generate temporary transaction ID
-        const tempTransactionId = `TEMP_${Date.now()}`;
-        
-        // Base URL for PayHere
-        const baseUrl = PAYHERE_SANDBOX_URL || 'https://sandbox.payhere.lk/pay/checkout';
-        
-        // Get URLs from environment or use defaults
-        const returnUrl = PAYHERE_RETURN_URL || 'http://localhost:4010/api/payments/success';
-        const cancelUrl = PAYHERE_CANCEL_URL || 'http://localhost:4010/api/payments/cancel';
-        const notifyUrl = PAYHERE_NOTIFY_URL || 'http://localhost:4010/api/payments/notify';
-        
-        // Construct PayHere URL parameters
-        const params = {
-            merchant_id: PAYHERE_MERCHANT_ID,
-            return_url: returnUrl,
-            cancel_url: cancelUrl,
-            notify_url: notifyUrl,
-            order_id: orderDetails.OrderID,
-            items: `Order #${orderDetails.OrderID}`,
-            amount: orderTotal.toFixed(2),
-            currency: 'LKR'
-        };
-        
-        // Add sandbox parameter if in sandbox mode
-        if (PAYHERE_MODE === 'sandbox') {
-            params.sandbox = '1';
-        }
-        
-        // Build the query string manually to ensure proper encoding
-        const queryString = Object.keys(params)
-            .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
-            .join('&');
-            
-        // Full redirect URL
-        const redirectUrl = `${baseUrl}?${queryString}`;
-        
-        // Log the URL for debugging
-        console.log('PayHere Redirect URL:', redirectUrl);
-        
-        return {
-            TransactionID: tempTransactionId,
-            redirectUrl: redirectUrl
-        };
-    } catch (error) {
-        console.error('PayHere payment error:', error);
-        throw error;
+  const stringToHash = `${merchant_id}${order_id}${payhere_amount}${payhere_currency}${status_code}${crypto.createHash('md5').update(PAYHERE_MERCHANT_SECRET).digest('hex')}`;
+  const localSig = crypto.createHash('md5').update(stringToHash).digest('hex').toUpperCase();
+
+  if (md5sig !== localSig) {
+    throw new Error('MD5 signature mismatch');
+  }
+
+  const paymentStatus = status_code === '2' ? 'Completed' : 'Failed';
+  const existingPayments = await PaymentModel.getPaymentsByOrderId(order_id);
+  let paymentID;
+
+  if (existingPayments && existingPayments.length > 0) {
+    const pendingPayment = existingPayments.find(p => p.PaymentStatus === 'Pending');
+    if (pendingPayment) {
+      paymentID = pendingPayment.PaymentID;
+      await PaymentModel.updatePaymentStatus(paymentID, paymentStatus);
+    } else {
+      const paymentData = {
+        OrderID: order_id,
+        TransactionID: payment_id,
+        PaymentMethod: 'PayHere',
+        PaymentStatus: paymentStatus,
+        Amount: payhere_amount
+      };
+      paymentID = await PaymentModel.createPayment(paymentData);
     }
+  }
+
+  try {
+    await updateOrderPaymentStatus(order_id, paymentStatus);
+  } catch (err) {
+    console.error(`Failed to update order status for #${order_id}:`, err.message);
+  }
+
+  try {
+    await sendPaymentNotification(order_id, paymentStatus, payhere_amount);
+  } catch (err) {
+    console.error(`Failed to send notification for #${order_id}:`, err.message);
+  }
+
+  return {
+    message: 'Payment processed and saved',
+    paymentID,
+    status: paymentStatus
+  };
 };
 
-// Verify PayHere Payment Notification Hash
-const verifyPaymentHash = (payload) => {
-    try {
-        if (!payload || !payload.md5sig) {
-            return false;
-        }
-        
-        const hashString = `${payload.merchant_id}${payload.order_id}${payload.payhere_amount}${payload.payhere_currency}${payload.status_code}${PAYHERE_MERCHANT_SECRET}`;
-        const computedHash = crypto.createHash('md5').update(hashString).digest('hex').toUpperCase();
-
-        return computedHash === payload.md5sig;
-    } catch (error) {
-        console.error('Hash verification error:', error);
-        return false;
-    }
-};
-
-// Update payment status in the database
+// Update payment status manually
 const updatePaymentStatus = async (PaymentID, PaymentStatus) => {
-    try {
-        await PaymentModel.updatePaymentStatus(PaymentID, PaymentStatus);
-    } catch (error) {
-        console.error('Update payment status error:', error);
-        throw error;
-    }
+  await PaymentModel.updatePaymentStatus(PaymentID, PaymentStatus);
+  const paymentDetails = await PaymentModel.getPaymentById(PaymentID);
+  if (!paymentDetails) throw new Error(`Payment #${PaymentID} not found`);
+
+  try {
+    await updateOrderPaymentStatus(paymentDetails.OrderID, PaymentStatus);
+  } catch (err) {
+    console.error(`Failed to update order #${paymentDetails.OrderID} status:`, err.message);
+  }
+
+  try {
+    await sendPaymentNotification(paymentDetails.OrderID, PaymentStatus, paymentDetails.Amount);
+  } catch (err) {
+    console.error(`Failed to notify for order #${paymentDetails.OrderID}:`, err.message);
+  }
 };
 
-// Process notification from PayHere
-const processPaymentNotification = async (notificationData) => {
-    try {
-        // Verify signature
-        if (!verifyPaymentHash(notificationData)) {
-            throw new Error('Invalid payment notification signature');
-        }
-        
-        const orderId = notificationData.order_id;
-        const statusCode = parseInt(notificationData.status_code);
-        
-        // Map PayHere status codes to our status
-        let paymentStatus;
-        switch (statusCode) {
-            case 2: // Success
-                paymentStatus = 'Completed';
-                break;
-            case 0: // Pending
-                paymentStatus = 'Pending';
-                break;
-            default:
-                paymentStatus = 'Failed';
-        }
-        
-        // Get payment record by OrderID
-        const payment = await PaymentModel.getPaymentByOrderId(orderId);
-        
-        if (!payment) {
-            throw new Error('Payment record not found');
-        }
-        
-        // Update payment status
-        await updatePaymentStatus(payment.PaymentID, paymentStatus);
-        
-        return {
-            success: true,
-            message: 'Payment notification processed successfully'
-        };
-    } catch (error) {
-        console.error('Process payment notification error:', error);
-        throw error;
-    }
-};
-
-module.exports = { 
-    initiatePayment, 
-    updatePaymentStatus, 
-    verifyPaymentHash,
-    processPaymentNotification
+// Expose functions
+module.exports = {
+  initiatePayment,
+  processPayHereNotification,
+  updatePaymentStatus,
+  generateSignature,
+  updateOrderPaymentStatus,
+  sendPaymentNotification
 };
