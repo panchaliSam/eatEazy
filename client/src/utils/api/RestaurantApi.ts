@@ -2,16 +2,12 @@ import axios from "axios";
 import { API_URL } from "./ApiURL";
 import { getAuthHeaders } from "../helper/AuthHelper";
 import { getAccessToken } from "../helper/TokenHelper";
-
-interface RestaurantData {
-  restaurantName?: string;
-  address?: string;
-  phone?: string;
-  availability?: string;
-}
+import { IRestaurant } from "../../interfaces/IRestaurant";
+import { IMenu } from "../../interfaces/IMenu";
 
 const RestaurantApi = {
-  registerRestaurant: async (restaurantData: RestaurantData) => {
+  // Restaurant APIs
+  registerRestaurant: async (restaurantData: IRestaurant) => {
     const accessToken = getAccessToken();
     if (!accessToken) {
       throw new Error("No access token found.");
@@ -86,7 +82,7 @@ const RestaurantApi = {
 
   updateRestaurantById: async (
     restaurantId: string,
-    restaurantData: RestaurantData
+    restaurantData: IRestaurant
   ) => {
     const accessToken = getAccessToken();
     if (!accessToken) {
@@ -134,6 +130,34 @@ const RestaurantApi = {
       if (axios.isAxiosError(error) && error.response) {
         throw new Error(
           error.response.data.message || "Failed to delete restaurant."
+        );
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
+
+  //Menu APIs
+  createMenuItem: async (restaurantId: string, menuItemData: IMenu) => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found.");
+    }
+    try {
+      const response = await axios.post(
+        `${API_URL}/restaurants/${restaurantId}/menu`,
+        menuItemData,
+        {
+          headers: {
+            ...getAuthHeaders(),
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          error.response.data.message || "Failed to create menu item."
         );
       }
       throw new Error("An unexpected error occurred.");
