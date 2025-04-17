@@ -12,10 +12,11 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import logo from "@app_assets/logo/png/logo-transparent.png";
 
-const settings = ["Home", "Logout"];
+const settings = ["Logout"];
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -43,6 +44,11 @@ function ResponsiveAppBar() {
     setAnchorElUser(null);
   };
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    handleCloseNavMenu();
+  };
+
   return (
     <>
       <AppBar
@@ -61,9 +67,9 @@ function ResponsiveAppBar() {
             alt="Logo"
             style={{
               display: "flex",
-              height: "80px",
-              marginRight: "30px",
-              marginLeft: "30px",
+              height: "60px",
+              marginRight: "20px",
+              marginLeft: "20px",
             }}
           />
 
@@ -94,7 +100,25 @@ function ResponsiveAppBar() {
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: "block", md: "none" } }}
-            ></Menu>
+            >
+              {/* Add all menu items for mobile */}
+              <MenuItem onClick={() => handleNavigate("/customer")}>
+                <HomeOutlinedIcon sx={{ marginRight: "10px" }} />
+                <Typography textAlign="center">Home</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => handleNavigate("/cart")}>
+                <ShoppingCartOutlinedIcon sx={{ marginRight: "10px" }} />
+                <Typography textAlign="center">Cart</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => handleNavigate("/notifications")}>
+                <NotificationsNoneOutlinedIcon sx={{ marginRight: "10px" }} />
+                <Typography textAlign="center">Notifications</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => handleNavigate("/profile")}>
+                <PersonOutlineIcon sx={{ marginRight: "10px" }} />
+                <Typography textAlign="center">Profile</Typography>
+              </MenuItem>
+            </Menu>
           </Box>
 
           {/* Search Bar */}
@@ -111,7 +135,7 @@ function ResponsiveAppBar() {
               variant="outlined"
               size="small"
               sx={{
-                width: "50%",
+                width: { xs: "80%", md: "50%" },
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
                     borderColor: "gray",
@@ -138,8 +162,14 @@ function ResponsiveAppBar() {
           ></Box>
 
           {/* User Avatar and Settings */}
-          <Box sx={{ flexGrow: 0, marginRight: "50px", display: "flex" }}>
-            <Tooltip title="Open settings">
+          <Box
+            sx={{
+              flexGrow: 0,
+              marginRight: { xs: "10px", md: "50px" },
+              display: { xs: "none", md: "flex" },
+            }}
+          >
+            <Tooltip title="Home">
               <IconButton
                 sx={{
                   p: 0,
@@ -148,18 +178,52 @@ function ResponsiveAppBar() {
                     outline: "none",
                   },
                 }}
+                onClick={() => handleNavigate("/customer ")}
+              >
+                <HomeOutlinedIcon
+                  sx={{
+                    color: "grey",
+                    fontSize: { xs: "24px", md: "30px" },
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Box
+            sx={{
+              flexGrow: 0,
+              marginRight: { xs: "10px", md: "50px" },
+              display: { xs: "none", md: "flex" },
+            }}
+          >
+            <Tooltip title="Cart">
+              <IconButton
+                sx={{
+                  p: 0,
+                  outline: "none",
+                  "&:focus": {
+                    outline: "none",
+                  },
+                }}
+                onClick={() => handleNavigate("/cart")}
               >
                 <ShoppingCartOutlinedIcon
                   sx={{
                     color: "grey",
-                    fontSize: "30px",
+                    fontSize: { xs: "24px", md: "30px" },
                   }}
                 />
               </IconButton>
             </Tooltip>
           </Box>
-          <Box sx={{ flexGrow: 0, marginRight: "50px", display: "flex" }}>
-            <Tooltip title="Open settings">
+          <Box
+            sx={{
+              flexGrow: 0,
+              marginRight: { xs: "10px", md: "50px" },
+              display: { xs: "none", md: "flex" },
+            }}
+          >
+            <Tooltip title="Notifications">
               <IconButton
                 sx={{
                   p: 0,
@@ -168,19 +232,25 @@ function ResponsiveAppBar() {
                     outline: "none",
                   },
                 }}
+                onClick={() => handleNavigate("/notifications")}
               >
                 <NotificationsNoneOutlinedIcon
                   sx={{
                     color: "grey",
-                    fontSize: "30px",
+                    fontSize: { xs: "24px", md: "30px" },
                   }}
                 />
               </IconButton>
             </Tooltip>
           </Box>
-          {/* User Avatar and Settings */}
-          <Box sx={{ flexGrow: 0, marginRight: "50px", display: "flex" }}>
-            <Tooltip title="Open settings">
+          <Box
+            sx={{
+              flexGrow: 0,
+              marginRight: { xs: "10px", md: "50px" },
+              display: { xs: "none", md: "flex" },
+            }}
+          >
+            <Tooltip title="Profile">
               <IconButton
                 onClick={handleOpenUserMenu}
                 sx={{
@@ -194,7 +264,7 @@ function ResponsiveAppBar() {
                 <PersonOutlineIcon
                   sx={{
                     color: "grey",
-                    fontSize: "30px",
+                    fontSize: { xs: "24px", md: "30px" },
                   }}
                 />
               </IconButton>
