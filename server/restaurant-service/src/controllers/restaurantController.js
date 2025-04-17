@@ -59,7 +59,7 @@ const updateRestaurantById = async (req, res) => {
         }
 
         // Ensure only the restaurant owner can update
-        if (req.user.role !== 'Restaurant' || Number(req.user.id) !== restaurant.OwnerID) {
+        if (req.user.role !== 'Restaurant' || Number(req.user.id) !== Number(restaurant.OwnerID)) {
             return res.status(403).json({ message: 'Access Denied: You are not the owner of this restaurant' });
         }
 
