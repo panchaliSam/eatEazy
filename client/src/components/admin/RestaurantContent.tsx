@@ -10,6 +10,9 @@ import Collapse from "@mui/material/Collapse";
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import PhoneIcon from "@mui/icons-material/Phone";
+import EmailIcon from "@mui/icons-material/Email";
+import PersonIcon from "@mui/icons-material/Person";
 import Typography from "@mui/material/Typography";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import RestaurantApi from "../../utils/api/RestaurantApi";
@@ -88,6 +91,10 @@ export const RestaurantView = () => {
     fetchRestaurants();
   }, []);
 
+  const handleExpandClick = (index: number) => {
+    setExpanded(expanded === index ? null : index);
+  };
+
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
@@ -151,6 +158,7 @@ export const RestaurantView = () => {
             <CardActions disableSpacing>
               <Button
                 variant="outlined"
+                onClick={() => handleExpandClick(index)}
                 sx={{
                   backgroundColor: "#EA7300",
                   color: "white",
@@ -167,10 +175,24 @@ export const RestaurantView = () => {
             </CardActions>
             <Collapse in={expanded === index} timeout="auto" unmountOnExit>
               <CardContent>
-                <Typography sx={{ marginBottom: 2 }}>Details:</Typography>
-                <Typography>
-                  {restaurant.Email || "No email provided"}
-                </Typography>
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <PhoneIcon sx={{ color: "orange" }} />
+                  <Typography variant="body1">
+                    {restaurant.Phone || "No phone number provided"}
+                  </Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <EmailIcon sx={{ color: "orange" }} />
+                  <Typography variant="body1">
+                    {restaurant.Email || "No email provided"}
+                  </Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <PersonIcon sx={{ color: "orange" }} />
+                  <Typography variant="body1">
+                    {restaurant.OwnerName || "No owner provided"}
+                  </Typography>
+                </Box>
               </CardContent>
             </Collapse>
           </Card>
