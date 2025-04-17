@@ -8,7 +8,7 @@ class DeliveryService {
     if (drivers.length === 0) {
       throw new Error("No delivery drivers available");
     }
-    await DeliveryRepository.assignDekiveryPerson(orderid, drivers[0].UserID);
+    await DeliveryRepository.assignDeliveryPerson(orderid, drivers[0].UserID);
     return drivers[0];
   }
 
@@ -17,11 +17,28 @@ class DeliveryService {
   }
 
   static async updateStatus(deliveryId, status) {
+    // Validate the status before updating
+    // Assuming valid statuses are "Assigned", "In Transit", "Delivered", "Failed"
+    const validStatuses = ["Assigned", "In Transit", "Delivered", "Failed"];
+    if (!validStatuses.includes(status)) {
+      throw new Error("Invalid delivery status");
+    }
+
     return await DeliveryRepository.updateDeliveryStatus(deliveryId, status);
   }
 
   static async getRoute(deliveryId) {
     return await DeliveryRepository.getDeliveryRoute(deliveryId);
+  }
+
+  static async addRoute(deliveryId, { startLat, startLng, endLat, endLng }) {
+    return await DeliveryRepository.insertRoute(
+      deliveryId,
+      startLat,
+      startLng,
+      endLat,
+      endLng
+    );
   }
 }
 

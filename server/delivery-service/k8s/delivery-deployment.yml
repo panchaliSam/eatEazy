@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: eatEazy
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  delivery-service:
+    build: .
+    environment:
+      DATABASE_URL: mysql://root:root@mysql:3306/eatEazy
+    depends_on:
+      - mysql
+    ports:
+      - "3000:3000"
+
+volumes:
+  db-data:
