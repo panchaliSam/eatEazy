@@ -10,9 +10,9 @@ import Collapse from "@mui/material/Collapse";
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
-import PersonIcon from "@mui/icons-material/Person";
 import Typography from "@mui/material/Typography";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import RestaurantApi from "../../utils/api/RestaurantApi";
@@ -155,7 +155,10 @@ export const RestaurantView = () => {
                   "No availability information provided"}{" "}
               </Typography>
             </CardContent>
-            <CardActions disableSpacing>
+            <CardActions
+              disableSpacing
+              sx={{ justifyContent: "space-between" }}
+            >
               <Button
                 variant="outlined"
                 onClick={() => handleExpandClick(index)}
@@ -174,7 +177,6 @@ export const RestaurantView = () => {
               </Button>
               <Button
                 variant="outlined"
-                onClick={() => handleExpandClick(index)}
                 sx={{
                   backgroundColor: "#EA7300",
                   color: "white",
@@ -184,9 +186,9 @@ export const RestaurantView = () => {
                     outline: "none",
                   },
                 }}
-                startIcon={<VisibilityIcon />}
+                startIcon={<ShoppingCartIcon />}
               >
-                View
+                Order
               </Button>
             </CardActions>
             <Collapse in={expanded === index} timeout="auto" unmountOnExit>

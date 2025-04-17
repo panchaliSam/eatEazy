@@ -5,10 +5,6 @@ import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import DescriptionIcon from "@mui/icons-material/Description";
-import LayersIcon from "@mui/icons-material/Layers";
-import PeopleIcon from "@mui/icons-material/People";
 import PaymentIcon from "@mui/icons-material/Payment";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -20,7 +16,7 @@ import { orange } from "@mui/material/colors";
 import UserApi from "../../utils/api/UserApi";
 import { getRefreshToken } from "../../utils/helper/TokenHelper";
 import { CustomerDashboardContent } from "../../components/customer/DashBoardContent";
-import { RestaurantView } from "../../components/admin/RestaurantContent";
+import { RestaurantView } from "../../components/customer/RestaurantContent";
 
 const theme = createTheme({
   palette: {
@@ -113,35 +109,6 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       segment: "notifications",
       title: "Notifications",
       icon: <NotificationsIcon />,
-    },
-    {
-      kind: "divider",
-    },
-    {
-      kind: "header",
-      title: "Analytics",
-    },
-    {
-      segment: "reports",
-      title: "Reports",
-      icon: <BarChartIcon />,
-      children: [
-        {
-          segment: "sales",
-          title: "Sales",
-          icon: <DescriptionIcon />,
-        },
-        {
-          segment: "traffic",
-          title: "Traffic",
-          icon: <DescriptionIcon />,
-        },
-      ],
-    },
-    {
-      segment: "integrations",
-      title: "Integrations",
-      icon: <LayersIcon />,
     },
     {
       kind: "divider",
