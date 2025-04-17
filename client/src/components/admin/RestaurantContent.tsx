@@ -8,10 +8,9 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Collapse from "@mui/material/Collapse";
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import Typography from "@mui/material/Typography";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import ShareIcon from "@mui/icons-material/Share";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import RestaurantApi from "../../utils/api/RestaurantApi";
 import { getAccessToken } from "../../utils/helper/TokenHelper";
@@ -22,7 +21,6 @@ import Image4 from "@app_assets/restaurants/Restaurant4.jpg";
 import Image5 from "@app_assets/restaurants/Restaurant5.jpg";
 import Image6 from "@app_assets/restaurants/Restaurant6.jpg";
 
-// List of images to randomly assign to restaurants
 const imageList = [
   { src: Image1, alt: "Restaurant 1" },
   { src: Image2, alt: "Restaurant 2" },
@@ -90,10 +88,6 @@ export const RestaurantView = () => {
     fetchRestaurants();
   }, []);
 
-  const handleExpandClick = (index: number) => {
-    setExpanded(expanded === index ? null : index);
-  };
-
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
@@ -155,20 +149,21 @@ export const RestaurantView = () => {
               </Typography>
             </CardContent>
             <CardActions disableSpacing>
-              <IconButton aria-label="add to favorites">
-                <FavoriteIcon />
-              </IconButton>
-              <IconButton aria-label="share">
-                <ShareIcon />
-              </IconButton>
-              <ExpandMore
-                expand={expanded === index}
-                onClick={() => handleExpandClick(index)}
-                aria-expanded={expanded === index}
-                aria-label="show more"
+              <Button
+                variant="outlined"
+                sx={{
+                  backgroundColor: "#EA7300",
+                  color: "white",
+                  border: "none",
+                  outline: "none",
+                  "&:focus": {
+                    outline: "none",
+                  },
+                }}
+                startIcon={<VisibilityIcon />}
               >
-                <ExpandMoreIcon />
-              </ExpandMore>
+                View
+              </Button>
             </CardActions>
             <Collapse in={expanded === index} timeout="auto" unmountOnExit>
               <CardContent>
