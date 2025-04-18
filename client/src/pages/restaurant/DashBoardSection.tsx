@@ -20,6 +20,7 @@ import { orange } from "@mui/material/colors";
 import UserApi from "../../utils/api/UserApi";
 import { getRefreshToken } from "../../utils/helper/TokenHelper";
 import { RestaurantDashboardContent } from "../../components/restaurant/DashBoardContent";
+import { ManageRestaurantView } from "../../components/restaurant/ManageRestaurantContent";
 import { RestaurantView } from "../../components/restaurant/RestaurantContent";
 
 const theme = createTheme({
@@ -170,6 +171,8 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       case "/admin":
         return <RestaurantDashboardContent />;
       case "/restaurants":
+        return <ManageRestaurantView />;
+      case "/menu":
         return <RestaurantView />;
       default:
         return <RestaurantDashboardContent />;

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -12,8 +11,6 @@ import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import RamenDiningIcon from "@mui/icons-material/RamenDining";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
 import PersonIcon from "@mui/icons-material/Person";
@@ -21,6 +18,11 @@ import Typography from "@mui/material/Typography";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import TextField from "@mui/material/TextField";
 import RestaurantApi from "../../utils/api/RestaurantApi";
 import { getAccessToken } from "../../utils/helper/TokenHelper";
 import Image1 from "@app_assets/restaurants/Restaurant1.jpg";
@@ -43,43 +45,35 @@ interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
 }
 
+// ...existing code...
+
 const ExpandMore = styled((props: ExpandMoreProps) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
-})(({ theme }) => ({
+})(({ theme, expand }) => ({
   marginLeft: "auto",
   transition: theme.transitions.create("transform", {
     duration: theme.transitions.duration.shortest,
   }),
-  variants: [
-    {
-      props: ({ expand }) => !expand,
-      style: {
-        transform: "rotate(0deg)",
-      },
-    },
-    {
-      props: ({ expand }) => !!expand,
-      style: {
-        transform: "rotate(180deg)",
-      },
-    },
-  ],
+  transform: expand ? "rotate(180deg)" : "rotate(0deg)",
 }));
 
-export const RestaurantView = () => {
+export const ManageRestaurantView = () => {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuIndex, setMenuIndex] = useState<number | null>(null);
-
-  const navigate = useNavigate();
-
-  const handleMenuSubmit = (restaurantId: string) => {
-    navigate("/menu", { state: { restaurantId } });
-  };
+  const [openEdit, setOpenEdit] = useState(false);
+  const [restaurantData, setRestaurantData] = useState({
+    restaurantId: "",
+    restaurantName: "",
+    address: "",
+    phone: "",
+    email: "",
+    availability: "",
+  });
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
@@ -95,12 +89,16 @@ export const RestaurantView = () => {
   };
 
   const handleEdit = (restaurant: any) => {
-    console.log("Edit:", restaurant);
-    handleMenuClose();
-  };
-
-  const handleDelete = (restaurant: any) => {
-    console.log("Delete:", restaurant);
+    console.log("Edit clicked for:", restaurant);
+    setRestaurantData({
+      restaurantId: restaurant.RestaurantID,
+      restaurantName: restaurant.RestaurantName,
+      address: restaurant.Address,
+      phone: restaurant.Phone,
+      email: restaurant.Email,
+      availability: restaurant.Availability,
+    });
+    setTimeout(() => setOpenEdit(true), 0);
     handleMenuClose();
   };
 
@@ -112,7 +110,12 @@ export const RestaurantView = () => {
           throw new Error("No access token found.");
         }
 
-        const userId = JSON.parse(atob(token.split(".")[1])).id;
+        let userId;
+        try {
+          userId = JSON.parse(atob(token.split(".")[1])).id;
+        } catch (err) {
+          throw new Error("Invalid token format.");
+        }
 
         const data = await RestaurantApi.getAllRestaurants();
 
@@ -140,6 +143,37 @@ export const RestaurantView = () => {
     fetchRestaurants();
   }, []);
 
+  const handleSaveChanges = async () => {
+    setLoading(true);
+    try {
+      if (!restaurantData.restaurantId) {
+        throw new Error("Restaurant ID is required for updating.");
+      }
+
+      await RestaurantApi.updateRestaurantById(restaurantData.restaurantId, {
+        restaurantName: restaurantData.restaurantName,
+        address: restaurantData.address,
+        phone: restaurantData.phone,
+        email: restaurantData.email,
+        availability: restaurantData.availability,
+      });
+      alert("Restaurant details updated successfully!");
+    } catch (error) {
+      console.error("Error updating restaurant details:", error);
+      alert("Failed to update restaurant details. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setRestaurantData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
   const handleExpandClick = (index: number) => {
     setExpanded(expanded === index ? null : index);
   };
@@ -158,7 +192,7 @@ export const RestaurantView = () => {
         py: 4,
         display: "flex",
         flexDirection: "column",
-        alignItems: "felx-start",
+        alignItems: "flex-start", // Aligns content to the start
         textAlign: "center",
         ml: 2,
         mr: 2,
@@ -171,13 +205,16 @@ export const RestaurantView = () => {
         sx={{
           display: "flex",
           flexWrap: "wrap",
-          justifyContent: "flex-start",
+          justifyContent: "flex-start", // Aligns cards with the title
           gap: 2,
           mt: 4,
         }}
       >
         {restaurants.map((restaurant, index) => (
-          <Card key={restaurant.RestaurantID} sx={{ maxWidth: 345 }}>
+          <Card
+            key={restaurant.RestaurantID || index}
+            sx={{ maxWidth: 345, alignSelf: "flex-start" }}
+          >
             <CardHeader
               action={
                 <>
@@ -194,9 +231,6 @@ export const RestaurantView = () => {
                   >
                     <MenuItem onClick={() => handleEdit(restaurant)}>
                       <EditIcon sx={{ mr: 1 }} /> Edit
-                    </MenuItem>
-                    <MenuItem onClick={() => handleDelete(restaurant)}>
-                      <DeleteIcon sx={{ mr: 1 }} /> Delete
                     </MenuItem>
                   </Menu>
                 </>
@@ -241,9 +275,8 @@ export const RestaurantView = () => {
               >
                 View
               </Button>
-              <Button
+              {/* <Button
                 variant="outlined"
-                onClick={() => handleMenuSubmit(restaurant.RestaurantID)}
                 sx={{
                   backgroundColor: "#EA7300",
                   color: "white",
@@ -255,8 +288,8 @@ export const RestaurantView = () => {
                 }}
                 startIcon={<RamenDiningIcon />}
               >
-                View Menu
-              </Button>
+                Add Menu
+              </Button> */}
             </CardActions>
             <Collapse in={expanded === index} timeout="auto" unmountOnExit>
               <CardContent>
@@ -283,6 +316,58 @@ export const RestaurantView = () => {
           </Card>
         ))}
       </Box>
+      {/* Edit Modal */}
+      <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth>
+        <DialogTitle>Edit Restaurant</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Restaurant Name"
+            name="restaurantName"
+            onChange={handleInputChange}
+            fullWidth
+            value={restaurantData.restaurantName}
+          />
+          <TextField
+            margin="dense"
+            label="Address"
+            name="address"
+            onChange={handleInputChange}
+            fullWidth
+            value={restaurantData.address}
+          />
+          <TextField
+            margin="dense"
+            label="Phone"
+            name="phone"
+            onChange={handleInputChange}
+            fullWidth
+            value={restaurantData.phone}
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            name="email"
+            onChange={handleInputChange}
+            fullWidth
+            value={restaurantData.email}
+          />
+          <TextField
+            margin="dense"
+            label="Availability"
+            name="availability"
+            onChange={handleInputChange}
+            fullWidth
+            value={restaurantData.availability}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveChanges}>
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
