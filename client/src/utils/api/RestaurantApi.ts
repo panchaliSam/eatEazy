@@ -63,10 +63,7 @@ const RestaurantApi = {
       const response = await axios.get(
         `${API_URL}/restaurants/${restaurantId}`,
         {
-          headers: {
-            ...getAuthHeaders(),
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
       return response.data;
