@@ -10,6 +10,7 @@ import Collapse from "@mui/material/Collapse";
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
@@ -88,6 +89,11 @@ export const ManageRestaurantView = () => {
     setMenuIndex(null);
   };
 
+  const handleCreateRestaurant = () => {
+    setTimeout(() => setOpenEdit(true), 0);
+    handleMenuClose();
+  };
+
   const handleEdit = (restaurant: any) => {
     console.log("Edit clicked for:", restaurant);
     setRestaurantData({
@@ -100,6 +106,25 @@ export const ManageRestaurantView = () => {
     });
     setTimeout(() => setOpenEdit(true), 0);
     handleMenuClose();
+  };
+
+  const handleCreateResataurantSubmit = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const accessToken = getAccessToken();
+      if (!accessToken) {
+        throw new Error("No access token found. Please log in again.");
+      }
+      const response = await RestaurantApi.registerRestaurant(restaurantData);
+      console.log("Restaurant created successfully:", response);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating restaurant:", error);
+      setError("Failed to create restaurant. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -192,20 +217,44 @@ export const ManageRestaurantView = () => {
         py: 4,
         display: "flex",
         flexDirection: "column",
-        alignItems: "flex-start", // Aligns content to the start
+        alignItems: "flex-start",
         textAlign: "center",
+        justifyContent: "space-between",
         ml: 2,
         mr: 2,
       }}
     >
-      <Typography sx={{ alignSelf: "flex-start", fontSize: 24 }}>
-        Restaurants
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        <Typography sx={{ fontSize: 24 }}>Restaurants</Typography>
+        <Button
+          variant="outlined"
+          onClick={handleCreateRestaurant}
+          sx={{
+            backgroundColor: "#EA7300",
+            color: "white",
+            border: "none",
+            outline: "none",
+            "&:focus": {
+              outline: "none",
+            },
+          }}
+          startIcon={<AddIcon />}
+        >
+          Create Restaurant
+        </Button>
+      </Box>
       <Box
         sx={{
           display: "flex",
           flexWrap: "wrap",
-          justifyContent: "flex-start", // Aligns cards with the title
+          justifyContent: "flex-start",
           gap: 2,
           mt: 4,
         }}
@@ -365,6 +414,58 @@ export const ManageRestaurantView = () => {
           <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
           <Button variant="contained" onClick={handleSaveChanges}>
             Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Add Restaurant Modal */}
+      <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth>
+        <DialogTitle>Create Restaurant</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Restaurant Name"
+            name="restaurantName"
+            value={restaurantData.restaurantName}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Address"
+            name="address"
+            value={restaurantData.address}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Phone"
+            name="phone"
+            value={restaurantData.phone}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            name="email"
+            value={restaurantData.email}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            margin="dense"
+            label="Availability"
+            name="availability"
+            value={restaurantData.availability}
+            onChange={handleInputChange}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreateResataurantSubmit}>
+            Create
           </Button>
         </DialogActions>
       </Dialog>
