@@ -140,17 +140,14 @@ const RestaurantApi = {
   createMenuItem: async (restaurantId: string, menuItemData: IMenu) => {
     const accessToken = getAccessToken();
     if (!accessToken) {
-      throw new Error("No access token found.");
+      throw new Error("No access token found. Please log in again.");
     }
     try {
       const response = await axios.post(
         `${API_URL}/restaurants/${restaurantId}/menu`,
         menuItemData,
         {
-          headers: {
-            ...getAuthHeaders(),
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
       return response.data;
@@ -158,6 +155,29 @@ const RestaurantApi = {
       if (axios.isAxiosError(error) && error.response) {
         throw new Error(
           error.response.data.message || "Failed to create menu item."
+        );
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
+
+  getMenuItemsByRestaurantId: async (restaurantId: string) => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+    try {
+      const response = await axios.get(
+        `${API_URL}/restaurants/${restaurantId}/menu`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          error.response.data.message || "Failed to fetch menu items."
         );
       }
       throw new Error("An unexpected error occurred.");
