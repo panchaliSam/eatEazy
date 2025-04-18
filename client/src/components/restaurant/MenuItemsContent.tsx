@@ -10,6 +10,15 @@ import {
   CardActions,
   Button,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import RestaurantApi from "../../utils/api/RestaurantApi";
@@ -39,6 +48,15 @@ export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedMenuItem, setSelectedMenuItem] = useState<any>(null);
+
+  const [editData, setEditData] = useState({
+    Name: "",
+    Price: "",
+    Description: "",
+    IsAvailable: false,
+  });
 
   useEffect(() => {
     const fetchMenuItems = async () => {
@@ -59,6 +77,36 @@ export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
 
     fetchMenuItems();
   }, [restaurantId]);
+
+  const handleEditClick = (menuItem: any) => {
+    setSelectedMenuItem(menuItem);
+    setEditData({
+      Name: menuItem.Name,
+      Price: menuItem.Price,
+      Description: menuItem.Description,
+      IsAvailable: menuItem.IsAvailable,
+    });
+    setOpenEdit(true);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveChanges = () => {
+    // Save changes logic here (e.g., API call to update the menu item)
+    const updatedMenuItems = menuItems.map((item) =>
+      item.MenuItemID === selectedMenuItem.MenuItemID
+        ? { ...item, ...editData }
+        : item
+    );
+    setMenuItems(updatedMenuItems);
+    setOpenEdit(false);
+  };
 
   if (loading) {
     return (
@@ -159,6 +207,7 @@ export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
                   },
                 }}
                 startIcon={<EditIcon />}
+                onClick={() => handleEditClick(menuItem)}
               >
                 Edit
               </Button>
@@ -166,6 +215,116 @@ export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
           </Card>
         ))}
       </Box>
+
+      <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth>
+        <DialogTitle>Edit Menu Item</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Name"
+            name="Name"
+            onChange={handleInputChange}
+            fullWidth
+            value={editData.Name}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "&.Mui-focused fieldset": {
+                  borderColor: "orange",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                "&.Mui-focused": {
+                  color: "orange",
+                },
+              },
+            }}
+          />
+          <TextField
+            margin="dense"
+            label="Price"
+            name="Price"
+            onChange={handleInputChange}
+            fullWidth
+            value={editData.Price}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "&.Mui-focused fieldset": {
+                  borderColor: "orange",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                "&.Mui-focused": {
+                  color: "orange",
+                },
+              },
+            }}
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            name="Description"
+            onChange={handleInputChange}
+            fullWidth
+            value={editData.Description}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "&.Mui-focused fieldset": {
+                  borderColor: "orange",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                "&.Mui-focused": {
+                  color: "orange",
+                },
+              },
+            }}
+          />
+          <FormControl
+            fullWidth
+            margin="dense"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "orange",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                "&.Mui-focused": {
+                  color: "orange",
+                },
+              },
+            }}
+          >
+            <InputLabel id="availability-label">Availability</InputLabel>
+            <Select
+              labelId="availability-label"
+              name="IsAvailable"
+              value={editData.IsAvailable ? "Available" : "Not Available"}
+              onChange={(e) =>
+                setEditData((prev) => ({
+                  ...prev,
+                  IsAvailable: e.target.value === "Available",
+                }))
+              }
+            >
+              <MenuItem value="Available">Available</MenuItem>
+              <MenuItem value="Not Available">Not Available</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEdit(false)} sx={{ color: "orange" }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveChanges}
+            sx={{ backgroundColor: "orange" }}
+          >
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
