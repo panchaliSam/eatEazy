@@ -50,7 +50,7 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/menu"
+            path="/menuItems"
             element={
               <ProtectedRoute
                 element={<RestaurantMenuScreen />}

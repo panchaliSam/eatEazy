@@ -78,7 +78,7 @@ export const RestaurantView = () => {
   const navigate = useNavigate();
 
   const handleMenuSubmit = (restaurantId: string) => {
-    navigate("/menu", { state: { restaurantId } });
+    navigate("/menuItems", { state: { restaurantId } });
   };
 
   const handleMenuOpen = (
