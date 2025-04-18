@@ -10,6 +10,7 @@ import { RestaurantDashboard } from "./pages/restaurant/Dashboard";
 import { CustomerDashboard } from "./pages/customer/Dashboard";
 import { DeliveryPersonDashboard } from "./pages/deliveryPerson/Dashboard";
 import { MenuScreen } from "./pages/customer/Menu";
+import { CartScreen } from "./pages/customer/Cart";
 
 const theme = createTheme({
   palette: {
@@ -61,6 +62,15 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute
                 element={<MenuScreen />}
+                allowedRoles={["Customer"]}
+              />
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute
+                element={<CartScreen />}
                 allowedRoles={["Customer"]}
               />
             }
