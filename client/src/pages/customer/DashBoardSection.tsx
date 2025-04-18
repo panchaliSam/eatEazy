@@ -7,6 +7,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import PaymentIcon from "@mui/icons-material/Payment";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import DescriptionIcon from "@mui/icons-material/Description";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { AppProvider, Navigation } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
@@ -94,6 +95,18 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       segment: "orders",
       title: "Orders",
       icon: <ShoppingCartIcon />,
+      children: [
+        {
+          segment: "cart",
+          title: "My Cart",
+          icon: <DescriptionIcon />,
+        },
+        {
+          segment: "order",
+          title: "My Orders",
+          icon: <DescriptionIcon />,
+        },
+      ],
     },
     {
       segment: "restaurants",
