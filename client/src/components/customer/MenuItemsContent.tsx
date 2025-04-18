@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -39,6 +40,12 @@ export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+
+  const handleAddToCart = (menuItemId: string) => {
+    navigate("/cart", { state: { menuItemId } });
+  };
 
   useEffect(() => {
     const fetchMenuItems = async () => {
@@ -149,6 +156,7 @@ export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
               />
               <Button
                 variant="outlined"
+                onClick={() => handleAddToCart(menuItem.MenuItemID)}
                 sx={{
                   backgroundColor: "#EA7300",
                   color: "white",

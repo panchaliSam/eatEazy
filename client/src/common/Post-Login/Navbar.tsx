@@ -15,6 +15,8 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import logo from "@app_assets/logo/png/logo-transparent.png";
+import UserApi from "../../utils/api/UserApi";
+import { getRefreshToken } from "../../utils/helper/TokenHelper";
 
 const settings = ["Logout"];
 
@@ -47,6 +49,22 @@ function ResponsiveAppBar() {
   const handleNavigate = (path: string) => {
     navigate(path);
     handleCloseNavMenu();
+  };
+
+  const handleLogout = async () => {
+    try {
+      console.log("Logging out...");
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) {
+        console.warn("No refresh token found. Redirecting to login.");
+        navigate("/");
+        return;
+      }
+      await UserApi.logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -290,10 +308,8 @@ function ResponsiveAppBar() {
                   key={setting}
                   onClick={() => {
                     handleCloseUserMenu();
-                    if (setting === "SignIn") {
-                      navigate("/login");
-                    } else if (setting === "SignUp") {
-                      navigate("/register");
+                    if (setting === "Logout") {
+                      handleLogout();
                     }
                   }}
                   sx={{
