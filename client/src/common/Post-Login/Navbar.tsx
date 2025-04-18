@@ -313,7 +313,7 @@ function ResponsiveAppBar() {
       </AppBar>
 
       {/* Add space below the AppBar */}
-      <Box sx={{ marginTop: "120px" }}>{/* Main content goes here */}</Box>
+      {/* <Box sx={{ marginTop: "120px" }}></Box> */}
     </>
   );
 }

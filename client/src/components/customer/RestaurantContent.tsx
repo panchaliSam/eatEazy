@@ -70,8 +70,8 @@ export const RestaurantView = () => {
 
   const navigate = useNavigate();
 
-  const handleOrderSubmit = () => {
-    navigate("/menu");
+  const handleOrderSubmit = (restaurantId: string) => {
+    navigate("/menu", { state: { restaurantId } });
   };
 
   useEffect(() => {
@@ -184,7 +184,7 @@ export const RestaurantView = () => {
               </Button>
               <Button
                 variant="outlined"
-                onClick={handleOrderSubmit}
+                onClick={() => handleOrderSubmit(restaurant.RestaurantID)}
                 sx={{
                   backgroundColor: "#EA7300",
                   color: "white",

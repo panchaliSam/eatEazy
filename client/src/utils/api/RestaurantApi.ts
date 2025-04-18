@@ -173,6 +173,7 @@ const RestaurantApi = {
           headers: getAuthHeaders(),
         }
       );
+      console.log("Menu items:", response.data);
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
