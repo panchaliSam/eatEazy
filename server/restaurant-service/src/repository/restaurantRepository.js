@@ -90,7 +90,7 @@ const RestaurantRepository = {
     deleteById: async (id) => {
         const deleted = await prisma.restaurants.delete({
             where: {
-                RestaurantID: id
+                RestaurantID: parseInt(id)
             }
         });
         return deleted;
@@ -100,7 +100,7 @@ const RestaurantRepository = {
         const { restaurantName, address, phone, email, availability } = restaurantData;
         const updated = await prisma.restaurants.update({
             where: {
-                RestaurantID: id
+                RestaurantID: parseInt(id)
             },
             data: {
                 RestaurantName: restaurantName,

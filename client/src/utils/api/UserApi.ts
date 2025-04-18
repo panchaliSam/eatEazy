@@ -7,18 +7,10 @@ import {
   setTokens,
   clearTokens,
 } from "../helper/TokenHelper";
-
-interface UserData {
-  firstname?: string;
-  lastname?: string;
-  email: string;
-  password: string;
-  phone?: string;
-  role?: string;
-}
+import { IUser } from "../../interfaces/IUser";
 
 const UserApi = {
-  register: async (userData: UserData) => {
+  register: async (userData: IUser) => {
     try {
       const response = await axios.post(`${API_URL}/auth/register`, userData);
       return response.data;
@@ -30,7 +22,7 @@ const UserApi = {
     }
   },
 
-  login: async (userData: Pick<UserData, "email" | "password">) => {
+  login: async (userData: Pick<IUser, "email" | "password">) => {
     try {
       const response = await axios.post(`${API_URL}/auth/login`, {
         email: userData.email,
@@ -142,7 +134,7 @@ const UserApi = {
     }
   },
 
-  updateUserById: async (updateData: Partial<UserData>) => {
+  updateUserById: async (updateData: Partial<IUser>) => {
     const accessToken = getAccessToken();
     if (!accessToken) {
       throw new Error("No access token found. Please log in again.");
@@ -179,6 +171,24 @@ const UserApi = {
     }
     try {
       const response = await axios.get(`${API_URL}/auth/users`, {
+        headers: getAuthHeaders(),
+      });
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw error.response.data;
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  },
+
+  deleteUserById: async (userId: string) => {
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      throw new Error("No access token found. Please log in again.");
+    }
+    try {
+      const response = await axios.delete(`${API_URL}/auth/users/${userId}`, {
         headers: getAuthHeaders(),
       });
       return response.data;
