@@ -1,8 +1,8 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import ResponsiveAppBar from "../../common/Post-Login/Navbar";
+import ResponsiveAppBar from "@app_common/Post-Login/Navbar";
 import { CssBaseline } from "@mui/material";
-import { CartItemsContent } from "../../components/customer/CartItemsContent";
+import { CartItemsContent } from "@app_components/customer/CartItemsContent";
 
 export const CartScreen: React.FC = () => {
   const location = useLocation();
