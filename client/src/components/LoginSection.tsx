@@ -12,8 +12,8 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import logo from "@app_assets/LoginImage.png";
-import UserApi from "../utils/api/UserApi";
-import { setTokens } from "../utils/helper/TokenHelper";
+import UserApi from "@app_utils/api/UserApi";
+import { setTokens } from "@app_utils/helper/TokenHelper";
 
 interface FormData {
   email: string;

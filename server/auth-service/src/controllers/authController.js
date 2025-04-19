@@ -82,6 +82,16 @@ const getAllUsers = async (req, res) => {
     }
 };
 
+// Get all delivery persons
+const getAllDeliveryPerson = async (req, res) => {
+    try {
+        const deliveryPersons = await authService.getAllDrivers();
+        res.status(200).json(deliveryPersons);
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to fetch delivery persons.', error: err.message });
+    }
+};
+
 // Get user by ID (any user or Admin)
 const getUserById = async (req, res) => {
     const userId = req.params.id;
@@ -161,6 +171,7 @@ module.exports = {
     refreshAccessToken,
     logout,
     getAllUsers,
+    getAllDeliveryPerson,
     getUserById,
     updateUser,
     deleteUser,

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { lazy, Suspense } from "react";
+import React, { Suspense } from "react";
 import Typography from "@mui/material/Typography";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -8,7 +8,7 @@ import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import DescriptionIcon from "@mui/icons-material/Description";
 import LayersIcon from "@mui/icons-material/Layers";
-import PeopleIcon from "@mui/icons-material/People";
+import RamenDiningIcon from "@mui/icons-material/RamenDining";
 import PaymentIcon from "@mui/icons-material/Payment";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -17,9 +17,11 @@ import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
 import logo from "@app_assets/logo/png/logo-transparent.png";
 import { orange } from "@mui/material/colors";
-import UserApi from "../../utils/api/UserApi";
-import { getRefreshToken } from "../../utils/helper/TokenHelper";
-import { RestaurantDashboardContent } from "../../components/restaurant/DashBoardContent";
+import UserApi from "@app_utils/api/UserApi";
+import { getRefreshToken } from "@app_utils/helper/TokenHelper";
+import { RestaurantDashboardContent } from "@app_components/restaurant/DashBoardContent";
+import { ManageRestaurantView } from "@app_components/restaurant/ManageRestaurantContent";
+import { RestaurantView } from "@app_components/restaurant/RestaurantContent";
 
 const theme = createTheme({
   palette: {
@@ -104,9 +106,9 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       icon: <RestaurantMenuIcon />,
     },
     {
-      segment: "people",
-      title: "People",
-      icon: <PeopleIcon />,
+      segment: "menu",
+      title: "Menu",
+      icon: <RamenDiningIcon />,
     },
     {
       segment: "payments",
@@ -168,8 +170,10 @@ export default function DashboardLayoutBasic(props: DemoProps) {
     switch (router.pathname) {
       case "/admin":
         return <RestaurantDashboardContent />;
-      case "/people":
-        return <Typography>Page Not Found</Typography>;
+      case "/restaurants":
+        return <ManageRestaurantView />;
+      case "/menu":
+        return <RestaurantView />;
       default:
         return <RestaurantDashboardContent />;
     }
