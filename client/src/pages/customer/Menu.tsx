@@ -1,8 +1,8 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import ResponsiveAppBar from "../../common/Post-Login/Navbar";
+import ResponsiveAppBar from "@app_common/Post-Login/Navbar";
 import { CssBaseline } from "@mui/material";
-import { MenuItemsContent } from "../../components/customer/MenuItemsContent";
+import { MenuItemsContent } from "@app_components/customer/MenuItemsContent";
 
 export const MenuScreen: React.FC = () => {
   const location = useLocation();

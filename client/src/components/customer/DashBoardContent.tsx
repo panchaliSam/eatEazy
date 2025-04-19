@@ -3,8 +3,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { TextField } from "@mui/material";
 import Button from "@mui/material/Button";
-import UserApi from "../../utils/api/UserApi";
-import { getAccessToken } from "../../utils/helper/TokenHelper";
+import UserApi from "@app_utils/api/UserApi";
+import { getAccessToken } from "@app_utils/helper/TokenHelper";
 
 export const CustomerDashboardContent = () => {
   const [userData, setUserData] = useState({
