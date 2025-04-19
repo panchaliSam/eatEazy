@@ -33,21 +33,33 @@ const getAllRestaurants = async (req, res) => {
 const getRestaurantById = async (req, res) => {
     try {
         const token = req.header('Authorization').split(' ')[1];
-        const restaurantId = req.params;
+        const restaurantId = req.params.restaurantId;
+
         if (!restaurantId) {
             return res.status(400).json({ message: "Restaurant ID is required" });
         }
 
-        const restaurant = await RestaurantRepository.findById(req.params.restaurantId, token);
+        const restaurant = await RestaurantRepository.findById(restaurantId, token);
         if (!restaurant) {
             return res.status(404).json({ message: 'Restaurant not found' });
         }
+
+        console.log('User Info:', req.user);
+        console.log('Fetched Restaurant:', restaurant);
+
+        // Ensure type consistency for comparison
+        if (req.user.role !== 'Restaurant' || Number(req.user.id) !== Number(restaurant.OwnerID)) {
+            return res.status(403).json({ message: 'Access Denied: You are not the owner of this restaurant' });
+        }
+
         res.status(200).json(restaurant);
     } catch (err) {
         console.error('Error:', err);
         res.status(500).json({ message: 'Server Error', error: err.message });
     }
 };
+
+
 
 // Update restaurant by ID
 const updateRestaurantById = async (req, res) => {

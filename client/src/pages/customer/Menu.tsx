@@ -6,18 +6,25 @@ import { MenuItemsContent } from "../../components/customer/MenuItemsContent";
 
 export const MenuScreen: React.FC = () => {
   const location = useLocation();
-  const { restaurantId } = location.state as { restaurantId: string };
+  const { restaurantId, restaurantName } = location.state as {
+    restaurantId: string;
+    restaurantName: string;
+  };
 
   if (!restaurantId) {
     return <div>Error: No restaurant ID provided</div>;
   } else {
     console.log("Restaurant ID:", restaurantId);
+    console.log("Restaurant Name:", restaurantName);
   }
   return (
     <div>
       <CssBaseline />
       <ResponsiveAppBar />
-      <MenuItemsContent restaurantId={restaurantId} />
+      <MenuItemsContent
+        restaurantId={restaurantId}
+        restaurantName={restaurantName}
+      />
     </div>
   );
 };
