@@ -89,6 +89,11 @@ const getAllUsers = async () => {
     return await UserModel.getAllUsers();
 };
 
+//Get all drivers
+const getAllDrivers = async () => {
+    return await UserModel.getAllDrivers();
+};
+
 // Get user by ID
 const getById = async (id) => {
     return await UserModel.findUserById(id);
@@ -104,4 +109,4 @@ const updateUser = async (id, userData) => {
     return await UserModel.updateUserById(id, userData);
 };
 
-module.exports = { register, login, refreshAccessToken, logout, getAllUsers, getById, deleteUser, updateUser };
+module.exports = { register, login, refreshAccessToken, logout, getAllUsers, getById, deleteUser, updateUser, getAllDrivers };

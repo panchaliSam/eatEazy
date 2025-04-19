@@ -44,6 +44,23 @@ const UserRepository = {
         return users;
     },
 
+    getAllDrivers: async () => {
+        const users = await prisma.users.findMany({
+            select: {
+                UserID: true,
+                Firstname: true,
+                Lastname: true,
+                Email: true,
+                Phone: true,
+                Role: true,
+            },
+            where: {
+                Role : "DeliveryPerson"
+            }
+        });
+        return users;
+    },
+
     deleteById: async (id) => {
         const deletedUser = await prisma.users.delete({
             where: { UserID: parseInt(id) },
