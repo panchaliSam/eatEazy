@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const PaymentController = require('../controllers/paymentController');
-const { authenticateToken } = require('../middleware/authMiddleware');
+const { authenticateToken, isAdmin } = require('../middleware/authMiddleware');
 require
 
 // Route to initiate payment
@@ -12,7 +12,7 @@ router.post('/initiate', authenticateToken, PaymentController.initiatePayment);
 router.post('/notify', PaymentController.handlePayHereNotify);
 
 // Route to manually update payment status (admin)
-router.put('/status', authenticateToken, PaymentController.updatePaymentStatus);
+router.put('/status', authenticateToken, isAdmin, PaymentController.updatePaymentStatus);
 
 // Route to get payment details
 router.get('/:PaymentID', authenticateToken, PaymentController.getPaymentById);
