@@ -117,19 +117,6 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.CartitemsScalarFieldEnum = {
-  ID: 'ID',
-  CartID: 'CartID',
-  MenuItemID: 'MenuItemID',
-  Quantity: 'Quantity'
-};
-
-exports.Prisma.CartsScalarFieldEnum = {
-  CartID: 'CartID',
-  UserID: 'UserID',
-  CreatedAt: 'CreatedAt'
-};
-
 exports.Prisma.DeliveryScalarFieldEnum = {
   DeliveryID: 'DeliveryID',
   OrderID: 'OrderID',
@@ -141,70 +128,9 @@ exports.Prisma.DeliveryScalarFieldEnum = {
 
 exports.Prisma.DeliveryroutesScalarFieldEnum = {
   RouteID: 'RouteID',
-  DeliveryID: 'DeliveryID'
-};
-
-exports.Prisma.MenuitemsScalarFieldEnum = {
-  MenuItemID: 'MenuItemID',
-  RestaurantID: 'RestaurantID',
-  Name: 'Name',
-  Description: 'Description',
-  Price: 'Price',
-  IsAvailable: 'IsAvailable'
-};
-
-exports.Prisma.NotificationsScalarFieldEnum = {
-  NotificationID: 'NotificationID',
-  UserID: 'UserID',
-  Message: 'Message',
-  NotificationDate: 'NotificationDate',
-  IsRead: 'IsRead'
-};
-
-exports.Prisma.OrderdetailsScalarFieldEnum = {
-  OrderDetailID: 'OrderDetailID',
-  OrderID: 'OrderID',
-  MenuItemID: 'MenuItemID',
-  Quantity: 'Quantity',
-  ItemPrice: 'ItemPrice'
-};
-
-exports.Prisma.OrdersScalarFieldEnum = {
-  OrderID: 'OrderID',
-  CustomerID: 'CustomerID',
-  RestaurantID: 'RestaurantID',
-  OrderStatus: 'OrderStatus',
-  OrderTotal: 'OrderTotal',
-  OrderDate: 'OrderDate'
-};
-
-exports.Prisma.PaymentsScalarFieldEnum = {
-  PaymentID: 'PaymentID',
-  OrderID: 'OrderID',
-  PaymentMethod: 'PaymentMethod',
-  PaymentStatus: 'PaymentStatus',
-  TransactionID: 'TransactionID',
-  PaymentDate: 'PaymentDate'
-};
-
-exports.Prisma.RestaurantsScalarFieldEnum = {
-  RestaurantID: 'RestaurantID',
-  OwnerID: 'OwnerID',
-  RestaurantName: 'RestaurantName',
-  Address: 'Address',
-  Phone: 'Phone',
-  Email: 'Email',
-  Availability: 'Availability'
-};
-
-exports.Prisma.UsersScalarFieldEnum = {
-  UserID: 'UserID',
-  Firstname: 'Firstname',
-  Lastname: 'Lastname',
-  PasswordHash: 'PasswordHash',
-  Email: 'Email',
-  Phone: 'Phone',
-  Role: 'Role'
+  DeliveryID: 'DeliveryID',
+  StartLocation: 'StartLocation',
+  EndLocation: 'EndLocation'
 };
 
 exports.Prisma.SortOrder = {
@@ -216,35 +142,6 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-
-exports.Prisma.menuitemsOrderByRelevanceFieldEnum = {
-  Name: 'Name',
-  Description: 'Description'
-};
-
-exports.Prisma.notificationsOrderByRelevanceFieldEnum = {
-  Message: 'Message'
-};
-
-exports.Prisma.paymentsOrderByRelevanceFieldEnum = {
-  TransactionID: 'TransactionID'
-};
-
-exports.Prisma.restaurantsOrderByRelevanceFieldEnum = {
-  RestaurantName: 'RestaurantName',
-  Address: 'Address',
-  Phone: 'Phone',
-  Email: 'Email',
-  Availability: 'Availability'
-};
-
-exports.Prisma.usersOrderByRelevanceFieldEnum = {
-  Firstname: 'Firstname',
-  Lastname: 'Lastname',
-  PasswordHash: 'PasswordHash',
-  Email: 'Email',
-  Phone: 'Phone'
-};
 exports.delivery_DeliveryStatus = exports.$Enums.delivery_DeliveryStatus = {
   Assigned: 'Assigned',
   In_Transit: 'In_Transit',
@@ -252,48 +149,9 @@ exports.delivery_DeliveryStatus = exports.$Enums.delivery_DeliveryStatus = {
   Failed: 'Failed'
 };
 
-exports.orders_OrderStatus = exports.$Enums.orders_OrderStatus = {
-  Pending: 'Pending',
-  Confirmed: 'Confirmed',
-  Preparing: 'Preparing',
-  Out_for_Delivery: 'Out_for_Delivery',
-  Delivered: 'Delivered',
-  Cancelled: 'Cancelled'
-};
-
-exports.payments_PaymentMethod = exports.$Enums.payments_PaymentMethod = {
-  PayHere: 'PayHere',
-  Dialog_Genie: 'Dialog_Genie',
-  FriMi: 'FriMi',
-  Stripe: 'Stripe',
-  PayPal: 'PayPal'
-};
-
-exports.payments_PaymentStatus = exports.$Enums.payments_PaymentStatus = {
-  Pending: 'Pending',
-  Completed: 'Completed',
-  Failed: 'Failed'
-};
-
-exports.users_Role = exports.$Enums.users_Role = {
-  Admin: 'Admin',
-  Restaurant: 'Restaurant',
-  Customer: 'Customer',
-  DeliveryPerson: 'DeliveryPerson'
-};
-
 exports.Prisma.ModelName = {
-  cartitems: 'cartitems',
-  carts: 'carts',
   delivery: 'delivery',
-  deliveryroutes: 'deliveryroutes',
-  menuitems: 'menuitems',
-  notifications: 'notifications',
-  orderdetails: 'orderdetails',
-  orders: 'orders',
-  payments: 'payments',
-  restaurants: 'restaurants',
-  users: 'users'
+  deliveryroutes: 'deliveryroutes'
 };
 
 /**

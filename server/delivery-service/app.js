@@ -5,9 +5,11 @@ const deliveryRoutes = require("./src/routes/DeliveryRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
+require("dotenv").config();
+
 app.use("/delivery", deliveryRoutes);
 
-const POST = process.env.POST || 3000;
-app.listen(POST, () => {
-  console.log(`Server is running on port ${POST}`);
+const PORT = process.env.PORT || 4005;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

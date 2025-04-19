@@ -29,6 +29,7 @@ class DeliveryController {
       const { deliveryId } = req.params;
       const { status } = req.body;
 
+      console.log(deliveryId, status);
       await DeliveryService.updateStatus(deliveryId, status);
       res.json({ success: true, message: "Delivery status updated" });
     } catch (error) {
@@ -53,17 +54,36 @@ class DeliveryController {
     try {
       const { deliveryId } = req.params;
       const { startLat, startLng, endLat, endLng } = req.body;
+      console.log(
+        `Received coordinates: startLat=${startLat}, startLng=${startLng}, endLat=${endLat}, endLng=${endLng}`
+      );
 
-      const result = await DeliveryService.addRoute(deliveryId, {
-        startLat,
-        startLng,
-        endLat,
-        endLng,
+      // Validate inputs
+      if (
+        !startLat ||
+        !startLng ||
+        !endLat ||
+        !endLng ||
+        isNaN(startLat) ||
+        isNaN(startLng) ||
+        isNaN(endLat) ||
+        isNaN(endLng)
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Invalid coordinates provided" });
+      }
+
+      const route = await DeliveryService.addRoute(parseInt(deliveryId), {
+        startLat: parseFloat(startLat),
+        startLng: parseFloat(startLng),
+        endLat: parseFloat(endLat),
+        endLng: parseFloat(endLng),
       });
 
-      res.json({ success: true, route: result });
+      res.json({ success: true, route });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ success: false, message: error.message });
     }
   }
 }

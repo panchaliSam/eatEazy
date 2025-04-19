@@ -18,7 +18,7 @@ model delivery {
 }
 
 model deliveryroutes {
-  RouteID       Int   @id @default(autoincrement())
+  RouteID       Int   @id
   DeliveryID    Int   @unique
   StartLocation Bytes
   EndLocation   Bytes
