@@ -17,11 +17,11 @@ import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
 import logo from "@app_assets/logo/png/logo-transparent.png";
 import { orange } from "@mui/material/colors";
-import UserApi from "../../utils/api/UserApi";
-import { getRefreshToken } from "../../utils/helper/TokenHelper";
-import { AdminDashboardContent } from "../../components/admin/DashBoardContent";
-import { PeopleContent } from "../../components/admin/PeopleContent";
-import { RestaurantView } from "../../components/admin/RestaurantContent";
+import UserApi from "@app_utils/api/UserApi";
+import { getRefreshToken } from "@app_utils/helper/TokenHelper";
+import { AdminDashboardContent } from "@app_components/admin/DashBoardContent";
+import { PeopleContent } from "@app_components/admin/PeopleContent";
+import { RestaurantView } from "@app_components/admin/RestaurantContent";
 
 const theme = createTheme({
   palette: {

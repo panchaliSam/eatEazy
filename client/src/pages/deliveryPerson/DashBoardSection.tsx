@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { lazy, Suspense } from "react";
+import React, { Suspense } from "react";
 import Typography from "@mui/material/Typography";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -7,7 +7,6 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import DescriptionIcon from "@mui/icons-material/Description";
-import LayersIcon from "@mui/icons-material/Layers";
 import PeopleIcon from "@mui/icons-material/People";
 import PaymentIcon from "@mui/icons-material/Payment";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -17,9 +16,9 @@ import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
 import logo from "@app_assets/logo/png/logo-transparent.png";
 import { orange } from "@mui/material/colors";
-import UserApi from "../../utils/api/UserApi";
-import { getRefreshToken } from "../../utils/helper/TokenHelper";
-import { DeliveryPersonDashboardContent } from "../../components/deliveryPerson/DashBoardContent";
+import UserApi from "@app_utils/api/UserApi";
+import { getRefreshToken } from "@app_utils/helper/TokenHelper";
+import { DeliveryPersonDashboardContent } from "@app_components/deliveryPerson/DashBoardContent";
 
 const theme = createTheme({
   palette: {
