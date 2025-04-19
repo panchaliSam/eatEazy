@@ -35,8 +35,9 @@ const sendSMSNotification = async (req, res) => {
 };
 
 const getMyNotifications = async (req, res) => {
+    const userId = req.user?.id;
     try {
-        const userId = req.user.userId; // comes from JWT
+        // const userId = req.user.userId; // comes from JWT
         const notifications = await NotificationService.getNotificationsByUserId(userId);
         res.status(200).json(notifications);
     } catch (error) {

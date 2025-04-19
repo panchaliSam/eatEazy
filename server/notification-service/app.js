@@ -9,7 +9,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Routes
-app.use('/api/notifications', notificationRoutes);
+app.use('/', notificationRoutes);
 
 // Root Route
 app.get('/', (req, res) => {
