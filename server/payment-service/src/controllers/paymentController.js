@@ -1,4 +1,7 @@
+// controllers/paymentController.js
 const PaymentService = require('../services/paymentService');
+// const PaymentRepository = require('../repository/paymentRepository');
+require('dotenv').config();
 
 const initiatePayment = async (req, res) => {
   try {
@@ -91,23 +94,24 @@ const updatePaymentStatus = async (req, res) => {
   }
 };
 
-const getPaymentDetails = async (req, res) => {
+const getPaymentById = async (req, res) => {
   try {
-    const { paymentId } = req.params;
+    const { PaymentID } = req.params;
     
-    if (!paymentId) {
+    if (!PaymentID) {
       return res.status(400).json({ error: 'Payment ID is required' });
     }
     
-    const payment = await PaymentService.getPaymentById(paymentId);
-    
-    if (!payment) {
-      return res.status(404).json({ error: `Payment #${paymentId} not found` });
-    }
+    const payment = await PaymentService.getPaymentById(PaymentID);
     
     res.status(200).json({ payment });
   } catch (err) {
     console.error('Error fetching payment details:', err);
+    
+    if (err.message.includes('not found')) {
+      return res.status(404).json({ message: err.message });
+    }
+    
     res.status(500).json({ 
       message: 'Failed to fetch payment details', 
       error: err.message 
@@ -115,9 +119,68 @@ const getPaymentDetails = async (req, res) => {
   }
 };
 
+const getPaymentsByOrderId = async (req, res) => {
+  try {
+    const { OrderID } = req.params;
+    
+    // Validate OrderID
+    if (!OrderID) {
+      return res.status(400).json({ error: 'OrderID is required' });
+    }
+    
+    // Fetch payments for the specified OrderID
+    const payments = await PaymentService.getPaymentsByOrderId(OrderID);
+
+    // Return the payments associated with the OrderID
+    res.status(200).json({ payments });
+  } catch (error) {
+    // Catch any error and send a 500 status with the error message
+    console.error('Error fetching payments:', error);
+    
+    if (error.message.includes('not found')) {
+      return res.status(404).json({ message: error.message });
+    }
+    
+    res.status(500).json({
+      message: 'Failed to fetch payments',
+      error: error.message
+    });
+  }
+};
+
+// const getOrderDetailsFromService = async (req, res) => {
+//   const { OrderID } = req.params;
+
+//   try {
+//     // Call the service to fetch order details
+//     const orderDetails = await PaymentRepository.getOrderDetailsFromService(OrderID);
+
+//     if (orderDetails) {
+//       return res.status(200).json({
+//         success: true,
+//         data: orderDetails
+//       });
+//     } else {
+//       return res.status(404).json({
+//         success: false,
+//         message: `Order with ID ${OrderID} not found`
+//       });
+//     }
+//   } catch (error) {
+//     console.error(`Error fetching order details: ${error.message}`);
+//     return res.status(500).json({
+//       success: false,
+//       message: 'Internal server error',
+//       error: error.message
+//     });
+//   }
+// };
+
 module.exports = {
   initiatePayment,
   handlePayHereNotify,
   updatePaymentStatus,
-  getPaymentDetails
+  getPaymentById,
+  getPaymentsByOrderId,
+  // getOrderDetailsFromService
 };

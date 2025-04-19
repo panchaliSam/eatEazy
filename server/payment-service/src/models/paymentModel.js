@@ -1,3 +1,4 @@
+// models/paymentModel.js
 const PaymentRepository = require('../repository/paymentRepository');
 
 const PaymentModel = {
@@ -5,8 +6,8 @@ const PaymentModel = {
     return await PaymentRepository.createPayment(paymentData);
   },
   
-  getOrderDetails: async (OrderID) => {
-    return await PaymentRepository.getOrderDetails(OrderID);
+  getOrderDetailsFromService: async (OrderID) => {
+    return await PaymentRepository.getOrderDetailsFromService(OrderID);
   },
   
   getPaymentById: async (PaymentID) => {

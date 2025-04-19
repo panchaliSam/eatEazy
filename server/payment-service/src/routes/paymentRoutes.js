@@ -1,8 +1,9 @@
+// routes/paymentRoutes.js
 const express = require('express');
 const router = express.Router();
 const PaymentController = require('../controllers/paymentController');
 const { authenticateToken } = require('../middleware/authMiddleware');
-const PaymentModel = require('../models/paymentModel');
+require
 
 // Route to initiate payment
 router.post('/initiate', authenticateToken, PaymentController.initiatePayment);
@@ -14,20 +15,12 @@ router.post('/notify', PaymentController.handlePayHereNotify);
 router.put('/status', authenticateToken, PaymentController.updatePaymentStatus);
 
 // Route to get payment details
-router.get('/:paymentId', authenticateToken, PaymentController.getPaymentDetails);
+router.get('/:PaymentID', authenticateToken, PaymentController.getPaymentById);
 
 // Route to get payments by order ID
-router.get('/order/:orderId', authenticateToken, async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const payments = await PaymentModel.getPaymentsByOrderId(orderId);
-    res.status(200).json({ payments });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Failed to fetch payments',
-      error: error.message
-    });
-  }
-});
+router.get('/order/:OrderID', authenticateToken, PaymentController.getPaymentsByOrderId);
+
+// // Route to get order details from the order service
+// router.get('/orders/:OrderID',authenticateToken,PaymentController.getOrderDetailsFromService)
 
 module.exports = router;
