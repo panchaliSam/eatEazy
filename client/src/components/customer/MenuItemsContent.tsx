@@ -32,10 +32,12 @@ const imageList = [
 
 interface MenuItemsContentProps {
   restaurantId: string;
+  restaurantName: string;
 }
 
 export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
   restaurantId,
+  restaurantName,
 }) => {
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
