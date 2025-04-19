@@ -148,33 +148,32 @@ const getPaymentsByOrderId = async (req, res) => {
   }
 };
 
-// const getOrderDetailsFromService = async (req, res) => {
-//   const { OrderID } = req.params;
+const getOrderDetails = async (req, res) => {
+  const { OrderID } = req.params;
+  const token = req.headers.authorization.split(' ')[1]; // Assuming the token is in the Authorization header
 
-//   try {
-//     // Call the service to fetch order details
-//     const orderDetails = await PaymentRepository.getOrderDetailsFromService(OrderID);
-
-//     if (orderDetails) {
-//       return res.status(200).json({
-//         success: true,
-//         data: orderDetails
-//       });
-//     } else {
-//       return res.status(404).json({
-//         success: false,
-//         message: `Order with ID ${OrderID} not found`
-//       });
-//     }
-//   } catch (error) {
-//     console.error(`Error fetching order details: ${error.message}`);
-//     return res.status(500).json({
-//       success: false,
-//       message: 'Internal server error',
-//       error: error.message
-//     });
-//   }
-// };
+  try {
+    const orderDetails = await PaymentService.getOrderDetailsFromService(OrderID, token);
+    if (orderDetails) {
+      return res.status(200).json({
+        success: true,
+        data: orderDetails
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: `Order with ID ${OrderID} not found`
+      });
+    }
+  } catch (error) {
+    console.error(`Error fetching order details: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
 
 module.exports = {
   initiatePayment,
@@ -182,5 +181,5 @@ module.exports = {
   updatePaymentStatus,
   getPaymentById,
   getPaymentsByOrderId,
-  // getOrderDetailsFromService
+  getOrderDetails
 };

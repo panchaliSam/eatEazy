@@ -25,21 +25,21 @@ const PaymentRepository = {
   //     return null;
   //   }
   // },
-  getOrderDetailsFromService: async (OrderID, token) => {
-    try {
-      const url = `http://localhost:4000/orders/getOrderByOrderId/${OrderID}`; // this works as you confirmed
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  // getOrderDetailsFromService: async (OrderID, token) => {
+  //   try {
+  //     const url = `http://localhost:4000/orders/getOrderByOrderId/${OrderID}`; // this works as you confirmed
+  //     const response = await axios.get(url, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
   
-      return response.data; // you can also destructure if needed
-    } catch (error) {
-      console.error(`Error fetching order details for OrderID ${OrderID}:`, error.response?.data || error.message);
-      return null;
-    }
-  },
+  //     return response.data; // you can also destructure if needed
+  //   } catch (error) {
+  //     console.error(`Error fetching order details for OrderID ${OrderID}:`, error.response?.data || error.message);
+  //     return null;
+  //   }
+  // },
   getPaymentById: async (PaymentID) => {
     const query = 'SELECT * FROM Payments WHERE PaymentID = ?';
     const [rows] = await pool.execute(query, [PaymentID]);

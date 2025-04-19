@@ -30,7 +30,7 @@ const updateOrderPaymentStatus = async (OrderID, paymentStatus) => {
     }, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SERVICE_API_KEY}`
+        'Authorization': `Bearer ${token}`
       },
       timeout: 5000
     });
@@ -63,167 +63,167 @@ const updateOrderPaymentStatus = async (OrderID, paymentStatus) => {
 };
 
 // Helper: Send Email Notification
-const sendEmailNotification = async (orderID, paymentStatus, amount) => {
-  try {
-    // First get order details to get the user info
-    const orderDetails = await PaymentService.getOrderDetailsFromService(orderID);
-    if (!orderDetails) {
-      console.error(`Order details not found for order #${orderID}`);
-      return { success: false, error: 'Order details not found' };
-    }
+// const sendEmailNotification = async (orderID, paymentStatus, amount) => {
+//   try {
+//     // First get order details to get the user info
+//     const orderDetails = await PaymentService.getOrderDetailsFromService(orderID);
+//     if (!orderDetails) {
+//       console.error(`Order details not found for order #${orderID}`);
+//       return { success: false, error: 'Order details not found' };
+//     }
 
-    // const notificationServiceUrl = NOTIFICATION_SERVICE_URL || 'http://localhost:4010';
+//     // const notificationServiceUrl = NOTIFICATION_SERVICE_URL || 'http://localhost:4010';
     
-    // Determine notification type based on payment status
-    const notificationType = paymentStatus === 'Completed' ? 'paymentSuccess' : 'paymentFailed';
+//     // Determine notification type based on payment status
+//     const notificationType = paymentStatus === 'Completed' ? 'paymentSuccess' : 'paymentFailed';
     
-    const response = await axios.post(`${API_GATEWAY_URL}/notifications//send-email`, {
-      email: orderDetails.Email || orderDetails.UserEmail,
-      userId: orderDetails.UserID,
-      type: notificationType,
-      data: {
-        orderId: orderID,
-        totalAmount: amount,
-        customerName: orderDetails.Name || orderDetails.UserName || 'Customer'
-      }
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SERVICE_API_KEY}`
-      },
-      timeout: 5000
-    });
+//     const response = await axios.post(`${API_GATEWAY_URL}/notifications/send-email`, {
+//       email: orderDetails.Email || orderDetails.UserEmail,
+//       userId: orderDetails.UserID,
+//       type: notificationType,
+//       data: {
+//         orderId: orderID,
+//         totalAmount: amount,
+//         customerName: orderDetails.Name || orderDetails.UserName || 'Customer'
+//       }
+//     }, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${SERVICE_API_KEY}`
+//       },
+//       timeout: 5000
+//     });
 
-    console.log(`Payment email notification sent for order #${orderID}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Failed to send email notification for order #${orderID}:`, error.response?.data || error.message);
-    // Log but continue - this is non-critical
-    return { success: false, error: error.message };
-  }
-};
+//     console.log(`Payment email notification sent for order #${orderID}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error(`Failed to send email notification for order #${orderID}:`, error.response?.data || error.message);
+//     // Log but continue - this is non-critical
+//     return { success: false, error: error.message };
+//   }
+// };
 
-// Helper: Send SMS Notification
-const sendSMSNotification = async (orderID, paymentStatus, amount) => {
-  try {
-    // First get order details to get the user info
-    const orderDetails = await PaymentModel.getOrderDetailsFromService(orderID);
-    if (!orderDetails || !orderDetails.Phone) {
-      console.error(`Order details or phone not found for order #${orderID}`);
-      return { success: false, error: 'Order details or phone not found' };
-    }
+// // Helper: Send SMS Notification
+// const sendSMSNotification = async (orderID, paymentStatus, amount) => {
+//   try {
+//     // First get order details to get the user info
+//     const orderDetails = await PaymentModel.getOrderDetailsFromService(orderID);
+//     if (!orderDetails || !orderDetails.Phone) {
+//       console.error(`Order details or phone not found for order #${orderID}`);
+//       return { success: false, error: 'Order details or phone not found' };
+//     }
 
-    // const notificationServiceUrl = NOTIFICATION_SERVICE_URL || 'http://localhost:4010';
+//     // const notificationServiceUrl = NOTIFICATION_SERVICE_URL || 'http://localhost:4010';
     
-    // Determine notification type based on payment status
-    const notificationType = paymentStatus === 'Completed' ? 'paymentSuccess' : 'paymentFailed';
+//     // Determine notification type based on payment status
+//     const notificationType = paymentStatus === 'Completed' ? 'paymentSuccess' : 'paymentFailed';
     
-    const response = await axios.post(`${API_GATEWAY_URL}/notifications/send-sms`, {
-      phone: orderDetails.Phone,
-      userId: orderDetails.UserID,
-      type: notificationType,
-      data: {
-        orderId: orderID,
-        totalAmount: amount
-      }
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SERVICE_API_KEY}`
-      },
-      timeout: 5000
-    });
+//     const response = await axios.post(`${API_GATEWAY_URL}/notifications/send-sms`, {
+//       phone: orderDetails.Phone,
+//       userId: orderDetails.UserID,
+//       type: notificationType,
+//       data: {
+//         orderId: orderID,
+//         totalAmount: amount
+//       }
+//     }, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${SERVICE_API_KEY}`
+//       },
+//       timeout: 5000
+//     });
 
-    console.log(`Payment SMS notification sent for order #${orderID}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Failed to send SMS notification for order #${orderID}:`, error.response?.data || error.message);
-    // Log but continue - this is non-critical
-    return { success: false, error: error.message };
-  }
-};
+//     console.log(`Payment SMS notification sent for order #${orderID}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error(`Failed to send SMS notification for order #${orderID}:`, error.response?.data || error.message);
+//     // Log but continue - this is non-critical
+//     return { success: false, error: error.message };
+//   }
+// };
 
-// Helper: Create in-app notification
-const createInAppNotification = async (orderID, paymentStatus, amount) => {
-  try {
-    // First get order details to get the user info
-    const orderDetails = await PaymentModel.getOrderDetailsFromService(orderID);
-    if (!orderDetails) {
-      console.error(`Order details not found for order #${orderID}`);
-      return { success: false, error: 'Order details not found' };
-    }
+// // Helper: Create in-app notification
+// const createInAppNotification = async (orderID, paymentStatus, amount) => {
+//   try {
+//     // First get order details to get the user info
+//     const orderDetails = await PaymentModel.getOrderDetailsFromService(orderID);
+//     if (!orderDetails) {
+//       console.error(`Order details not found for order #${orderID}`);
+//       return { success: false, error: 'Order details not found' };
+//     }
 
-    // const notificationServiceUrl = NOTIFICATION_SERVICE_URL || 'http://localhost:4010';
+//     // const notificationServiceUrl = NOTIFICATION_SERVICE_URL || 'http://localhost:4010';
     
-    // Construct appropriate message based on payment status
-    let message;
-    if (paymentStatus === 'Completed') {
-      message = `Payment of LKR ${amount} for order #${orderID} was successful.`;
-    } else if (paymentStatus === 'Failed') {
-      message = `Payment for order #${orderID} has failed. Please try again.`;
-    } else {
-      message = `Payment status for order #${orderID} changed to ${paymentStatus}.`;
-    }
+//     // Construct appropriate message based on payment status
+//     let message;
+//     if (paymentStatus === 'Completed') {
+//       message = `Payment of LKR ${amount} for order #${orderID} was successful.`;
+//     } else if (paymentStatus === 'Failed') {
+//       message = `Payment for order #${orderID} has failed. Please try again.`;
+//     } else {
+//       message = `Payment status for order #${orderID} changed to ${paymentStatus}.`;
+//     }
     
-    const response = await axios.post(`${API_GATEWAY_URL}/notifications/send-sms`, {
-      userId: orderDetails.UserID,
-      message: message,
-      channel: 'InApp',
-      type: 'PAYMENT_STATUS_CHANGE'
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SERVICE_API_KEY}`
-      },
-      timeout: 5000
-    });
+//     const response = await axios.post(`${API_GATEWAY_URL}/notifications/send-sms`, {
+//       userId: orderDetails.UserID,
+//       message: message,
+//       channel: 'InApp',
+//       type: 'PAYMENT_STATUS_CHANGE'
+//     }, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${SERVICE_API_KEY}`
+//       },
+//       timeout: 5000
+//     });
 
-    console.log(`In-app notification sent for order #${orderID}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Failed to send in-app notification for order #${orderID}:`, error.response?.data || error.message);
-    // Log but continue - this is non-critical
-    return { success: false, error: error.message };
-  }
-};
+//     console.log(`In-app notification sent for order #${orderID}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error(`Failed to send in-app notification for order #${orderID}:`, error.response?.data || error.message);
+//     // Log but continue - this is non-critical
+//     return { success: false, error: error.message };
+//   }
+// };
 
 // Master notification function that manages all notification channels
-const sendPaymentNotification = async (orderID, paymentStatus, amount) => {
-  const results = {
-    inApp: false,
-    email: false,
-    sms: false
-  };
+// const sendPaymentNotification = async (orderID, paymentStatus, amount) => {
+//   const results = {
+//     inApp: false,
+//     email: false,
+//     sms: false
+//   };
 
-  try {
-    // First, always try to create in-app notification
-    const inAppResult = await createInAppNotification(orderID, paymentStatus, amount);
-    results.inApp = inAppResult.success !== false;
+//   try {
+//     // First, always try to create in-app notification
+//     const inAppResult = await createInAppNotification(orderID, paymentStatus, amount);
+//     results.inApp = inAppResult.success !== false;
     
-    // Then try email notification
-    const emailResult = await sendEmailNotification(orderID, paymentStatus, amount);
-    results.email = emailResult.success !== false;
+//     // Then try email notification
+//     const emailResult = await sendEmailNotification(orderID, paymentStatus, amount);
+//     results.email = emailResult.success !== false;
     
-    // Finally try SMS for completed/failed payments only
-    if (paymentStatus === 'Completed' || paymentStatus === 'Failed') {
-      const smsResult = await sendSMSNotification(orderID, paymentStatus, amount);
-      results.sms = smsResult.success !== false;
-    }
+//     // Finally try SMS for completed/failed payments only
+//     if (paymentStatus === 'Completed' || paymentStatus === 'Failed') {
+//       const smsResult = await sendSMSNotification(orderID, paymentStatus, amount);
+//       results.sms = smsResult.success !== false;
+//     }
     
-    console.log(`Payment notifications sent for order #${orderID}:`, results);
-    return {
-      success: true,
-      channels: results
-    };
-  } catch (error) {
-    console.error(`Error in notification process for order #${orderID}:`, error.message);
-    return {
-      success: false,
-      channels: results,
-      error: error.message
-    };
-  }
-};
+//     console.log(`Payment notifications sent for order #${orderID}:`, results);
+//     return {
+//       success: true,
+//       channels: results
+//     };
+//   } catch (error) {
+//     console.error(`Error in notification process for order #${orderID}:`, error.message);
+//     return {
+//       success: false,
+//       channels: results,
+//       error: error.message
+//     };
+//   }
+// };
 
 // Payment initiation
 const initiatePayment = async (OrderID, PaymentMethod) => {
@@ -361,14 +361,14 @@ const processPayHereNotification = async (data) => {
     console.warn(`Order status update failed for #${order_id}, but continuing...`);
   }
 
-  // Try to send notifications, but don't block on failure
-  try {
-    await sendPaymentNotification(order_id, paymentStatus, payhere_amount).catch(err => {
-      console.error(`Failed to send notification for #${order_id}:`, err.message);
-    });
-  } catch (err) {
-    console.warn(`Notifications failed for #${order_id}, but continuing...`);
-  }
+  // // Try to send notifications, but don't block on failure
+  // try {
+  //   await sendPaymentNotification(order_id, paymentStatus, payhere_amount).catch(err => {
+  //     console.error(`Failed to send notification for #${order_id}:`, err.message);
+  //   });
+  // } catch (err) {
+  //   console.warn(`Notifications failed for #${order_id}, but continuing...`);
+  // }
 
   // 6) Finally return to PayHere
   return {
@@ -394,13 +394,13 @@ const updatePaymentStatus = async (PaymentID, PaymentStatus) => {
   }
 
   // Try to send notifications, but don't block on failure
-  try {
-    await sendPaymentNotification(paymentDetails.OrderID, PaymentStatus, paymentDetails.Amount).catch(err => {
-      console.error(`Failed to notify for order #${paymentDetails.OrderID}:`, err.message);
-    });
-  } catch (err) {
-    console.warn(`Notifications failed for #${paymentDetails.OrderID}, but continuing...`);
-  }
+  // try {
+  //   await sendPaymentNotification(paymentDetails.OrderID, PaymentStatus, paymentDetails.Amount).catch(err => {
+  //     console.error(`Failed to notify for order #${paymentDetails.OrderID}:`, err.message);
+  //   });
+  // } catch (err) {
+  //   console.warn(`Notifications failed for #${paymentDetails.OrderID}, but continuing...`);
+  // }
 
   return { success: true };
 };
@@ -427,7 +427,7 @@ const getOrderDetailsFromService = async (OrderID) => {
   try {
     const response = await axios.get(`http://localhost:4000/orders/getOrderByOrderId/${OrderID}`, {
       headers: {
-        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       timeout: 5000
@@ -446,7 +446,7 @@ module.exports = {
   updatePaymentStatus,
   generateSignature,
   updateOrderPaymentStatus,
-  sendPaymentNotification,
+  // sendPaymentNotification,
   getPaymentById,
   getPaymentsByOrderId,
   getOrderDetailsFromService
