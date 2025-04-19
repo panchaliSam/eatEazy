@@ -3071,21 +3071,19 @@ export namespace Prisma {
   }
 
   export type deliveryroutesCreateInput = {
-    RouteID: number
     DeliveryID: number
     StartLocation: Uint8Array
     EndLocation: Uint8Array
   }
 
   export type deliveryroutesUncheckedCreateInput = {
-    RouteID: number
+    RouteID?: number
     DeliveryID: number
     StartLocation: Uint8Array
     EndLocation: Uint8Array
   }
 
   export type deliveryroutesUpdateInput = {
-    RouteID?: IntFieldUpdateOperationsInput | number
     DeliveryID?: IntFieldUpdateOperationsInput | number
     StartLocation?: BytesFieldUpdateOperationsInput | Uint8Array
     EndLocation?: BytesFieldUpdateOperationsInput | Uint8Array
@@ -3099,14 +3097,13 @@ export namespace Prisma {
   }
 
   export type deliveryroutesCreateManyInput = {
-    RouteID: number
+    RouteID?: number
     DeliveryID: number
     StartLocation: Uint8Array
     EndLocation: Uint8Array
   }
 
   export type deliveryroutesUpdateManyMutationInput = {
-    RouteID?: IntFieldUpdateOperationsInput | number
     DeliveryID?: IntFieldUpdateOperationsInput | number
     StartLocation?: BytesFieldUpdateOperationsInput | Uint8Array
     EndLocation?: BytesFieldUpdateOperationsInput | Uint8Array

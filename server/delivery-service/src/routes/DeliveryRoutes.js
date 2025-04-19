@@ -16,7 +16,7 @@ router.get("/track/:orderId", authenticate, DeliveryController.trackDelivery);
 router.patch(
   "/update-status/:deliveryId",
   authenticate,
-  authorizeRoles("DeliveryPerson"),
+  authorizeRoles("DeliveryPerson", "Admin"),
   DeliveryController.updateDeliveryStatus
 );
 router.get(

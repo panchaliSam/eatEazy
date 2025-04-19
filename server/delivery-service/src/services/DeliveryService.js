@@ -6,6 +6,7 @@ const { AUTH_SERVICE_URL } = require("../config/env");
 class DeliveryService {
   static async assignDelivery(orderId) {
     //.env the base URL for user service
+
     const { data: drivers } = await axios.get(`${AUTH_SERVICE_URL}/drivers`);
     const orderID = parseInt(orderId);
 
@@ -34,6 +35,7 @@ class DeliveryService {
 
   static async trackDelivery(orderId) {
     const orderID = parseInt(orderId);
+
     return await DeliveryRepository.getDeliveryStatus(orderID);
   }
 
