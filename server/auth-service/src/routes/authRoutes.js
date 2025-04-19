@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, login, refreshAccessToken, logout, getAllUsers, getUserById, updateUser, deleteUser, verifyToken} = require('../controllers/authController');
+const { register, login, refreshAccessToken, logout, getAllUsers, getUserById, updateUser, deleteUser, verifyToken, getAllDeliveryPerson} = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const router = express.Router();
 
@@ -38,6 +38,7 @@ router.post('/logout', async (req, res) => {
 });
 
 router.get('/users', authenticateToken, getAllUsers);
+router.get('/drivers', getAllDeliveryPerson);
 router.get('/users/:id', authenticateToken, getUserById);
 router.put('/users/:id', authenticateToken, updateUser);
 router.delete('/users/:id', authenticateToken, deleteUser);

@@ -6,7 +6,10 @@ import { CartItemsContent } from "../../components/customer/CartItemsContent";
 
 export const CartScreen: React.FC = () => {
   const location = useLocation();
-  const { menuItemId } = location.state as { menuItemId: string };
+  const { menuItemId, name } = location.state as {
+    menuItemId: string;
+    name: string;
+  };
 
   if (!menuItemId) {
     return <div>Error: No menu ID provided</div>;
@@ -17,7 +20,7 @@ export const CartScreen: React.FC = () => {
     <div>
       <CssBaseline />
       <ResponsiveAppBar />
-      <CartItemsContent menuItemId={menuItemId} />
+      <CartItemsContent menuItemId={menuItemId} name={name} />
     </div>
   );
 };

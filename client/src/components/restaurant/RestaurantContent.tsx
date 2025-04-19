@@ -11,11 +11,16 @@ import Collapse from "@mui/material/Collapse";
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import RamenDiningIcon from "@mui/icons-material/RamenDining";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
+import PersonIcon from "@mui/icons-material/Person";
 import Typography from "@mui/material/Typography";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import RestaurantApi from "../../utils/api/RestaurantApi";
 import { getAccessToken } from "../../utils/helper/TokenHelper";
 import Image1 from "@app_assets/restaurants/Restaurant1.jpg";
@@ -67,11 +72,36 @@ export const RestaurantView = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuIndex, setMenuIndex] = useState<number | null>(null);
 
   const navigate = useNavigate();
 
-  const handleOrderSubmit = (restaurantId: string, restaurantName: string) => {
-    navigate("/menu", { state: { restaurantId, restaurantName } });
+  const handleMenuSubmit = (restaurantId: string) => {
+    navigate("/menuItems", { state: { restaurantId } });
+  };
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    index: number
+  ) => {
+    setAnchorEl(event.currentTarget);
+    setMenuIndex(index);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuIndex(null);
+  };
+
+  const handleEdit = (restaurant: any) => {
+    console.log("Edit:", restaurant);
+    handleMenuClose();
+  };
+
+  const handleDelete = (restaurant: any) => {
+    console.log("Delete:", restaurant);
+    handleMenuClose();
   };
 
   useEffect(() => {
@@ -81,12 +111,23 @@ export const RestaurantView = () => {
         if (!token) {
           throw new Error("No access token found.");
         }
+
+        const userId = JSON.parse(atob(token.split(".")[1])).id;
+
         const data = await RestaurantApi.getAllRestaurants();
-        // Add a random image property to each restaurant
-        const restaurantsWithImages = data.map((restaurant: any) => ({
-          ...restaurant,
-          randomImage: imageList[Math.floor(Math.random() * imageList.length)],
-        }));
+
+        const filteredRestaurants = data.filter(
+          (restaurant: any) => restaurant.OwnerID === userId
+        );
+
+        const restaurantsWithImages = filteredRestaurants.map(
+          (restaurant: any) => ({
+            ...restaurant,
+            randomImage:
+              imageList[Math.floor(Math.random() * imageList.length)],
+          })
+        );
+
         setRestaurants(restaurantsWithImages);
         console.log("Fetched restaurants:", restaurantsWithImages);
       } catch (err: any) {
@@ -95,6 +136,7 @@ export const RestaurantView = () => {
         setLoading(false);
       }
     };
+
     fetchRestaurants();
   }, []);
 
@@ -116,7 +158,7 @@ export const RestaurantView = () => {
         py: 4,
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "felx-start",
         textAlign: "center",
         ml: 2,
         mr: 2,
@@ -129,7 +171,7 @@ export const RestaurantView = () => {
         sx={{
           display: "flex",
           flexWrap: "wrap",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           gap: 2,
           mt: 4,
         }}
@@ -138,9 +180,26 @@ export const RestaurantView = () => {
           <Card key={restaurant.RestaurantID} sx={{ maxWidth: 345 }}>
             <CardHeader
               action={
-                <IconButton aria-label="settings">
-                  <MoreVertIcon />
-                </IconButton>
+                <>
+                  <IconButton
+                    aria-label="settings"
+                    onClick={(event) => handleMenuOpen(event, index)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl) && menuIndex === index}
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem onClick={() => handleEdit(restaurant)}>
+                      <EditIcon sx={{ mr: 1 }} /> Edit
+                    </MenuItem>
+                    <MenuItem onClick={() => handleDelete(restaurant)}>
+                      <DeleteIcon sx={{ mr: 1 }} /> Delete
+                    </MenuItem>
+                  </Menu>
+                </>
               }
               title={restaurant.RestaurantName}
               subheader={restaurant.Address || "No address provided"}
@@ -184,12 +243,7 @@ export const RestaurantView = () => {
               </Button>
               <Button
                 variant="outlined"
-                onClick={() =>
-                  handleOrderSubmit(
-                    restaurant.RestaurantID,
-                    restaurant.RestaurantName
-                  )
-                }
+                onClick={() => handleMenuSubmit(restaurant.RestaurantID)}
                 sx={{
                   backgroundColor: "#EA7300",
                   color: "white",
@@ -199,9 +253,9 @@ export const RestaurantView = () => {
                     outline: "none",
                   },
                 }}
-                startIcon={<ShoppingCartIcon />}
+                startIcon={<RamenDiningIcon />}
               >
-                Order
+                View Menu
               </Button>
             </CardActions>
             <Collapse in={expanded === index} timeout="auto" unmountOnExit>
@@ -216,6 +270,12 @@ export const RestaurantView = () => {
                   <EmailIcon sx={{ color: "orange" }} />
                   <Typography variant="body1">
                     {restaurant.Email || "No email provided"}
+                  </Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <PersonIcon sx={{ color: "orange" }} />
+                  <Typography variant="body1">
+                    {restaurant.OwnerName || "No owner provided"}
                   </Typography>
                 </Box>
               </CardContent>

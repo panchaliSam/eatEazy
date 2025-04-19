@@ -196,7 +196,7 @@ function ResponsiveAppBar() {
                     outline: "none",
                   },
                 }}
-                onClick={() => handleNavigate("/customer ")}
+                onClick={() => navigate(-1)}
               >
                 <HomeOutlinedIcon
                   sx={{
