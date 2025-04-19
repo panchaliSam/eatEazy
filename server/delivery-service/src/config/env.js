@@ -9,4 +9,6 @@ module.exports = {
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRATION: process.env.JWT_EXPIRATION,
   AUTH_SERVICE_PORT: process.env.AUTH_SERVICE_PORT,
+  AUTH_SERVICE_URL: process.env.AUTH_SERVICE_URL,
+  AUTH_SERVICE_URL: process.env.AUTH_SERVICE_URL,
 };

@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model delivery {
+  DeliveryID       Int                     @id @default(autoincrement())
+  OrderID          Int                     @unique
+  DeliveryPersonID Int?
+  AssignedAt       DateTime?               @default(now()) @db.DateTime(0)
+  DeliveredAt      DateTime?               @db.DateTime(0)
+  DeliveryStatus   delivery_DeliveryStatus
+}
+
+model deliveryroutes {
+  RouteID       Int   @id
+  DeliveryID    Int   @unique
+  StartLocation Bytes
+  EndLocation   Bytes
+}
+
+enum delivery_DeliveryStatus {
+  Assigned
+  In_Transit @map("In Transit")
+  Delivered
+  Failed
+}

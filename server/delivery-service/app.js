@@ -5,6 +5,8 @@ const deliveryRoutes = require("./src/routes/DeliveryRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
+require("dotenv").config();
+
 app.use("/delivery", deliveryRoutes);
 
 const PORT = process.env.PORT || 4005;

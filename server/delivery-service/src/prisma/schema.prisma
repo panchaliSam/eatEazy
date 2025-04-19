@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/prisma/client"
+  output   = "./generated/prisma"
 }
 
 datasource db {
@@ -8,143 +8,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model cartitems {
-  ID         Int @id @default(autoincrement())
-  CartID     Int
-  MenuItemID Int
-  Quantity   Int
-
-  @@index([CartID], map: "FK_Cart_CartItem")
-  @@index([MenuItemID], map: "FK_Menu_CartItem")
-}
-
-model carts {
-  CartID    Int       @id @default(autoincrement())
-  UserID    Int
-  CreatedAt DateTime? @default(now()) @db.DateTime(0)
-
-  @@index([UserID], map: "UserID")
-}
-
 model delivery {
   DeliveryID       Int                     @id @default(autoincrement())
-  OrderID          Int?
+  OrderID          Int                     @unique
   DeliveryPersonID Int?
   AssignedAt       DateTime?               @default(now()) @db.DateTime(0)
   DeliveredAt      DateTime?               @db.DateTime(0)
   DeliveryStatus   delivery_DeliveryStatus
-
-  @@index([DeliveryPersonID], map: "DeliveryPersonID")
-  @@index([OrderID], map: "OrderID")
 }
 
 model deliveryroutes {
-  RouteID       Int                  @id @default(autoincrement())
-  DeliveryID    Int?
-  StartLocation Unsupported("point")
-  EndLocation   Unsupported("point")
-
-  @@index([DeliveryID], map: "DeliveryID")
-}
-
-model menuitems {
-  MenuItemID   Int      @id @default(autoincrement())
-  RestaurantID Int?
-  Name         String   @db.VarChar(255)
-  Description  String?  @db.Text
-  Price        Decimal  @db.Decimal(10, 2)
-  IsAvailable  Boolean? @default(true)
-
-  @@index([RestaurantID], map: "RestaurantID")
-}
-
-model notifications {
-  NotificationID   Int       @id @default(autoincrement())
-  UserID           Int?
-  Message          String    @db.Text
-  NotificationDate DateTime? @default(now()) @db.DateTime(0)
-  IsRead           Boolean?  @default(false)
-
-  @@index([UserID], map: "UserID")
-}
-
-model orderdetails {
-  OrderDetailID Int     @id @default(autoincrement())
-  OrderID       Int?
-  MenuItemID    Int?
-  Quantity      Int
-  ItemPrice     Decimal @db.Decimal(10, 2)
-
-  @@index([MenuItemID], map: "MenuItemID")
-  @@index([OrderID], map: "OrderID")
-}
-
-model orders {
-  OrderID      Int                @id @default(autoincrement())
-  CustomerID   Int?
-  RestaurantID Int?
-  OrderStatus  orders_OrderStatus
-  OrderTotal   Decimal            @db.Decimal(10, 2)
-  OrderDate    DateTime?          @default(now()) @db.DateTime(0)
-
-  @@index([CustomerID], map: "CustomerID")
-  @@index([RestaurantID], map: "RestaurantID")
-}
-
-model payments {
-  PaymentID     Int                    @id @default(autoincrement())
-  OrderID       Int?
-  PaymentMethod payments_PaymentMethod
-  PaymentStatus payments_PaymentStatus
-  TransactionID String                 @db.VarChar(255)
-  PaymentDate   DateTime?              @default(now()) @db.DateTime(0)
-
-  @@index([OrderID], map: "OrderID")
-}
-
-model restaurants {
-  RestaurantID   Int     @id @default(autoincrement())
-  OwnerID        Int?
-  RestaurantName String  @db.VarChar(255)
-  Address        String  @db.Text
-  Phone          String? @db.VarChar(15)
-  Email          String? @db.VarChar(255)
-  Availability   String  @db.VarChar(255)
-
-  @@index([OwnerID], map: "OwnerID")
-}
-
-model users {
-  UserID       Int        @id @default(autoincrement())
-  Firstname    String     @db.VarChar(255)
-  Lastname     String     @db.VarChar(255)
-  PasswordHash String     @db.VarChar(255)
-  Email        String     @unique(map: "Email") @db.VarChar(255)
-  Phone        String?    @db.VarChar(15)
-  Role         users_Role
-}
-
-enum payments_PaymentMethod {
-  PayHere
-  Dialog_Genie @map("Dialog Genie")
-  FriMi
-  Stripe
-  PayPal
-}
-
-enum orders_OrderStatus {
-  Pending
-  Confirmed
-  Preparing
-  Out_for_Delivery @map("Out for Delivery")
-  Delivered
-  Cancelled
-}
-
-enum payments_PaymentStatus {
-  Pending
-  Completed
-  Failed
+  RouteID       Int   @id @default(autoincrement())
+  DeliveryID    Int   @unique
+  StartLocation Bytes
+  EndLocation   Bytes
 }
 
 enum delivery_DeliveryStatus {
@@ -152,11 +29,4 @@ enum delivery_DeliveryStatus {
   In_Transit @map("In Transit")
   Delivered
   Failed
-}
-
-enum users_Role {
-  Admin
-  Restaurant
-  Customer
-  DeliveryPerson
 }
