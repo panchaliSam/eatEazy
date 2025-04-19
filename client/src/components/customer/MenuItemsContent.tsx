@@ -43,8 +43,8 @@ export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
 
   const navigate = useNavigate();
 
-  const handleAddToCart = (menuItemId: string) => {
-    navigate("/cart", { state: { menuItemId } });
+  const handleAddToCart = (menuItemId: string, name: string) => {
+    navigate("/cart", { state: { menuItemId, name } });
   };
 
   useEffect(() => {
@@ -156,7 +156,9 @@ export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
               />
               <Button
                 variant="outlined"
-                onClick={() => handleAddToCart(menuItem.MenuItemID)}
+                onClick={() =>
+                  handleAddToCart(menuItem.MenuItemID, menuItem.Name)
+                }
                 sx={{
                   backgroundColor: "#EA7300",
                   color: "white",
