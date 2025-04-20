@@ -10,7 +10,8 @@ datasource db {
 
 model Carts {
   CartID       Int      @id @default(autoincrement())
-  UserID       Int           
+  UserID       Int      
+  RestaurantID Int      
   CartItems    CartItems[]
   Status       CartStatus  @default(ACTIVE)
   CreatedAt    DateTime    @default(now())
@@ -28,7 +29,8 @@ model CartItems {
 
 model Orders {
   OrderID      Int      @id @default(autoincrement())
-  UserID       Int            
+  UserID       Int      
+  RestaurantID Int      
   CartID       Int    
   Items        OrderItems[] 
   TotalAmount  Float
