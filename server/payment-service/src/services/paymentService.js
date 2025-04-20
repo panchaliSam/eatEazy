@@ -233,8 +233,26 @@ const getOrderDetailsFromService = async (OrderID, userToken) => {
 
 // Payment initiation
 const initiatePayment = async (OrderID, PaymentMethod, userToken) => {
+
+  // Only PayHere supported for now
+  if (PaymentMethod !== 'PayHere') {
+    throw new Error(`Payment method '${PaymentMethod}' is not supported yet.`);
+  }
+
   // Try to get order details from the order service
   let orderDetails = await getOrderDetailsFromService(OrderID, userToken);
+
+  // Check for existing active payment
+  const existingPayments = await PaymentModel.getPaymentsByOrderId(OrderID);
+
+  const hasActivePayment = existingPayments?.some(p => 
+    p.PaymentStatus === 'Pending' || p.PaymentStatus === 'Completed'
+  );
+
+  if (hasActivePayment) {
+    throw new Error(`A payment for Order #${OrderID} is already in progress or completed.`);
+  }
+  
   
   // DEVELOPMENT ONLY: If order details can't be fetched, use a mock for development
   if (!orderDetails && (NODE_ENV === 'development' || NODE_ENV === 'test')) {
