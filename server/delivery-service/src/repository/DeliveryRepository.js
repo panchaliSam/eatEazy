@@ -2,6 +2,15 @@ const prisma = require("../config/prisma");
 
 class DeliveryRepository {
   static async assignDeliveryPerson(orderId, deliveryPersonId) {
+    const existingDelivery = await prisma.delivery.findUnique({
+      where: {
+        OrderID: orderId,
+      },
+    });
+
+    if (existingDelivery) {
+      throw new Error("Delivery already assigned for this order.");
+    }
     return prisma.delivery.create({
       data: {
         OrderID: orderId,
@@ -16,11 +25,8 @@ class DeliveryRepository {
       where: {
         OrderID: orderId,
       },
-      include: {
-        DeliveryPerson: true,
-      },
     });
-
+    
     if (!delivery) return null;
 
     return {
@@ -68,6 +74,9 @@ class DeliveryRepository {
   }
 
   static async insertRoute(deliveryId, startLat, startLng, endLat, endLng) {
+    console.log(
+      `Inserting route: startLat=${startLat}, startLng=${startLng}, endLat=${endLat}, endLng=${endLng}`
+    );
     return prisma.$executeRawUnsafe(`
       INSERT INTO DeliveryRoutes (DeliveryID, StartLocation, EndLocation)
       VALUES (
