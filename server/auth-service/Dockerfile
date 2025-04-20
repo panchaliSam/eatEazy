@@ -1,5 +1,5 @@
 # Use Alpine-based Node.js image (lighter image)
-FROM node:22.13.1-alpine AS build
+FROM node:18-alpine AS build
 
 # Set working directory
 WORKDIR /usr/src/auth-service
@@ -19,7 +19,6 @@ COPY src/prisma/schema.prisma ./prisma/
 
 # Copy .env file from the src directory
 COPY src/.env ./prisma/
-
 
 # Generate Prisma client
 RUN npx prisma generate
