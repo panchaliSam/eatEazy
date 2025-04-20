@@ -1,6 +1,6 @@
 // controllers/paymentController.js
 const PaymentService = require('../services/paymentService');
-// const PaymentRepository = require('../repository/paymentRepository');
+const PaymentRepository = require('../repository/paymentRepository'); // Uncommented this line
 require('dotenv').config();
 
 const initiatePayment = async (req, res) => {
@@ -37,6 +37,7 @@ const initiatePayment = async (req, res) => {
   }
 };
 
+//Handle PayHere webhooks
 const handlePayHereNotify = async (req, res) => {
   try {
     // Log the notification for debugging
@@ -63,6 +64,7 @@ const handlePayHereNotify = async (req, res) => {
   }
 };
 
+//Update and retrieve payment status
 const updatePaymentStatus = async (req, res) => {
   try {
     const { PaymentID, PaymentStatus } = req.body;
@@ -148,6 +150,7 @@ const getPaymentsByOrderId = async (req, res) => {
   }
 };
 
+//Fetch order details from another service
 const getOrderDetails = async (req, res) => {
   const { OrderID } = req.params;
   const token = req.headers.authorization.split(' ')[1]; // Assuming the token is in the Authorization header

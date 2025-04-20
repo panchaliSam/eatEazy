@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const PaymentController = require('../controllers/paymentController');
 const { authenticateToken, isAdmin } = require('../middleware/authMiddleware');
-require
+// const PaymentRepository = require('../repository/paymentRepository');
 
 // Route to initiate payment
 router.post('/initiate', authenticateToken, PaymentController.initiatePayment);
@@ -21,6 +21,6 @@ router.get('/:PaymentID', authenticateToken, PaymentController.getPaymentById);
 router.get('/order/:OrderID', authenticateToken, PaymentController.getPaymentsByOrderId);
 
 // // Route to get order details from the order service
-// router.get('/orders/:OrderID',authenticateToken,PaymentController.getOrderDetailsFromService)
+// router.get('/orders/:OrderID',authenticateToken,PaymentRepository.getOrderDetailsFromService)
 
 module.exports = router;
