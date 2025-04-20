@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery"; // Import useMediaQuery
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
@@ -46,8 +47,6 @@ interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
 }
 
-// ...existing code...
-
 const ExpandMore = styled((props: ExpandMoreProps) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
@@ -60,6 +59,8 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 }));
 
 export const ManageRestaurantView = () => {
+  const isSmallScreen = useMediaQuery("(max-width:600px)"); // Check for small screen size
+
   const [expanded, setExpanded] = useState<number | null>(null);
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -233,22 +234,37 @@ export const ManageRestaurantView = () => {
         }}
       >
         <Typography sx={{ fontSize: 24 }}>Restaurants</Typography>
-        <Button
-          variant="outlined"
-          onClick={handleCreateRestaurant}
-          sx={{
-            backgroundColor: "#EA7300",
-            color: "white",
-            border: "none",
-            outline: "none",
-            "&:focus": {
+        {isSmallScreen ? (
+          <IconButton
+            onClick={handleCreateRestaurant}
+            sx={{
+              backgroundColor: "#EA7300",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#d06200",
+              },
+            }}
+          >
+            <AddIcon />
+          </IconButton>
+        ) : (
+          <Button
+            variant="outlined"
+            onClick={handleCreateRestaurant}
+            sx={{
+              backgroundColor: "#EA7300",
+              color: "white",
+              border: "none",
               outline: "none",
-            },
-          }}
-          startIcon={<AddIcon />}
-        >
-          Create Restaurant
-        </Button>
+              "&:focus": {
+                outline: "none",
+              },
+            }}
+            startIcon={<AddIcon />}
+          >
+            Create Restaurant
+          </Button>
+        )}
       </Box>
       <Box
         sx={{
@@ -324,21 +340,6 @@ export const ManageRestaurantView = () => {
               >
                 View
               </Button>
-              {/* <Button
-                variant="outlined"
-                sx={{
-                  backgroundColor: "#EA7300",
-                  color: "white",
-                  border: "none",
-                  outline: "none",
-                  "&:focus": {
-                    outline: "none",
-                  },
-                }}
-                startIcon={<RamenDiningIcon />}
-              >
-                Add Menu
-              </Button> */}
             </CardActions>
             <Collapse in={expanded === index} timeout="auto" unmountOnExit>
               <CardContent>

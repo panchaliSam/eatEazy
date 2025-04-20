@@ -8,6 +8,8 @@ import {
   Button,
   IconButton,
   InputAdornment,
+  useMediaQuery,
+  Theme,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -30,6 +32,9 @@ const LoginSection: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const isMobile = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.down("sm")
+  );
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -43,7 +48,6 @@ const LoginSection: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // Step 1: Login and get tokens
       const response = await UserApi.login({
         email: formData.email,
         password: formData.password,
@@ -100,6 +104,7 @@ const LoginSection: React.FC = () => {
         width: "100vw",
         background: "linear-gradient(90deg, #FFEDD5 50%, #FFF)",
         display: "flex",
+        flexDirection: isMobile ? "column" : "row",
         alignItems: "center",
         justifyContent: "center",
         padding: "2rem",
@@ -108,22 +113,36 @@ const LoginSection: React.FC = () => {
       {/* Left Content (Login Form) */}
       <Box
         sx={{
-          width: "40%",
+          width: isMobile ? "100%" : "40%",
           padding: "2rem",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
+          alignItems: isMobile ? "center" : "flex-start",
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: "bold",
+            mb: 3,
+            textAlign: isMobile ? "center" : "left",
+          }}
+        >
           Welcome Back
         </Typography>
-        <Typography variant="subtitle1" sx={{ color: "gray", mb: 3 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ color: "gray", mb: 3, textAlign: isMobile ? "center" : "left" }}
+        >
           Please login to your account to continue.
         </Typography>
 
         {error && (
-          <Typography color="error" sx={{ mb: 2 }}>
+          <Typography
+            color="error"
+            sx={{ mb: 2, textAlign: isMobile ? "center" : "left" }}
+          >
             {error}
           </Typography>
         )}
@@ -206,6 +225,7 @@ const LoginSection: React.FC = () => {
             borderRadius: "30px",
             textTransform: "none",
             outline: "none",
+            width: "100%",
             "&:focus": {
               outline: "none",
             },
@@ -214,7 +234,15 @@ const LoginSection: React.FC = () => {
           {loading ? "Login" : "Login"}
         </Button>
 
-        <Typography variant="subtitle1" sx={{ color: "gray", mt: 6, mb: 3 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: "gray",
+            mt: 6,
+            mb: 3,
+            textAlign: isMobile ? "center" : "left",
+          }}
+        >
           Don't have an account?{" "}
           <span
             onClick={handleRegisterClick}
@@ -230,7 +258,12 @@ const LoginSection: React.FC = () => {
       </Box>
 
       {/* Right Image */}
-      <Box sx={{ position: "relative" }}>
+      <Box
+        sx={{
+          position: "relative",
+          display: isMobile ? "none" : "block",
+        }}
+      >
         <img
           src={logo}
           alt="Delicious Food"
