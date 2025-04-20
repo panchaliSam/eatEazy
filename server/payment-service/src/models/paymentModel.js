@@ -6,14 +6,8 @@ const PaymentModel = {
     return await PaymentRepository.createPayment(paymentData);
   },
   
-  getOrderDetailsFromService: async (OrderID, token) => {
-    // Ensure token is always provided
-    if (!token) {
-      console.warn('Token not provided to getOrderDetailsFromService, using SERVICE_API_KEY');
-      // We could use SERVICE_API_KEY from config here as a fallback
-      // but it's better for the calling code to provide the token
-    }
-    return await PaymentRepository.getOrderDetailsFromService(OrderID, token);
+  getOrderDetailsFromService: async (OrderID, userToken) => {
+    return await PaymentRepository.getOrderDetailsFromService(OrderID, userToken);
   },
   
   getPaymentById: async (PaymentID) => {

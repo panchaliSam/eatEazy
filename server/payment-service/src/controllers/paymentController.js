@@ -1,6 +1,5 @@
 // controllers/paymentController.js
 const PaymentService = require('../services/paymentService');
-const PaymentRepository = require('../repository/paymentRepository'); // Uncommented this line
 require('dotenv').config();
 
 const initiatePayment = async (req, res) => {
@@ -18,7 +17,23 @@ const initiatePayment = async (req, res) => {
       return res.status(400).json({ error: `Invalid payment method. Supported methods: ${validPaymentMethods.join(', ')}` });
     }
     
-    const paymentDetails = await PaymentService.initiatePayment(OrderID, PaymentMethod);
+    // Get the user's token and ensure it's formatted correctly
+    let userToken = req.headers.authorization;
+    
+    // Debug the token
+    console.log('Token from request:', userToken ? `${userToken.substring(0, 15)}...` : 'No token');
+    
+    // Make sure we have a token
+    if (!userToken) {
+      console.warn('No authorization token found in request headers');
+      // If your auth middleware verified the user, you might have the token elsewhere
+      if (req.user && req.user.token) {
+        userToken = req.user.token;
+        console.log('Using token from req.user instead');
+      }
+    }
+    
+    const paymentDetails = await PaymentService.initiatePayment(OrderID, PaymentMethod, userToken);
     res.status(201).json({ 
       message: 'Payment initiated successfully', 
       paymentDetails 
@@ -37,7 +52,6 @@ const initiatePayment = async (req, res) => {
   }
 };
 
-//Handle PayHere webhooks
 const handlePayHereNotify = async (req, res) => {
   try {
     // Log the notification for debugging
@@ -64,7 +78,6 @@ const handlePayHereNotify = async (req, res) => {
   }
 };
 
-//Update and retrieve payment status
 const updatePaymentStatus = async (req, res) => {
   try {
     const { PaymentID, PaymentStatus } = req.body;
@@ -150,39 +163,10 @@ const getPaymentsByOrderId = async (req, res) => {
   }
 };
 
-//Fetch order details from another service
-const getOrderDetails = async (req, res) => {
-  const { OrderID } = req.params;
-  const token = req.headers.authorization.split(' ')[1]; // Assuming the token is in the Authorization header
-
-  try {
-    const orderDetails = await PaymentService.getOrderDetailsFromService(OrderID, token);
-    if (orderDetails) {
-      return res.status(200).json({
-        success: true,
-        data: orderDetails
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: `Order with ID ${OrderID} not found`
-      });
-    }
-  } catch (error) {
-    console.error(`Error fetching order details: ${error.message}`);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error.message
-    });
-  }
-};
-
 module.exports = {
   initiatePayment,
   handlePayHereNotify,
   updatePaymentStatus,
   getPaymentById,
-  getPaymentsByOrderId,
-  getOrderDetails
+  getPaymentsByOrderId
 };
