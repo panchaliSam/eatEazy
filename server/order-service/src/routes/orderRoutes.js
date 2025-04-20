@@ -11,7 +11,7 @@ const {
     deleteOrder
 } = require("../controllers/orderController");
 
-router.post("/addOrder/:restaurantId", addOrder);
+router.post("/addOrder", addOrder);
 router.get("/getOrderByOrderId/:id", authenticateToken,getOrder);
 router.get("/getOrderByUserId/:id", authenticateToken,getOrderByUserId);
 router.get("/getAllOrderbyRestaurantId/:id", authenticateToken,isRestaurant,getAllOrderbyRestaurantId);

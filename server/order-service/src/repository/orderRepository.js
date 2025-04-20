@@ -1,9 +1,9 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-const createCart = (userId, restaurantId, status) => {
+const createCart = (userId, status) => {
   return prisma.carts.create({
-    data: { UserID: userId, RestaurantID: restaurantId, Status: status },
+    data: { UserID: userId, Status: status },
   });
 };
 
