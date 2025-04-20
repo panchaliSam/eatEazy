@@ -44,18 +44,43 @@ const HeroSection: React.FC = () => {
         alignItems: "center",
         justifyContent: "center",
         padding: "2rem",
+        flexDirection: { xs: "column", md: "row" }, // Stack on small screens
       }}
     >
       {/* Left Content */}
-      <Box sx={{ position: "relative" }}>
-        <Typography variant="h3" sx={{ fontWeight: "bold", mb: 2 }}>
+      <Box
+        sx={{
+          position: "relative",
+          textAlign: { xs: "center", md: "left" }, // Center text on small screens
+          mb: { xs: 4, md: 0 }, // Add margin on small screens
+        }}
+      >
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: "bold",
+            mb: 2,
+            fontSize: { xs: "1.8rem", md: "2.5rem" }, // Adjust font size
+          }}
+        >
           We Offer{" "}
-          <Typography component="span" variant="h3" sx={{ color: "orange" }}>
+          <Typography
+            component="span"
+            variant="h3"
+            sx={{ color: "orange", fontSize: { xs: "1.8rem", md: "2.5rem" } }}
+          >
             Delicious Food
           </Typography>{" "}
           <br /> And Quick Service
         </Typography>
-        <Typography variant="subtitle1" sx={{ color: "gray", mb: 3 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: "gray",
+            mb: 3,
+            fontSize: { xs: "0.9rem", md: "1rem" }, // Adjust font size
+          }}
+        >
           Imagine you don’t need a diet because we provide healthy and delicious
           food for you!
         </Typography>
@@ -65,12 +90,12 @@ const HeroSection: React.FC = () => {
           sx={{
             background: "#EA7300",
             mb: 2,
-            padding: "1rem",
-            fontSize: "18px",
+            padding: { xs: "0.8rem", md: "1rem" }, // Adjust padding
+            fontSize: { xs: "16px", md: "18px" }, // Adjust font size
             fontWeight: "lighter",
             borderRadius: "30px",
             textTransform: "none",
-            width: "200px",
+            width: { xs: "150px", md: "200px" }, // Adjust width
             outline: "none",
             "&:focus": {
               outline: "none",
@@ -82,11 +107,23 @@ const HeroSection: React.FC = () => {
       </Box>
 
       {/* Right Image */}
-      <Box sx={{ position: "relative" }}>
+      <Box
+        sx={{
+          position: "relative",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <img
           src={logo}
           alt="Delicious Food"
-          style={{ borderRadius: "50%", width: "600px", height: "500px" }}
+          style={{
+            borderRadius: "50%",
+            width: "100%",
+            maxWidth: "600px", // Limit max width
+            height: "auto", // Maintain aspect ratio
+          }}
         />
 
         {/* Icons with animations around the image */}
@@ -96,6 +133,7 @@ const HeroSection: React.FC = () => {
             top: "-5%",
             left: "10%",
             animation: `${bounce} 2s infinite`,
+            display: { xs: "none", md: "block" }, // Hide on small screens
           }}
         >
           <LocalDiningIcon sx={{ fontSize: 40, color: "orange" }} />
@@ -106,6 +144,7 @@ const HeroSection: React.FC = () => {
             top: "30%",
             right: "-10%",
             animation: `${bounce} 3s infinite linear`,
+            display: { xs: "none", md: "block" }, // Hide on small screens
           }}
         >
           <RamenDiningIcon sx={{ fontSize: 40, color: "orange" }} />
@@ -116,6 +155,7 @@ const HeroSection: React.FC = () => {
             bottom: "-5%",
             left: "15%",
             animation: `${bounce} 2.5s infinite`,
+            display: { xs: "none", md: "block" }, // Hide on small screens
           }}
         >
           <LunchDiningIcon sx={{ fontSize: 40, color: "orange" }} />
@@ -126,6 +166,7 @@ const HeroSection: React.FC = () => {
             bottom: "-10%",
             right: "15%",
             animation: `${rotate} 4s infinite linear`,
+            display: { xs: "none", md: "block" }, // Hide on small screens
           }}
         >
           <BakeryDiningIcon sx={{ fontSize: 40, color: "orange" }} />

@@ -1,11 +1,30 @@
-class Delivery {
-  constructor(orderId, deliveryPersonId, status, assignedAt, deliveredAt) {
-    this.orderId = orderId;
-    this.deliveryPersonId = deliveryPersonId;
-    this.status = status;
-    this.assignedAt = assignedAt;
-    this.deliveredAt = deliveredAt;
-  }
-}
+const DeliveryRepository = require("../repository/DeliveryRepository");
 
-module.exports = Delivery;
+const DeliveryModel = {
+  assignDeliveryPerson: async (orderId, deliveryPersonId) => {
+    return await DeliveryRepository.assignDeliveryPerson(
+      orderId,
+      deliveryPersonId
+    );
+  },
+  getDeliveryStatus: async (orderId) => {
+    return await DeliveryRepository.getDeliveryStatus(orderId);
+  },
+  updateDeliveryStatus: async (deliveryId, status) => {
+    return await DeliveryRepository.updateDeliveryStatus(deliveryId, status);
+  },
+  getDeliveryRoute: async (deliveryId) => {
+    return await DeliveryRepository.getDeliveryRoute(deliveryId);
+  },
+  insertRoute: async (deliveryId, startLat, startLng, endLat, endLng) => {
+    return await DeliveryRepository.insertRoute(
+      deliveryId,
+      startLat,
+      startLng,
+      endLat,
+      endLng
+    );
+  },
+};
+
+module.exports = DeliveryModel;

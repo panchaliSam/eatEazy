@@ -1,45 +1,62 @@
-const DeliveryRepository = require("../repository/DeliveryRepository");
+const DeliveryModel = require("../models/Delivery");
+const prisma = require("../config/prisma");
+const axios = require("axios");
+const { AUTH_SERVICE_URL } = require("../config/env");
 
-class DeliveryService {
-  static async assignDelivery(orderid) {
-    const [drivers] = await db.query(
-      "SELECT UserID FROM Users WHERE Role = 'DeliveryPerson' ORDER BY RAND() LIMIT 1"
-    );
-    if (drivers.length === 0) {
-      throw new Error("No delivery drivers available");
-    }
-    await DeliveryRepository.assignDeliveryPerson(orderid, drivers[0].UserID);
-    return drivers[0];
+const assignDelivery = async (orderId) => {
+  //.env the base URL for user service
+
+  const { data: drivers } = await axios.get(`${AUTH_SERVICE_URL}/drivers`);
+  const orderID = parseInt(orderId);
+
+  if (!drivers.length) {
+    throw new Error("No delivery drivers available");
   }
 
-  static async trackDelivery(orderId) {
-    return await DeliveryRepository.getDeliveryStatus(orderId);
+  const randomDriver = drivers[Math.floor(Math.random() * drivers.length)];
+
+  await DeliveryModel.assignDeliveryPerson(orderID, randomDriver.UserID);
+  return randomDriver;
+};
+
+const updateStatus = async (deliveryId, status) => {
+  const deliveryID = parseInt(deliveryId);
+  console.log(deliveryID);
+  // Validate the status before updating
+  // Assuming valid statuses are "Assigned", "In Transit", "Delivered", "Failed"
+  const validStatuses = ["Assigned", "In Transit", "Delivered", "Failed"];
+  if (!validStatuses.includes(status)) {
+    throw new Error("Invalid delivery status");
   }
 
-  static async updateStatus(deliveryId, status) {
-    // Validate the status before updating
-    // Assuming valid statuses are "Assigned", "In Transit", "Delivered", "Failed"
-    const validStatuses = ["Assigned", "In Transit", "Delivered", "Failed"];
-    if (!validStatuses.includes(status)) {
-      throw new Error("Invalid delivery status");
-    }
+  return await DeliveryModel.updateDeliveryStatus(deliveryID, status);
+};
 
-    return await DeliveryRepository.updateDeliveryStatus(deliveryId, status);
-  }
+const trackDelivery = async (orderId) => {
+  const orderID = parseInt(orderId);
 
-  static async getRoute(deliveryId) {
-    return await DeliveryRepository.getDeliveryRoute(deliveryId);
-  }
+  return await DeliveryModel.getDeliveryStatus(orderID);
+};
 
-  static async addRoute(deliveryId, { startLat, startLng, endLat, endLng }) {
-    return await DeliveryRepository.insertRoute(
-      deliveryId,
-      startLat,
-      startLng,
-      endLat,
-      endLng
-    );
-  }
-}
+const getRoute = async (deliveryId) => {
+  const deliveryID = parseInt(deliveryId);
+  return await DeliveryModel.getDeliveryRoute(deliveryID);
+};
 
-module.exports = DeliveryService;
+const addRoute = async (deliveryId, { startLat, startLng, endLat, endLng }) => {
+  return await DeliveryModel.insertRoute(
+    deliveryId,
+    startLat,
+    startLng,
+    endLat,
+    endLng
+  );
+};
+
+module.exports = {
+  assignDelivery,
+  updateStatus,
+  trackDelivery,
+  getRoute,
+  addRoute,
+};

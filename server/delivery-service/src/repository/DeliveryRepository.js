@@ -1,7 +1,16 @@
 const prisma = require("../config/prisma");
 
-class DeliveryRepository {
-  static async assignDeliveryPerson(orderId, deliveryPersonId) {
+const DeliveryRepository = {
+  assignDeliveryPerson: async (orderId, deliveryPersonId) => {
+    const existingDelivery = await prisma.delivery.findUnique({
+      where: {
+        OrderID: orderId,
+      },
+    });
+
+    if (existingDelivery) {
+      throw new Error("Delivery already assigned for this order.");
+    }
     return prisma.delivery.create({
       data: {
         OrderID: orderId,
@@ -9,15 +18,12 @@ class DeliveryRepository {
         DeliveryStatus: "Assigned",
       },
     });
-  }
+  },
 
-  static async getDeliveryStatus(orderId) {
+  getDeliveryStatus: async (orderId) => {
     const delivery = await prisma.delivery.findUnique({
       where: {
         OrderID: orderId,
-      },
-      include: {
-        DeliveryPerson: true,
       },
     });
 
@@ -31,9 +37,9 @@ class DeliveryRepository {
       DriverName: delivery.DeliveryPerson?.Firstname || null,
       DriverPhone: delivery.DeliveryPerson?.Phone || null,
     };
-  }
+  },
 
-  static async updateDeliveryStatus(deliveryId, status) {
+  updateDeliveryStatus: async (deliveryId, status) => {
     return prisma.delivery.update({
       where: {
         DeliveryID: deliveryId,
@@ -42,9 +48,9 @@ class DeliveryRepository {
         DeliveryStatus: status,
       },
     });
-  }
+  },
 
-  static async getDeliveryRoute(deliveryId) {
+  getDeliveryRoute: async (deliveryId) => {
     const route = await prisma.deliveryRoutes.findUnique({
       where: {
         DeliveryID: deliveryId,
@@ -65,9 +71,12 @@ class DeliveryRepository {
     `);
 
     return rows;
-  }
+  },
 
-  static async insertRoute(deliveryId, startLat, startLng, endLat, endLng) {
+  insertRoute: (deliveryId, startLat, startLng, endLat, endLng) => {
+    console.log(
+      `Inserting route: startLat=${startLat}, startLng=${startLng}, endLat=${endLat}, endLng=${endLng}`
+    );
     return prisma.$executeRawUnsafe(`
       INSERT INTO DeliveryRoutes (DeliveryID, StartLocation, EndLocation)
       VALUES (
@@ -76,7 +85,7 @@ class DeliveryRepository {
         ST_GeomFromText('POINT(${endLng} ${endLat})')
       )
     `);
-  }
-}
+  },
+};
 
 module.exports = DeliveryRepository;
