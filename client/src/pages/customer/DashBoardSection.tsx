@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { lazy, Suspense } from "react";
+import React, { Suspense } from "react";
 import Typography from "@mui/material/Typography";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -14,10 +14,10 @@ import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
 import logo from "@app_assets/logo/png/logo-transparent.png";
 import { orange } from "@mui/material/colors";
-import UserApi from "../../utils/api/UserApi";
-import { getRefreshToken } from "../../utils/helper/TokenHelper";
-import { CustomerDashboardContent } from "../../components/customer/DashBoardContent";
-import { RestaurantView } from "../../components/customer/RestaurantContent";
+import UserApi from "@app_utils/api/UserApi";
+import { getRefreshToken } from "@app_utils/helper/TokenHelper";
+import { CustomerDashboardContent } from "@app_components/customer/DashBoardContent";
+import { RestaurantView } from "@app_components/customer/RestaurantContent";
 
 const theme = createTheme({
   palette: {

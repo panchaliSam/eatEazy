@@ -21,7 +21,7 @@ import {
   InputLabel,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import RestaurantApi from "../../utils/api/RestaurantApi";
+import RestaurantApi from "@app_utils/api/RestaurantApi";
 import Image1 from "@app_assets/restaurants/Restaurant1.jpg";
 import Image2 from "@app_assets/restaurants/Restaurant2.jpg";
 import Image3 from "@app_assets/restaurants/Restaurant3.jpg";
