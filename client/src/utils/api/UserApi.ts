@@ -9,6 +9,64 @@ import {
 } from "../helper/TokenHelper";
 import { IUser } from "../../interfaces/IUser";
 
+const refreshAccessToken = async () => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    throw new Error("No refresh token found. Please log in again.");
+  }
+
+  try {
+    const response = await axios.post(`${API_URL}/auth/refresh`, {
+      refreshToken,
+    });
+    const { accessToken } = response.data;
+    setTokens(accessToken, refreshToken);
+    return accessToken;
+  } catch (error: unknown) {
+    clearTokens();
+    throw new Error("Failed to refresh access token. Please log in again.");
+  }
+};
+
+// Axios instance with interceptors
+const axiosInstance = axios.create();
+
+axiosInstance.interceptors.request.use(
+  async (config) => {
+    const accessToken = getAccessToken();
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        const newAccessToken = await refreshAccessToken();
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 const UserApi = {
   register: async (userData: IUser) => {
     try {
