@@ -177,10 +177,16 @@ const getAllOrderbyRestaurantId=async(id)=>{
   if(!order) throw new Error("No orders for restaurant");
   return order;
 }  
+const updatePaymentStatus = async (orderId, status) => {
+  const updatedOrder = await orderRepo.updatePaymentStatus(orderId, status);
+  return updatedOrder;
+};
+
   
   module.exports = {
     processOrder,
     updateCartAndOrder,
+    updatePaymentStatus,
     getOrderById,
     getOrderByUserId,
     getAllOrderbyRestaurantId,

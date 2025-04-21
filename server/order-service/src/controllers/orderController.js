@@ -101,11 +101,33 @@ const deleteOrder = async (req, res) => {
   }
 };
 
+const updatePaymentStatus = async (req, res) => {
+  const { id } = req.params;
+  const { paymentStatus } = req.body;
+
+  if (!paymentStatus) {
+    return res.status(400).json({ message: 'Missing paymentStatus in body' });
+  }
+
+  try {
+    const updatedOrder = await orderService.updatePaymentStatus(id, paymentStatus);
+    res.status(200).json({ 
+      message: `Payment Status for order ${id} updated to ${paymentStatus}`,
+      order: updatedOrder
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to update payment status' });
+  }
+};
+
+
 module.exports = {
   addOrder,
   getOrder,
   getOrderByUserId,
   getAllOrderbyRestaurantId,
   updateCartByCartId,
+  updatePaymentStatus,
   deleteOrder,
 };

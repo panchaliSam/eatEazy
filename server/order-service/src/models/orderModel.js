@@ -57,6 +57,13 @@ const OrderModel = {
       throw new Error("Error while deleting the order: " + error.message);
     }
   },
+  // Update payment status of an order
+updatePaymentStatus: async (orderId, status) => {
+  return await OrderRepository.updatePaymentStatus(orderId, status);
+},
+
+
+  
 };
 
 module.exports = OrderModel;
