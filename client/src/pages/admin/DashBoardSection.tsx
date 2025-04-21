@@ -18,7 +18,7 @@ import { useDemoRouter } from "@toolpad/core/internal";
 import logo from "@app_assets/logo/png/logo-transparent.png";
 import { orange } from "@mui/material/colors";
 import UserApi from "@app_utils/api/UserApi";
-import { getRefreshToken } from "@app_utils/helper/TokenHelper";
+import { getRefreshToken, clearTokens } from "@app_utils/helper/TokenHelper";
 import { AdminDashboardContent } from "@app_components/admin/DashBoardContent";
 import { PeopleContent } from "@app_components/admin/PeopleContent";
 import { RestaurantView } from "@app_components/admin/RestaurantContent";
@@ -75,10 +75,12 @@ export default function DashboardLayoutBasic(props: DemoProps) {
       const refreshToken = getRefreshToken();
       if (!refreshToken) {
         console.warn("No refresh token found. Redirecting to login.");
+        clearTokens();
         navigate("/");
         return;
       }
       await UserApi.logout();
+      clearTokens();
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
