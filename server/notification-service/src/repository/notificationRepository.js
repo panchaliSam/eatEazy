@@ -2,8 +2,9 @@ const pool = require('../config/db');
 
 const NotificationRepository = {
     create: async (userId, message, channel = 'InApp', type = null) => {
+        const safeType = type === undefined ? null : type;
         const query = `INSERT INTO Notifications (UserID, Message, Channel, NotificationType) VALUES (?, ?, ?, ?)`;
-        const [result] = await pool.execute(query, [userId, message, channel, type]);
+        const [result] = await pool.execute(query, [userId, message, channel, type ?? null]);
         return result.insertId;
     },
 
