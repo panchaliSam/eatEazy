@@ -16,7 +16,7 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import logo from "@app_assets/logo/png/logo-transparent.png";
 import UserApi from "../../utils/api/UserApi";
-import { getRefreshToken } from "../../utils/helper/TokenHelper";
+import { getRefreshToken, clearTokens } from "../../utils/helper/TokenHelper";
 
 const settings = ["Logout"];
 
@@ -57,10 +57,12 @@ function ResponsiveAppBar() {
       const refreshToken = getRefreshToken();
       if (!refreshToken) {
         console.warn("No refresh token found. Redirecting to login.");
+        clearTokens();
         navigate("/");
         return;
       }
       await UserApi.logout();
+      clearTokens();
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
