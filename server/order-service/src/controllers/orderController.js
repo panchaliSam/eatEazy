@@ -67,13 +67,10 @@ const updateCartByCartId = async (req, res) => {
   const { cartId } = req.params;
   const { items } = req.body;
 
-  console.log("🔧 [updateCartByCartId] Incoming request to update cartId:", cartId);
-  console.log("📦 Items to update:", JSON.stringify(items, null, 2));
-
   try {
     const updatedOrder = await orderService.updateCartAndOrder(cartId, items);
 
-    console.log("✅ Cart and Order updated successfully:", updatedOrder);
+    console.log("Cart and Order updated successfully:", updatedOrder);
 
     res.status(200).json({
       message: "Cart and Order updated successfully",
@@ -81,7 +78,7 @@ const updateCartByCartId = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Failed to update cart or order:", error.message);
+    console.error("Failed to update cart or order:", error.message);
 
     res.status(500).json({
       message: "Failed to update cart or order",

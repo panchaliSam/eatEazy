@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require('../config/prisma');
 
 const createCart = (userId, restaurantId, status) => {
   return prisma.carts.create({
@@ -61,30 +60,24 @@ const updateCartStatus = (cartId, status) => {
 };
 
 const updateCartItems = async (cartId, items) => {
-  // First, update the cart items
-  for (const item of items) {
-    console.log("Updating item:", item);
+  try {
+    for (const item of items) {
+      if (!item.CartItemsID) {
+        throw new Error("CartItemsID is required.");
+      }
 
-    if (!item.CartItemsID) {
-      console.log("Missing CartItemsID in:", item);
-      throw new Error("CartItemsID is required to update a cart item.");
+      await prisma.cartItems.update({
+        where: { CartItemsID: item.CartItemsID },
+        data: { Quantity: item.Quantity },
+      });
     }
 
-    await prisma.cartItems.update({
-      where: {
-        CartItemsID: item.CartItemsID, // Ensure this is valid
-      },
-      data: {
-        Quantity: item.Quantity, // Assuming you want to update quantity
-      },
+    return await prisma.cartItems.findMany({
+      where: { CartID: parseInt(cartId) },
     });
-    console.log(`Cart item ${item.CartItemsID} updated with Quantity ${item.Quantity}`);
+  } catch (error) {
+    throw new Error(`Failed to update cart items: ${error.message}`);
   }
-
-  // Fetch the updated cart items
-  const updatedCartItems = await prisma.cartItems.findMany({
-    where: { CartID: parseInt(cartId) },
-  });
 };
 
 const updateOrder = async (orderId, items) => {
@@ -119,9 +112,10 @@ const updateOrderTotal = async (orderId) => {
     where: { OrderID: orderId },
   });
 
-  const totalAmount = updatedOrderItems.reduce((sum, item) => {
-    return sum + item.Price * item.Quantity;
-  }, 0);
+  const totalAmount = updatedOrderItems.reduce(
+    (sum, item) => sum + item.Price * item.Quantity,
+    0
+  );
 
   return await prisma.orders.update({
     where: { OrderID: orderId },

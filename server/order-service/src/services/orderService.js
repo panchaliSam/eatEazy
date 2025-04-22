@@ -82,71 +82,55 @@ const processOrder = async (token, items, restaurantId) => {
   return order;
 };
 
-const updateCartAndOrder = async (cartId,items) => {
-  const cartIdInt = parseInt(cartId);
+const updateCartAndOrder = async (cartId, items) => {
+  try {
+    const cartIdInt = parseInt(cartId);
 
-  //update cart items first
-  for(const item of items){
-    if(!item.CartItemsID){
-      throw new Error("CartItemID is required to update a cart item");
+    // Update Cart Items
+    for (const item of items) {
+      if (!item.CartItemsID) {
+        throw new Error("CartItemsID is required.");
+      }
+
+      await prisma.cartItems.update({
+        where: { CartItemsID: item.CartItemsID },
+        data: { Quantity: item.Quantity },
+      });
     }
-    await prisma.cartItems.update({
-      where:{
-        CartItemsID: item.CartItemsID,
-      },
-      data:{
-        Quantity: item.Quantity,
-      },
-    });
-  }
 
-  //get related order id by cart id
-  const order = await prisma.orders.findFirst({
-    where: {CartID: cartIdInt},
-  });
-
-  if(!order){
-    throw new Error("Order not found for the given CartID");
-  }
-
-  const orderId=order.orderID;
-
-  //update order items quantity
-  for(const item of items){
-    const cartItem=await prisma.cartItems.findUnique({
-      where:{CartItemsID:item.CartItemsID},
+    // Find the associated Order
+    const order = await prisma.orders.findFirst({
+      where: { CartID: cartIdInt },
     });
 
-    if(!cartItem) continue;
+    if (!order) {
+      throw new Error("Order not found.");
+    }
 
-    await prisma.orderItems.updateMany({
-      where:{
-        OrderID: orderId,
-        MenuItemID: cartItem.MenuItemID,
-      },
-      data:{
-        Quantity: item.Quantity,
-      },
-    });
+    const orderId = order.OrderID;
+
+    // Update Order Items
+    for (const item of items) {
+      const cartItem = await prisma.cartItems.findUnique({
+        where: { CartItemsID: item.CartItemsID },
+      });
+
+      if (!cartItem) continue;
+
+      await prisma.orderItems.updateMany({
+        where: {
+          OrderID: orderId,
+          MenuItemID: cartItem.MenuItemID,
+        },
+        data: { Quantity: item.Quantity },
+      });
+    }
+
+    // Recalculate and Update Order Total
+    return await updateOrderTotal(orderId);
+  } catch (error) {
+    throw new Error(`Failed to update cart and order: ${error.message}`);
   }
-
-  //re calulate total amount
-  const updatedOrderItems = await prisma.orderItems.findMany({
-    where:{OrderID: orderId},
-  });
-
-  const totalAmount=updatedOrderItems.reduce((sum,item) =>{
-    return sum + item.Price * item.Quantity;
-  },0);
-
-  //update order total amount
-  const updatedOrder = await prisma.orders.update({
-    where:{OrderID:orderId},
-    data:{
-      TotalAmount: totalAmount,
-    },
-  });
-  return updatedOrder;
 };
 
   
