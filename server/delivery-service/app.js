@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 require("dotenv").config();
 
-app.use("/delivery", deliveryRoutes);
+app.use("/", deliveryRoutes);
 
 const PORT = process.env.PORT || 4005;
 app.listen(PORT, () => {
