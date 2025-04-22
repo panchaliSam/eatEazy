@@ -1,15 +1,19 @@
 const DeliveryService = require("../services/DeliveryService");
+const logger = require("../config/logger");
 
+//creating a Delivery as assignning a random driver
 const assignDelivery = async (req, res) => {
   try {
     const { orderId } = req.params;
     const driver = await DeliveryService.assignDelivery(orderId);
     res.json({ success: true, message: "Driver assigned", driver });
   } catch (error) {
+    logger.error("Error assigning delivery:", req.url, error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+//Fetching Delivery details
 const trackDelivery = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -18,10 +22,12 @@ const trackDelivery = async (req, res) => {
 
     res.json(delivery);
   } catch (error) {
+    logger.error("Error assigning delivery:", req.url, error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+//Update status of the Deilvery
 const updateDeliveryStatus = async (req, res) => {
   try {
     const { deliveryId } = req.params;
@@ -31,10 +37,12 @@ const updateDeliveryStatus = async (req, res) => {
     await DeliveryService.updateStatus(deliveryId, status);
     res.json({ success: true, message: "Delivery status updated" });
   } catch (error) {
+    logger.error("Error assigning delivery:", req.url, error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+//fetch deilvery route related to a delievery
 const getDeliveryRoute = async (req, res) => {
   try {
     const { deliveryId } = req.params;
@@ -44,10 +52,12 @@ const getDeliveryRoute = async (req, res) => {
 
     res.json(route);
   } catch (error) {
+    logger.error("Error assigning delivery:", req.url, error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+//add a dilevery route to a Deilvery
 const addDeliveryRoute = async (req, res) => {
   try {
     const { deliveryId } = req.params;
@@ -79,6 +89,7 @@ const addDeliveryRoute = async (req, res) => {
 
     res.json({ success: true, route });
   } catch (error) {
+    logger.error("Error assigning delivery:", req.url, error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
