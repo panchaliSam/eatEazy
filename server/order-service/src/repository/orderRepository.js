@@ -149,6 +149,13 @@ const deleteCart = async (cartId) => {
       where: { CartID: cartId },
     });
   };
+
+  const updatePaymentStatus= async (orderId, status) => {
+    return prisma.orders.update({
+      where: { OrderID: parseInt(orderId)  },
+      data: { Status: status }
+    });
+  }
   
 
   
@@ -160,6 +167,7 @@ module.exports = {
   updateCartItems,
   updateOrder,
   updateOrderTotal,
+  updatePaymentStatus,
   getOrderById,
   getOrderByUserId,
   getAllOrderbyRestaurantId,

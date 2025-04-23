@@ -8,6 +8,7 @@ const {
     getOrderByUserId,
     getAllOrderbyRestaurantId,
     updateCartByCartId,
+    updatePaymentStatus,
     deleteOrder
 } = require("../controllers/orderController");
 
@@ -16,6 +17,7 @@ router.get("/getOrderByOrderId/:id", authenticateToken,getOrder);
 router.get("/getOrderByUserId/:id", authenticateToken,getOrderByUserId);
 router.get("/getAllOrderbyRestaurantId/:id", authenticateToken,isRestaurant,getAllOrderbyRestaurantId);
 router.put("/updateCartByCartId/:cartId", authenticateToken, updateCartByCartId);
+router.put('/:id/payment-status', authenticateToken, updatePaymentStatus);
 router.delete("/deleteOrderByOrderId/:id", authenticateToken, deleteOrder);
 
 module.exports = router;
