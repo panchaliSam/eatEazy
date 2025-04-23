@@ -1,45 +1,33 @@
 const express = require('express');
-const { body, validationResult } = require('express-validator');
 const router = express.Router();
-const { 
-    initiatePayment, 
-    updatePaymentStatus,
-    handlePaymentNotification 
-} = require('../controllers/paymentController');
+const PaymentController = require('../controllers/paymentController');
+const { authenticateToken } = require('../middleware/authMiddleware');
+const PaymentModel = require('../models/paymentModel');
 
-// Middleware for input validation
-const validatePaymentRequest = [
-    body('OrderID').notEmpty().withMessage('OrderID is required'),
-    body('PaymentMethod').notEmpty().withMessage('PaymentMethod is required'),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        next();
-    }
-];
+// Route to initiate payment
+router.post('/initiate', authenticateToken, PaymentController.initiatePayment);
 
-// Middleware for validating payment status update request
-const validatePaymentStatusUpdate = [
-    body('PaymentID').notEmpty().withMessage('PaymentID is required'),
-    body('PaymentStatus').notEmpty().withMessage('PaymentStatus is required'),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        next();
-    }
-];
+// Routes for PayHere callbacks
+router.post('/notify', PaymentController.handlePayHereNotify);
 
-// Route to initiate a payment
-router.post('/initiate', validatePaymentRequest, initiatePayment);
+// Route to manually update payment status (admin)
+router.put('/status', authenticateToken, PaymentController.updatePaymentStatus);
 
-// Route to update payment status
-router.post('/update-status', validatePaymentStatusUpdate, updatePaymentStatus);
+// Route to get payment details
+router.get('/:paymentId', authenticateToken, PaymentController.getPaymentDetails);
 
-// Route to handle payment notifications (IPN)
-router.post('/notify', handlePaymentNotification);
+// Route to get payments by order ID
+router.get('/order/:orderId', authenticateToken, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const payments = await PaymentModel.getPaymentsByOrderId(orderId);
+    res.status(200).json({ payments });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Failed to fetch payments',
+      error: error.message
+    });
+  }
+});
 
 module.exports = router;

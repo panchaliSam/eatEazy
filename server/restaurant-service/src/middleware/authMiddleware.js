@@ -13,12 +13,10 @@ const authenticateToken = async (req, res, next) => {
     try {
         const response = await axios.post(
             `http://localhost:${AUTH_SERVICE_PORT}/auth/verify`,
-            {
-                token: token
-            },
+            { token },
             {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 }
             }
         );
@@ -54,6 +52,6 @@ const isRestaurant = async (req, res, next) => {
     }
 
     next();
-}
+};
 
 module.exports = { authenticateToken, isRestaurant };

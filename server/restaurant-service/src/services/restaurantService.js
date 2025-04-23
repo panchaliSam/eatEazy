@@ -1,5 +1,4 @@
-const RestaurantModel = require("../models/RestaurantModel");
-const RestaurantRepository = require("../repository/restaurantRepository");
+const RestaurantModel = require("../models/restaurantModel");
 
 //Register a new restaurant
 const registerRestaurant = async (restaurantData) => {

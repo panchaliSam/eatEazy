@@ -1,35 +1,103 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./routes/ProtectedRoutes";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import { AdminDashboard } from "./pages/admin/Dashboard";
+import { RestaurantDashboard } from "./pages/restaurant/Dashboard";
+import { CustomerDashboard } from "./pages/customer/Dashboard";
+import { DeliveryPersonDashboard } from "./pages/deliveryPerson/Dashboard";
+import { MenuScreen } from "./pages/customer/Menu";
+import { CartScreen } from "./pages/customer/Cart";
+import { RestaurantMenuScreen } from "./pages/restaurant/Menu";
 
-function App() {
-  const [count, setCount] = useState(0)
+const theme = createTheme({
+  palette: {
+    background: {
+      default: "#ffffff",
+    },
+  },
+});
 
+const App: React.FC = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1  className="text-red-500">Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/logout" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute
+                element={<AdminDashboard />}
+                allowedRoles={["Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/restaurant"
+            element={
+              <ProtectedRoute
+                element={<RestaurantDashboard />}
+                allowedRoles={["Restaurant"]}
+              />
+            }
+          />
+          <Route
+            path="/menuItems"
+            element={
+              <ProtectedRoute
+                element={<RestaurantMenuScreen />}
+                allowedRoles={["Restaurant"]}
+              />
+            }
+          />
+          <Route
+            path="/customer"
+            element={
+              <ProtectedRoute
+                element={<CustomerDashboard />}
+                allowedRoles={["Customer"]}
+              />
+            }
+          />
+          <Route
+            path="/menu"
+            element={
+              <ProtectedRoute
+                element={<MenuScreen />}
+                allowedRoles={["Customer"]}
+              />
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute
+                element={<CartScreen />}
+                allowedRoles={["Customer"]}
+              />
+            }
+          />
+          <Route
+            path="/delivery"
+            element={
+              <ProtectedRoute
+                element={<DeliveryPersonDashboard />}
+                allowedRoles={["DeliveryPerson"]}
+              />
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+};
 
-export default App
+export default App;

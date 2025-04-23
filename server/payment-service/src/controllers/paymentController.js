@@ -1,81 +1,123 @@
-// controllers/paymentController.js
 const PaymentService = require('../services/paymentService');
-const md5 = require('md5');
-const { PAYHERE_MERCHANT_SECRET } = require('../config/env');
 
 const initiatePayment = async (req, res) => {
-    try {
-        const { OrderID, PaymentMethod } = req.body;
-
-        if (!OrderID || !PaymentMethod) {
-            return res.status(400).json({ error: 'OrderID and PaymentMethod are required' });
-        }
-
-        const paymentDetails = await PaymentService.initiatePayment(OrderID, PaymentMethod);
-        
-        res.status(201).json({ 
-            message: 'Payment initiated successfully', 
-            paymentDetails 
-        });
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).json({ message: 'Server Error', error: err.message });
+  try {
+    const { OrderID, PaymentMethod } = req.body;
+    
+    // Validate required fields
+    if (!OrderID || !PaymentMethod) {
+      return res.status(400).json({ error: 'OrderID and PaymentMethod are required' });
     }
+    
+    // Validate payment method
+    const validPaymentMethods = ['PayHere', 'Dialog Genie', 'FriMi', 'Stripe', 'PayPal'];
+    if (!validPaymentMethods.includes(PaymentMethod)) {
+      return res.status(400).json({ error: `Invalid payment method. Supported methods: ${validPaymentMethods.join(', ')}` });
+    }
+    
+    const paymentDetails = await PaymentService.initiatePayment(OrderID, PaymentMethod);
+    res.status(201).json({ 
+      message: 'Payment initiated successfully', 
+      paymentDetails 
+    });
+  } catch (err) {
+    console.error('Error initiating payment:', err);
+    
+    if (err.message.includes('not found')) {
+      return res.status(404).json({ message: err.message });
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to initiate payment', 
+      error: err.message 
+    });
+  }
+};
+
+const handlePayHereNotify = async (req, res) => {
+  try {
+    // Log the notification for debugging
+    console.log('Received PayHere notification:', req.body);
+    
+    // Validate required fields
+    const requiredFields = ['merchant_id', 'order_id', 'payment_id', 'payhere_amount', 'payhere_currency', 'status_code', 'md5sig'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        message: 'Invalid notification data', 
+        missingFields 
+      });
+    }
+    
+    const result = await PaymentService.processPayHereNotification(req.body);
+    
+    // Return 200 OK to PayHere
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Payment notification error:', error);
+    res.status(400).json({ message: error.message });
+  }
 };
 
 const updatePaymentStatus = async (req, res) => {
-    try {
-        const { PaymentID, PaymentStatus } = req.body;
-
-        if (!PaymentID || !PaymentStatus) {
-            return res.status(400).json({ error: 'PaymentID and PaymentStatus are required' });
-        }
-
-        await PaymentService.updatePaymentStatus(PaymentID, PaymentStatus);
-
-        res.status(200).json({ message: 'Payment status updated successfully' });
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).json({ message: 'Server Error', error: err.message });
+  try {
+    const { PaymentID, PaymentStatus } = req.body;
+    
+    // Validate required fields
+    if (!PaymentID || !PaymentStatus) {
+      return res.status(400).json({ error: 'PaymentID and PaymentStatus are required' });
     }
-};
-
-const handlePaymentNotification = async (req, res) => {
-    try {
-        const payload = req.body;
-        
-        // Verify the payment hash
-        const generatedHash = createPaymentHash(
-            payload.merchant_id,
-            payload.order_id,
-            payload.payhere_amount,
-            payload.payhere_currency,
-            payload.status_code
-        );
-
-        if (generatedHash !== payload.md5sig) {
-            return res.status(400).json({ error: 'Invalid signature' });
-        }
-
-        // Update payment status based on PayHere response
-        if (payload.status_code === 2) {
-            await PaymentService.updatePaymentStatus(payload.order_id, 'Completed');
-        } else if (payload.status_code === 0) {
-            await PaymentService.updatePaymentStatus(payload.order_id, 'Pending');
-        } else if (payload.status_code === -1) {
-            await PaymentService.updatePaymentStatus(payload.order_id, 'Failed');
-        }
-
-        res.status(200).send('OK');
-    } catch (err) {
-        console.error('IPN Error:', err);
-        res.status(500).send('Error');
+    
+    // Validate payment status
+    const validStatuses = ['Pending', 'Completed', 'Failed'];
+    if (!validStatuses.includes(PaymentStatus)) {
+      return res.status(400).json({ error: `Invalid payment status. Valid statuses: ${validStatuses.join(', ')}` });
     }
+    
+    await PaymentService.updatePaymentStatus(PaymentID, PaymentStatus);
+    res.status(200).json({ message: 'Payment status updated successfully' });
+  } catch (err) {
+    console.error('Error updating payment status:', err);
+    
+    if (err.message.includes('not found')) {
+      return res.status(404).json({ message: err.message });
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to update payment status', 
+      error: err.message 
+    });
+  }
 };
 
-const createPaymentHash = (merchant_id, order_id, amount, currency, status_code) => {
-    const data = `${merchant_id}${order_id}${amount}${currency}${status_code}${PAYHERE_MERCHANT_SECRET}`;
-    return md5(data).toUpperCase();
+const getPaymentDetails = async (req, res) => {
+  try {
+    const { paymentId } = req.params;
+    
+    if (!paymentId) {
+      return res.status(400).json({ error: 'Payment ID is required' });
+    }
+    
+    const payment = await PaymentService.getPaymentById(paymentId);
+    
+    if (!payment) {
+      return res.status(404).json({ error: `Payment #${paymentId} not found` });
+    }
+    
+    res.status(200).json({ payment });
+  } catch (err) {
+    console.error('Error fetching payment details:', err);
+    res.status(500).json({ 
+      message: 'Failed to fetch payment details', 
+      error: err.message 
+    });
+  }
 };
 
-module.exports = { initiatePayment, updatePaymentStatus, handlePaymentNotification };
+module.exports = {
+  initiatePayment,
+  handlePayHereNotify,
+  updatePaymentStatus,
+  getPaymentDetails
+};

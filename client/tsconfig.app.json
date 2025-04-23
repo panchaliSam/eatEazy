@@ -6,6 +6,7 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "types": ["node"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -20,7 +21,26 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    "baseUrl": "./",
+
+    /* Paths */
+    "paths": {
+      "@app_assets/*": ["src/assets/*"],
+      "@app_components/*": ["src/components/*"],
+      "@app_common/*": ["src/common/*"],
+      "@app_contexts/*": ["src/contexts/*"],
+      "@app_helper/*": ["src/helper/*"],
+      "@app_hooks/*": ["src/hooks/*"],
+      "@app_pages/*": ["src/pages/*"],
+      "@app_redux/*": ["src/redux/*"],
+      "@app_routes/*": ["src/routes/*"],
+      "@app_services/*": ["src/services/*"],
+      "@app_theme/*": ["src/theme/*"],
+      "@app_utils/*": ["src/utils/*"],
+      "@app_interfaces/*": ["src/interfaces/*"]
+    }
   },
   "include": ["src"]
 }

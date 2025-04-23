@@ -1,4 +1,4 @@
-# Use the node image to avoid re-installing Node.js and npm
+# Use Node.js image
 FROM node:22.13.1 AS build
 
 WORKDIR /usr/src/restaurant-service
@@ -12,9 +12,7 @@ RUN npm install
 # Copy the entire application code
 COPY . .
 
-RUN npm rebuild bcrypt --build-from-source
-
-# Expose the port your app runs on
+# Expose the restaurant service port
 EXPOSE 4002
 
 # Command to run the application

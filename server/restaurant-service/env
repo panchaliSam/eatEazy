@@ -1,0 +1,14 @@
+#DB Configuration
+DB_HOST=localhost
+DB_PORT=3306
+#DB_HOST=beta-core
+DB_USER=root
+DB_PASSWORD=MySQL*123
+DB_NAME=eatEazy
+
+#Auth Service Port
+AUTH_SERVICE_PORT=4000
+RESTAURANT_SERVICE_PORT=4002
+
+#API Gateway URLS
+API_GATEWAY_AUTH_SERVICE_URL=http://localhost:4000/auth/users

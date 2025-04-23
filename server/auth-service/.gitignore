@@ -2,4 +2,8 @@
 .env
 
 #node_moduels
-./node_modules
+node_modules
+
+# Ignore Kubernetes secrets and config maps
+*.secret.yaml
+*.config.yaml

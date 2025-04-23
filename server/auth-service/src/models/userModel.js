@@ -17,6 +17,10 @@ const UserModel = {
         return await UserRepository.getAllUsers();
     },
 
+    getAllDrivers: async () => {
+        return await UserRepository.getAllDrivers();
+    },
+
     deleteUserById: async (id) => {
         return await UserRepository.deleteById(id);
     },
