@@ -1,9 +1,9 @@
 import axios from "axios";
 import { API_URL } from "./ApiURL";
-import { getAuthHeaders } from "../helper/AuthHelper";
-import { getAccessToken } from "../helper/TokenHelper";
-import { IRestaurant } from "../../interfaces/IRestaurant";
-import { IMenu } from "../../interfaces/IMenu";
+import { getAuthHeaders } from "@app_utils/helper/AuthHelper";
+import { getAccessToken } from "@app_utils/helper/TokenHelper";
+import { IRestaurant } from "@app_interfaces/IRestaurant";
+import { IMenu } from "@app_interfaces/IMenu";
 
 const RestaurantApi = {
   // Restaurant APIs
