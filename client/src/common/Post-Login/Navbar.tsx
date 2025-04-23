@@ -15,8 +15,8 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import logo from "@app_assets/logo/png/logo-transparent.png";
-import UserApi from "../../utils/api/UserApi";
-import { getRefreshToken, clearTokens } from "../../utils/helper/TokenHelper";
+import UserApi from "@app_utils/api/UserApi";
+import { getRefreshToken, clearTokens } from "@app_utils/helper/TokenHelper";
 
 const settings = ["Logout"];
 
