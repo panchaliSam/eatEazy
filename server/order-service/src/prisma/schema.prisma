@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./node_modules/.prisma/client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -8,52 +8,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Carts {
-  CartID       Int      @id @default(autoincrement())
-  UserID       Int      
-  RestaurantID Int      
-  CartItems    CartItems[]
-  Status       CartStatus  @default(ACTIVE)
-  CreatedAt    DateTime    @default(now())
-  UpdatedAt    DateTime    @updatedAt
-}
-
-model CartItems {
+model cartitems {
   CartItemsID Int   @id @default(autoincrement())
   CartID      Int
-  Cart        Carts     @relation(fields: [CartID], references: [CartID])
-  MenuItemID  Int   
-  Quantity    Int      @default(1)
-  Price Float
+  MenuItemID  Int
+  Quantity    Int?  @default(1)
+  Price       Float @db.Float
+  carts       carts @relation(fields: [CartID], references: [CartID], onUpdate: Restrict, map: "FK_CartItems_CartID")
+
+  @@index([CartID], map: "FK_CartItems_CartID")
 }
 
-model Orders {
-  OrderID      Int      @id @default(autoincrement())
-  UserID       Int      
-  RestaurantID Int      
-  CartID       Int    
-  Items        OrderItems[] 
-  TotalAmount  Float
-  Status       OrderStatus @default(PENDING)
-  CreatedAt    DateTime    @default(now())
-  UpdatedAt    DateTime    @updatedAt
+model carts {
+  CartID       Int           @id @default(autoincrement())
+  UserID       Int
+  RestaurantID Int
+  Status       carts_Status? @default(ACTIVE)
+  CreatedAt    DateTime      @default(now()) @db.DateTime(0)
+  UpdatedAt    DateTime      @default(now()) @db.DateTime(0)
+  cartitems    cartitems[]
 }
 
-model OrderItems {
-  OrderItemsID Int   @id @default(autoincrement())
-  OrderID    Int
-  Order       Orders    @relation(fields: [OrderID], references: [OrderID])
-  MenuItemID  Int   
-  Quantity    Int
-  Price       Float   
+model orderitems {
+  OrderItemsID Int    @id @default(autoincrement())
+  OrderID      Int
+  MenuItemID   Int
+  Quantity     Int
+  Price        Float  @db.Float
+  orders       orders @relation(fields: [OrderID], references: [OrderID], onUpdate: Restrict, map: "FK_OrderItems_OrderID")
+
+  @@index([OrderID], map: "FK_OrderItems_OrderID")
 }
 
-enum CartStatus {
-  ACTIVE      
-  COMPLETED 
+model orders {
+  OrderID      Int            @id @default(autoincrement())
+  UserID       Int
+  RestaurantID Int
+  CartID       Int
+  TotalAmount  Float          @db.Float
+  Status       orders_Status? @default(PENDING)
+  CreatedAt    DateTime       @default(now()) @db.DateTime(0)
+  UpdatedAt    DateTime       @default(now()) @db.DateTime(0)
+  orderitems   orderitems[]
 }
 
-enum OrderStatus {
+enum carts_Status {
+  ACTIVE
+  COMPLETED
+}
+
+enum orders_Status {
   PENDING
   CONFIRMED
   PREPARING
