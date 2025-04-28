@@ -1,6 +1,6 @@
 // controllers/notificationController.js
-// Import the entire service object
 const NotificationService = require('../services/notificationService'); 
+const NotificationTypes = require('../constants/notificationTypes');
 
 // Handle request to create a notification (intended for service-to-service calls)
 const createNotification = async (req, res) => {
@@ -138,6 +138,138 @@ const markAllNotificationsAsRead = async (req, res) => {
     }
 };
 
+// Process notifications from Order Service
+const processOrderNotification = async (req, res) => {
+    try {
+      const { orderId, userId, customerEmail, customerPhone, status, notificationType } = req.body;
+      
+      // Validate required fields
+      if (!orderId || !userId || !notificationType) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields: orderId, userId, and notificationType are required'
+        });
+      }
+      
+      // Check if valid notification type
+      if (!Object.values(NotificationTypes.ORDER).includes(notificationType)) {
+        console.warn(`Received invalid order notification type: ${notificationType}`);
+      }
+      
+      const result = await NotificationService.processOrderNotification(req.body, notificationType);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Order notification processed successfully'
+      });
+    } catch (error) {
+      console.error('Error processing order notification:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to process order notification',
+        error: error.message
+      });
+    }
+  };
+  
+  // Process notifications from Payment Service
+  const processPaymentNotification = async (req, res) => {
+    try {
+      const { orderId, userId, paymentId, amount, status, notificationType } = req.body;
+      
+      // Validate required fields
+      if (!orderId || !userId || !notificationType) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields: orderId, userId, and notificationType are required'
+        });
+      }
+      
+      // Check if valid notification type
+      if (!Object.values(NotificationTypes.PAYMENT).includes(notificationType)) {
+        console.warn(`Received invalid payment notification type: ${notificationType}`);
+      }
+      
+      const result = await NotificationService.processPaymentNotification(req.body, notificationType);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Payment notification processed successfully'
+      });
+    } catch (error) {
+      console.error('Error processing payment notification:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to process payment notification',
+        error: error.message
+      });
+    }
+  };
+  
+  // Process notifications from Delivery Service
+  const processDeliveryNotification = async (req, res) => {
+    try {
+      const { orderId, userId, driverId, status, notificationType } = req.body;
+      
+      // Validate required fields
+      if (!orderId || !userId || !notificationType) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields: orderId, userId, and notificationType are required'
+        });
+      }
+      
+      // Check if valid notification type
+      if (!Object.values(NotificationTypes.DELIVERY).includes(notificationType)) {
+        console.warn(`Received invalid delivery notification type: ${notificationType}`);
+      }
+      
+      const result = await NotificationService.processDeliveryNotification(req.body, notificationType);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Delivery notification processed successfully'
+      });
+    } catch (error) {
+      console.error('Error processing delivery notification:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to process delivery notification',
+        error: error.message
+      });
+    }
+  };
+  
+  // Process notifications from Restaurant Service
+  const processRestaurantNotification = async (req, res) => {
+    try {
+      const { orderId, userId, restaurantId, status, notificationType } = req.body;
+      
+      // Validate required fields
+      if (!orderId || !userId || !notificationType) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields: orderId, userId, and notificationType are required'
+        });
+      }
+      
+      // For simplicity, we'll reuse the order notification process
+      const result = await NotificationService.processOrderNotification(req.body, notificationType);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Restaurant notification processed successfully'
+      });
+    } catch (error) {
+      console.error('Error processing restaurant notification:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to process restaurant notification',
+        error: error.message
+      });
+    }
+  };
+
 
 // Export controller functions
 module.exports = {
@@ -145,6 +277,10 @@ module.exports = {
     sendEmailNotification,
     sendSMSNotification,
     getMyNotifications,
-    markNotificationAsRead, // ADDED export
-    markAllNotificationsAsRead // ADDED export
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    processOrderNotification,
+    processPaymentNotification,
+    processDeliveryNotification,
+    processRestaurantNotification
 };
