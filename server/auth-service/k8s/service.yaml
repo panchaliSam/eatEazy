@@ -8,6 +8,6 @@ spec:
     app: auth-service
   ports:
     - protocol: TCP
-      port: 4001      # External port
-      targetPort: 4001  # Port inside the container
-  type: ClusterIP  # Internal communication only
+      port: 4001
+      targetPort: 4001
+  type: ClusterIP

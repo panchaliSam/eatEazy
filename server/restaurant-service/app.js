@@ -1,17 +1,23 @@
-const express = require('express');
-const restaurantRoutes = require('./src/routes/restaurantRoutes');
-const bodyParser = require('body-parser');
-const { RESTAURANT_SERVICE_PORT } = require('./src/config/env');
+const express = require("express");
+const restaurantRoutes = require("./src/routes/restaurantRoutes");
+const bodyParser = require("body-parser");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const app = express();
+
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/', restaurantRoutes);
+const PORT = process.env.RESTAURANT_SERVICE_PORT || 4002;
 
-app.get('/', (req, res) => {
-    res.send('Restaurant Service is running!');
+app.use("/", restaurantRoutes);
+
+app.get("/", (req, res) => {
+  res.send("Restaurant Service is running!");
 });
 
-app.listen(RESTAURANT_SERVICE_PORT, () => {
-    console.log(`Server is running on port ${RESTAURANT_SERVICE_PORT}`);
+app.listen(PORT, () => {
+  console.log(`Restaurant Service is running on port ${PORT}`);
 });
