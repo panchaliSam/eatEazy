@@ -1,20 +1,22 @@
-require('dotenv').config();  // Ensure .env variables are loaded
+require('dotenv').config();
 
 const express = require('express');
-const cors = require('cors'); 
+const cors = require('cors');
 const paymentRoutes = require('./src/routes/paymentRoutes');
 const { PAYMENT_SERVICE_PORT } = require('./src/config/env');
 
 const app = express();
 
-app.use(cors());  // Enable CORS
-app.use(express.json()); // Use built-in JSON parser
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-app.use('/api/payments', paymentRoutes);
+// Routes
+app.use('/', paymentRoutes);
 
-// Root Route
+// Health Check
 app.get('/', (req, res) => {
-    res.send('Database connection test is complete!');
+    res.json({ status: 'Payment Service is running' });
 });
 
 // Global Error Handler
@@ -23,7 +25,8 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Something went wrong', error: err.message });
 });
 
-// Start the Server
-app.listen(PAYMENT_SERVICE_PORT || 4010, () => {
-    console.log(`Server is running on port ${PAYMENT_SERVICE_PORT || 4010}`);
+// Start Server
+const PORT = PAYMENT_SERVICE_PORT || 4010;
+app.listen(PORT, () => {
+    console.log(`Payment Service running on port ${PORT}`);
 });

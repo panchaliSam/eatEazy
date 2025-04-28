@@ -1,3 +1,4 @@
+// models/paymentModel.js
 const PaymentRepository = require('../repository/paymentRepository');
 
 const PaymentModel = {
@@ -5,8 +6,8 @@ const PaymentModel = {
     return await PaymentRepository.createPayment(paymentData);
   },
   
-  getOrderDetails: async (OrderID) => {
-    return await PaymentRepository.getOrderDetails(OrderID);
+  getOrderDetailsFromService: async (OrderID, userToken) => {
+    return await PaymentRepository.getOrderDetailsFromService(OrderID, userToken);
   },
   
   getPaymentById: async (PaymentID) => {
@@ -19,7 +20,15 @@ const PaymentModel = {
   
   getPaymentsByOrderId: async (OrderID) => {
     return await PaymentRepository.getPaymentsByOrderId(OrderID);
-  }
+  },
+
+  getPaymentHistoryByUserId: async (userId) => {
+    return await PaymentRepository.getPaymentHistoryByUserId(userId);
+  },
+  updatePaymentTransactionDetails: async (paymentID, transactionID, amount) => {
+    const query = 'UPDATE Payments SET TransactionID = ?, Amount = ?, UpdatedAt = CURRENT_TIMESTAMP WHERE PaymentID = ?';
+    await pool.execute(query, [transactionID, amount, paymentID]);
+  },
 };
 
 module.exports = PaymentModel;

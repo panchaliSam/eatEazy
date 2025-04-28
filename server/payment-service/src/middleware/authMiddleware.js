@@ -21,5 +21,14 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// Middleware to check if user is an admin
+const isAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next(); 
+    } else {
+        return res.status(403).json({ message: 'Access denied. Admins only.' });
+    }
+};
 
-module.exports = { authenticateToken };
+
+module.exports = { authenticateToken, isAdmin };
