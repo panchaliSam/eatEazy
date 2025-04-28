@@ -1,35 +1,27 @@
-// routes/notificationRoutes.js
+// src/routes/notificationRoutes.js
 const express = require('express');
 const router = express.Router();
-const { // Import all necessary controller functions
-    createNotification,
-    sendEmailNotification,
-    sendSMSNotification,
-    getMyNotifications,
-    markNotificationAsRead, // ADDED
-    markAllNotificationsAsRead // ADDED
-  } = require('../controllers/notificationController');
-
-  const { authenticateToken } = require('../middleware/authMiddleware'); // User auth
-const serviceAuth = require('../middleware/serviceAuth'); // Service auth
-
+const notificationController = require('../controllers/notificationController');
+const { authenticateToken } = require('../middleware/authMiddleware');
+const serviceAuth = require('../middleware/serviceAuth');
 
 // Service-to-service routes (protected by serviceAuth middleware)
-// Used by other backend services (like Order Service, Payment Service) to request notifications
-router.post('/create', serviceAuth, createNotification); // To create In-App notifications in DB
-router.post('/send-email', serviceAuth, sendEmailNotification); // To request sending emails
-router.post('/send-sms', serviceAuth, sendSMSNotification); // To request sending SMS
+router.post('/create', serviceAuth, notificationController.createNotification);
+router.post('/send-email', serviceAuth, notificationController.sendEmailNotification);
+router.post('/send-sms', serviceAuth, notificationController.sendSMSNotification);
+
+// NEW SERVICE INTEGRATION ROUTES - all protected by serviceAuth
+router.post('/service/order', serviceAuth, notificationController.processOrderNotification);
+router.post('/service/payment', serviceAuth, notificationController.processPaymentNotification);
+router.post('/service/delivery', serviceAuth, notificationController.processDeliveryNotification);
+router.post('/service/restaurant', serviceAuth, notificationController.processRestaurantNotification);
 
 // User-facing routes (protected by authenticateToken middleware)
-// Used by frontend clients (customer, delivery person)
-router.get('/myNotifications', authenticateToken, getMyNotifications); // Get notifications for the logged-in user
+router.get('/myNotifications', authenticateToken, notificationController.getMyNotifications);
+router.put('/mark-all-read', authenticateToken, notificationController.markAllNotificationsAsRead);
+router.put('/:notificationId/read', authenticateToken, notificationController.markNotificationAsRead);
 
-// ADDED: Routes to mark notifications as read
-// PUT request is appropriate for updating a resource (the notification's IsRead status)
-router.put('/mark-all-read', authenticateToken, markAllNotificationsAsRead); // Mark all for user as read
-router.put('/:notificationId/read', authenticateToken, markNotificationAsRead); // Mark a specific one as read
-
-// Add this route to the notification routes
+// Health check endpoint
 router.get('/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -37,6 +29,5 @@ router.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-
 
 module.exports = router;
