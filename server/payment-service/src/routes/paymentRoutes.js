@@ -5,6 +5,8 @@ const PaymentController = require('../controllers/paymentController');
 const { authenticateToken, isAdmin } = require('../middleware/authMiddleware');
 // const PaymentRepository = require('../repository/paymentRepository');
 
+// Route to get payment history for authenticated user
+router.get('/history', authenticateToken, PaymentController.getPaymentHistory);
 // Route to initiate payment
 router.post('/initiate', authenticateToken, PaymentController.initiatePayment);
 
@@ -22,5 +24,15 @@ router.get('/order/:OrderID', authenticateToken, PaymentController.getPaymentsBy
 
 // // Route to get order details from the order service
 // router.get('/orders/:OrderID',authenticateToken,PaymentRepository.getOrderDetailsFromService)
+
+// Add this route to the payment routes
+router.get('/health', (req, res) => {
+    res.status(200).json({
+      status: 'UP',
+      service: 'Payment Service',
+      timestamp: new Date().toISOString()
+    });
+  });
+  
 
 module.exports = router;

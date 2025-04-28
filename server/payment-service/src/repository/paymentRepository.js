@@ -6,71 +6,70 @@ const { ORDER_SERVICE_URL } = require('../config/env');
 
 const PaymentRepository = {
   createPayment: async (paymentData) => {
-    const { OrderID, TransactionID, PaymentMethod, PaymentStatus, Amount } = paymentData;
+    const { OrderID, UserID, TransactionID, PaymentMethod, PaymentStatus, Amount } = paymentData;
+    
+    // Ensure UserID is valid
+    const validUserId = UserID || 3; // Fallback to customer ID 3 if null
+    
     const query = `
-      INSERT INTO Payments (OrderID, Amount, TransactionID, PaymentMethod, PaymentStatus)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO Payments (OrderID, UserID, Amount, TransactionID, PaymentMethod, PaymentStatus)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
-    const [result] = await pool.execute(query, [OrderID, Amount, TransactionID, PaymentMethod, PaymentStatus]);
+    const [result] = await pool.execute(query, [OrderID, validUserId, Amount, TransactionID, PaymentMethod, PaymentStatus]);
     return result.insertId;
   },
   
   getOrderDetailsFromService: async (OrderID, userToken) => {
     try {
-      const url = `http://localhost:4000/orders/getOrderByOrderId/${OrderID}`;
-      
-      console.log(`Fetching order details from: ${url}`);
-      
-      // Format the token properly if it exists
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-      
+      // Only try to fetch order details if we have a user token
       if (userToken) {
-        // Make sure token has the Bearer prefix
-        if (!userToken.startsWith('Bearer ')) {
-          headers.Authorization = `Bearer ${userToken}`;
-        } else {
-          headers.Authorization = userToken;
-        }
-        console.log(`Using authorization header: ${headers.Authorization.substring(0, 15)}...`);
-      } else {
-        console.warn('No user token provided for authentication');
-      }
-      
-      const response = await axios.get(url, {
-        headers,
-        timeout: 5000
-      });
-  
-      if (!response.data) {
-        console.error(`Order service returned empty data for OrderID ${OrderID}`);
-        return null;
-      }
-      
-      return response.data;
-    } catch (error) {
-      // Enhanced error logging
-      if (error.response) {
-        // The server responded with a status code outside the 2xx range
-        console.error(`Error fetching order details for OrderID ${OrderID}: Status ${error.response.status}`, 
-          error.response.data);
+        const url = `http://localhost:4000/orders/getOrderByOrderId/${OrderID}`;
+        console.log(`Fetching order details with user token: ${url}`);
         
-        // Check for authentication errors specifically
-        if (error.response.status === 401 || error.response.status === 403) {
-          console.error('Authentication failed. User authorization may be required.');
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': userToken.startsWith('Bearer ') ? userToken : `Bearer ${userToken}`
+        };
+        
+        try {
+          const response = await axios.get(url, {
+            headers,
+            timeout: 5000
+          });
+      
+          if (response.data) {
+            console.log(`Successfully fetched order details for OrderID ${OrderID}`);
+            return response.data;
+          }
+        } catch (requestError) {
+          console.log(`Could not fetch order details with user token: ${requestError.message}`);
+          // Continue to fallback
         }
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error(`Error fetching order details for OrderID ${OrderID}: No response received`, 
-          error.message);
-      } else {
-        // Something happened in setting up the request
-        console.error(`Error fetching order details for OrderID ${OrderID}: Request setup failed`, 
-          error.message);
       }
       
-      return null;
+      // For webhook context (no user token) or if fetching with user token failed
+      console.log(`OrderID ${OrderID}: No user token or fetching with token failed. Using fallback data.`);
+      
+      // Return fallback data that contains the minimum we need for payment processing
+      return {
+        OrderID: parseInt(OrderID),
+        UserID: 3, // Default admin user
+        TotalAmount: 0, // Will be overridden by the actual payment amount
+        Email: process.env.FALLBACK_ADMIN_EMAIL || 'kumodib@gmail.com',
+        Phone: process.env.FALLBACK_ADMIN_PHONE || '94768501850',
+        Name: 'Kumodi Bogahawatte'
+      };
+    } catch (error) {
+      console.error(`Unexpected error fetching order details: ${error.message}`);
+      // Return fallback data even on unexpected errors
+      return {
+        OrderID: parseInt(OrderID),
+        UserID: 3,
+        TotalAmount: 0,
+        Email: process.env.FALLBACK_ADMIN_EMAIL || 'kumodib@gmail.com',
+        Phone: process.env.FALLBACK_ADMIN_PHONE || '94768501850',
+        Name: 'Kumodi Bogahawatte'
+      };
     }
   },
   
@@ -89,6 +88,28 @@ const PaymentRepository = {
     const query = 'SELECT * FROM Payments WHERE OrderID = ?';
     const [rows] = await pool.execute(query, [OrderID]);
     return rows;
+  },
+  getPaymentHistoryByUserId: async (userId) => {
+    try {
+      // Directly query by UserID
+      const query = 'SELECT * FROM Payments WHERE UserID = ? ORDER BY PaymentDate DESC';
+      const [rows] = await pool.execute(query, [userId]);
+      return rows;
+    } catch (error) {
+      console.error('Error in getPaymentHistoryByUserId:', error);
+      throw error;
+    }
+  },
+  updatePaymentTransactionDetails: async (paymentID, transactionID, amount) => {
+    try {
+      const query = 'UPDATE Payments SET TransactionID = ?, Amount = ?, UpdatedAt = CURRENT_TIMESTAMP WHERE PaymentID = ?';
+      const [result] = await pool.execute(query, [transactionID, amount, paymentID]);
+      console.log(`Updated payment #${paymentID} with transaction ID ${transactionID} and amount ${amount}`);
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error(`Error updating payment transaction details for payment #${paymentID}:`, error);
+      throw error;
+    }
   }
 };
 

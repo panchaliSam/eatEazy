@@ -12,7 +12,7 @@ const initiatePayment = async (req, res) => {
     }
     
     // Validate payment method
-    const validPaymentMethods = ['PayHere', 'Dialog Genie', 'FriMi', 'Stripe', 'PayPal'];
+    const validPaymentMethods = ['PayHere'];
     if (!validPaymentMethods.includes(PaymentMethod)) {
       return res.status(400).json({ error: `Invalid payment method. Supported methods: ${validPaymentMethods.join(', ')}` });
     }
@@ -113,6 +113,13 @@ const getPaymentById = async (req, res) => {
   try {
     const { PaymentID } = req.params;
     
+    // Guard against confusion with the /history endpoint
+    if (PaymentID === 'history') {
+      return res.status(400).json({ 
+        error: 'Invalid payment ID. Did you mean to use the /payments/history endpoint?' 
+      });
+    }
+    
     if (!PaymentID) {
       return res.status(400).json({ error: 'Payment ID is required' });
     }
@@ -163,10 +170,42 @@ const getPaymentsByOrderId = async (req, res) => {
   }
 };
 
+const getPaymentHistory = async (req, res) => {
+  try {
+    // Get user ID from authenticated token
+    const userId = req.user.id || req.user.userId;
+    
+    if (!userId) {
+      return res.status(400).json({ 
+        message: 'User ID not found in token'
+      });
+    }
+    
+    // Pass the authorization token to the service
+    const userToken = req.headers.authorization;
+    
+    // Get payment history for user
+    const payments = await PaymentService.getPaymentHistoryByUserId(userId, userToken);
+    
+    res.status(200).json({
+      success: true,
+      payments: payments
+    });
+  } catch (err) {
+    console.error('Error fetching payment history:', err);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to fetch payment history', 
+      error: err.message 
+    });
+  }
+};
+
 module.exports = {
   initiatePayment,
   handlePayHereNotify,
   updatePaymentStatus,
   getPaymentById,
-  getPaymentsByOrderId
+  getPaymentsByOrderId,
+  getPaymentHistory
 };

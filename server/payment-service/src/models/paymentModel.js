@@ -20,7 +20,15 @@ const PaymentModel = {
   
   getPaymentsByOrderId: async (OrderID) => {
     return await PaymentRepository.getPaymentsByOrderId(OrderID);
-  }
+  },
+
+  getPaymentHistoryByUserId: async (userId) => {
+    return await PaymentRepository.getPaymentHistoryByUserId(userId);
+  },
+  updatePaymentTransactionDetails: async (paymentID, transactionID, amount) => {
+    const query = 'UPDATE Payments SET TransactionID = ?, Amount = ?, UpdatedAt = CURRENT_TIMESTAMP WHERE PaymentID = ?';
+    await pool.execute(query, [transactionID, amount, paymentID]);
+  },
 };
 
 module.exports = PaymentModel;
