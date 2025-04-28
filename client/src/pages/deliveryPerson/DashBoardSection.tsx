@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import Typography from "@mui/material/Typography";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -19,7 +19,6 @@ import { orange } from "@mui/material/colors";
 import UserApi from "@app_utils/api/UserApi";
 import { clearTokens, getRefreshToken } from "@app_utils/helper/TokenHelper";
 import { DeliveryPersonDashboardContent } from "@app_components/deliveryPerson/DashBoardContent";
-import { clear } from "console";
 
 const theme = createTheme({
   palette: {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { TextField } from "@mui/material";
+import { TextField, CircularProgress } from "@mui/material";
 import Button from "@mui/material/Button";
 import UserApi from "@app_utils/api/UserApi";
 import { getAccessToken } from "@app_utils/helper/TokenHelper";
@@ -198,7 +198,11 @@ export const CustomerDashboardContent = () => {
                 },
               }}
             >
-              Save Changes
+              {loading ? (
+                <CircularProgress size={24} sx={{ color: "white" }} />
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </Box>
         </Box>

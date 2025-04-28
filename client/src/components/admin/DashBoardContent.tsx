@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { TextField } from "@mui/material";
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
+import CircularProgress from "@mui/material/CircularProgress";
 import UserApi from "@app_utils/api/UserApi";
 import { getAccessToken } from "@app_utils/helper/TokenHelper";
 
@@ -16,7 +16,7 @@ export const AdminDashboardContent = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false); // Track saving state
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -47,7 +47,7 @@ export const AdminDashboardContent = () => {
   }, []);
 
   const handleSaveChanges = async () => {
-    setSaving(true); // Set saving to true
+    setSaving(true);
     try {
       await UserApi.updateUserById({
         firstname: userData.firstName,
