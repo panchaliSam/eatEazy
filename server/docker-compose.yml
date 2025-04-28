@@ -1,4 +1,19 @@
 services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - AUTH_SERVICE_URL=http://auth-service:4001/
+      - RESTAURANT_SERVICE_URL=http://restaurant-service:4002/
+    depends_on:
+      - auth-service
+      - restaurant-service
+    networks:
+      - backend
   auth-service:
     build:
       context: ./auth-service
@@ -6,7 +21,16 @@ services:
     ports:
       - "4001:4001"
     environment:
+      - PORT=4001
+      - DATABASE_URL=mysql://root:MySQL*123@host.docker.internal:3306/eatEazy_users
       - NODE_ENV=production
+      - DATABASE_HOST=host.docker.internal
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=MySQL*123
+      - DATABASE_NAME=eatEazy_users
+      - JWT_SECRET=2c22f96cc4f4b71adcb0e10d98749d6996ea89220724c8cad66aa8201a97da81e459198a1ea493819fe0652890b69fe3a009572f17443ae6cde7bd878285bfde9bff26783878b712341df109cd9a13d148dadfda708d65957ec6c357edb8370240146d9b832f1950c4f9deff57f64a45050f5c590fc8c9c3314df8ff32c3dc98fad92e17e12426f2d865d3bdd0dc86891860593039702706919f0cb2d2d3e5fcba699d1bc799f5d0f5f3e699b2b6bc94123f3b819ad48b146ee7a690b7b8633cb3662820bbb554aa06c8bdcd26bf7023f3f63a8a608689149c801486efcf45c7ab13c5e3f13119b1745e8a74987bb0a098e93b8634c7314f128cd5eed65cd08d
+      - JWT_EXPIRATION=1h
+      - REFRESH_TOKEN_EXPIRATION=7d
     networks:
       - backend
 
@@ -17,28 +41,20 @@ services:
     ports:
       - "4002:4002"
     environment:
+      - PORT=4002
+      - DATABASE_URL=mysql://root:MySQL*123@host.docker.internal:3306/eatEazy_restaurants
       - NODE_ENV=production
-      - AUTH_SERVICE_PORT=4001
+      - DATABASE_HOST=host.docker.internal
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=MySQL*123
+      - DATABASE_NAME=eatEazy_restaurants
+      - AUTH_SERVICE_VERIFICATION=http://auth-service:4001/verify
+      - API_GATEWAY_AUTH_SERVICE_URL=http://api-gateway:4000/auth/users
     depends_on:
       - auth-service
     networks:
       - backend
 
-  beta-core:
-    image: mysql:8
-    environment:
-      MYSQL_ROOT_PASSWORD: MySQL*123
-      MYSQL_DATABASE: eatEazy
-    ports:
-      - "3308:3306"
-    networks:
-      - backend
-    volumes:
-      - mysql-data:/var/lib/mysql
-
 networks:
   backend:
     driver: bridge
-
-volumes:
-  mysql-data:
