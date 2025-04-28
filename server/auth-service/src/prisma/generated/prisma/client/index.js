@@ -166,6 +166,10 @@ const config = {
       {
         "fromEnvVar": null,
         "value": "darwin-arm64"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-arm64-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -191,8 +195,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/prisma/client\"\n  binaryTargets = [\"windows\", \"darwin-arm64\"]\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel RefreshTokens {\n  TokenID   Int      @id @default(autoincrement())\n  Token     String   @unique\n  user      Users    @relation(fields: [UserID], references: [UserID])\n  UserID    Int\n  ExpiresAt DateTime\n  CreatedAt DateTime @default(now())\n  UpdatedAt DateTime @updatedAt\n}\n\nmodel Users {\n  UserID        Int             @id @default(autoincrement())\n  Firstname     String          @db.VarChar(255)\n  Lastname      String          @db.VarChar(255)\n  PasswordHash  String          @db.VarChar(255)\n  Email         String          @unique(map: \"Email\") @db.VarChar(255)\n  Phone         String?         @db.VarChar(15)\n  Role          Users_Role\n  refreshTokens RefreshTokens[]\n}\n\nenum Users_Role {\n  Admin\n  Restaurant\n  Customer\n  DeliveryPerson\n}\n",
-  "inlineSchemaHash": "18a3a018d5e59a9dea91a886190f9fa9f3379941035c9be0af9812687763b2bd",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/prisma/client\"\n  binaryTargets = [\"windows\", \"darwin-arm64\", \"linux-musl-arm64-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel RefreshTokens {\n  TokenID   Int      @id @default(autoincrement())\n  Token     String   @unique\n  user      Users    @relation(fields: [UserID], references: [UserID])\n  UserID    Int\n  ExpiresAt DateTime\n  CreatedAt DateTime @default(now())\n  UpdatedAt DateTime @updatedAt\n}\n\nmodel Users {\n  UserID        Int             @id @default(autoincrement())\n  Firstname     String          @db.VarChar(255)\n  Lastname      String          @db.VarChar(255)\n  PasswordHash  String          @db.VarChar(255)\n  Email         String          @unique(map: \"Email\") @db.VarChar(255)\n  Phone         String?         @db.VarChar(15)\n  Role          Users_Role\n  refreshTokens RefreshTokens[]\n}\n\nenum Users_Role {\n  Admin\n  Restaurant\n  Customer\n  DeliveryPerson\n}\n",
+  "inlineSchemaHash": "367911fc0516f45f89befe55ac339a3faed608a8c562a5eb404ba7a8afa25c9c",
   "copyEngine": true
 }
 
@@ -237,6 +241,10 @@ path.join(process.cwd(), "prisma/generated/prisma/client/query_engine-windows.dl
 // file annotations for bundling tools to include these files
 path.join(__dirname, "libquery_engine-darwin-arm64.dylib.node");
 path.join(process.cwd(), "prisma/generated/prisma/client/libquery_engine-darwin-arm64.dylib.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-linux-musl-arm64-openssl-3.0.x.so.node");
+path.join(process.cwd(), "prisma/generated/prisma/client/libquery_engine-linux-musl-arm64-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "prisma/generated/prisma/client/schema.prisma")

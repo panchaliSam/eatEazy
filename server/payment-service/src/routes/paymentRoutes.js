@@ -1,9 +1,12 @@
+// routes/paymentRoutes.js
 const express = require('express');
 const router = express.Router();
 const PaymentController = require('../controllers/paymentController');
-const { authenticateToken } = require('../middleware/authMiddleware');
-const PaymentModel = require('../models/paymentModel');
+const { authenticateToken, isAdmin } = require('../middleware/authMiddleware');
+// const PaymentRepository = require('../repository/paymentRepository');
 
+// Route to get payment history for authenticated user
+router.get('/history', authenticateToken, PaymentController.getPaymentHistory);
 // Route to initiate payment
 router.post('/initiate', authenticateToken, PaymentController.initiatePayment);
 
@@ -11,23 +14,25 @@ router.post('/initiate', authenticateToken, PaymentController.initiatePayment);
 router.post('/notify', PaymentController.handlePayHereNotify);
 
 // Route to manually update payment status (admin)
-router.put('/status', authenticateToken, PaymentController.updatePaymentStatus);
+router.put('/status', authenticateToken, isAdmin, PaymentController.updatePaymentStatus);
 
 // Route to get payment details
-router.get('/:paymentId', authenticateToken, PaymentController.getPaymentDetails);
+router.get('/:PaymentID', authenticateToken, PaymentController.getPaymentById);
 
 // Route to get payments by order ID
-router.get('/order/:orderId', authenticateToken, async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const payments = await PaymentModel.getPaymentsByOrderId(orderId);
-    res.status(200).json({ payments });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Failed to fetch payments',
-      error: error.message
+router.get('/order/:OrderID', authenticateToken, PaymentController.getPaymentsByOrderId);
+
+// // Route to get order details from the order service
+// router.get('/orders/:OrderID',authenticateToken,PaymentRepository.getOrderDetailsFromService)
+
+// Add this route to the payment routes
+router.get('/health', (req, res) => {
+    res.status(200).json({
+      status: 'UP',
+      service: 'Payment Service',
+      timestamp: new Date().toISOString()
     });
-  }
-});
+  });
+  
 
 module.exports = router;

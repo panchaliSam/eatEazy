@@ -157,8 +157,15 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "darwin-arm64",
-        "native": true
+        "value": "windows"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "darwin-arm64"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-arm64-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -176,17 +183,16 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "mysql://root:MySQL*123@localhost:3306/eatEazy_restaurants"
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"./generated/prisma/client\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Restaurants {\n  RestaurantID   Int         @id @default(autoincrement())\n  OwnerID        Int?\n  RestaurantName String      @db.VarChar(255)\n  Address        String      @db.Text\n  Phone          String?     @db.VarChar(15)\n  Email          String?     @db.VarChar(255)\n  Availability   String      @db.VarChar(255)\n  MenuItems      MenuItems[]\n}\n\nmodel MenuItems {\n  MenuItemID   Int          @id @default(autoincrement())\n  RestaurantID Int?\n  Name         String       @db.VarChar(255)\n  Description  String?      @db.Text\n  Price        Decimal      @db.Decimal(10, 2)\n  IsAvailable  Boolean?     @default(true)\n  Restaurants  Restaurants? @relation(fields: [RestaurantID], references: [RestaurantID], onDelete: Cascade, onUpdate: NoAction, map: \"menuitems_ibfk_1\")\n\n  @@index([RestaurantID], map: \"RestaurantID\")\n}\n",
-  "inlineSchemaHash": "f73f75ecd22a9c29d7b4708cbf18ea201418d85c4529b16b7280b254a8f24a2e",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/prisma/client\"\n  binaryTargets = [\"windows\", \"darwin-arm64\", \"linux-musl-arm64-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Restaurants {\n  RestaurantID   Int         @id @default(autoincrement())\n  OwnerID        Int?\n  RestaurantName String      @db.VarChar(255)\n  Address        String      @db.Text\n  Phone          String?     @db.VarChar(15)\n  Email          String?     @db.VarChar(255)\n  Availability   String      @db.VarChar(255)\n  MenuItems      MenuItems[]\n}\n\nmodel MenuItems {\n  MenuItemID   Int          @id @default(autoincrement())\n  RestaurantID Int?\n  Name         String       @db.VarChar(255)\n  Description  String?      @db.Text\n  Price        Decimal      @db.Decimal(10, 2)\n  IsAvailable  Boolean?     @default(true)\n  Restaurants  Restaurants? @relation(fields: [RestaurantID], references: [RestaurantID], onDelete: Cascade, onUpdate: NoAction, map: \"menuitems_ibfk_1\")\n\n  @@index([RestaurantID], map: \"RestaurantID\")\n}\n",
+  "inlineSchemaHash": "4c82930a17835aa0325ee02eee0fd5eb407f504ac254abf31393ade2f141b0d1",
   "copyEngine": true
 }
 
@@ -225,8 +231,16 @@ exports.PrismaClient = PrismaClient
 Object.assign(exports, Prisma)
 
 // file annotations for bundling tools to include these files
+path.join(__dirname, "query_engine-windows.dll.node");
+path.join(process.cwd(), "prisma/generated/prisma/client/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
 path.join(__dirname, "libquery_engine-darwin-arm64.dylib.node");
 path.join(process.cwd(), "prisma/generated/prisma/client/libquery_engine-darwin-arm64.dylib.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-linux-musl-arm64-openssl-3.0.x.so.node");
+path.join(process.cwd(), "prisma/generated/prisma/client/libquery_engine-linux-musl-arm64-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "prisma/generated/prisma/client/schema.prisma")

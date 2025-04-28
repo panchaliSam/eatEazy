@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config/env");
 
-// Dummy secret key (use .env in real apps)
-const SECRET_KEY = JWT_SECRET || "your-secret";
+//.env should be included with JWT_SECRECT 
+const SECRET_KEY = JWT_SECRET;
 
+//Auth middleware to check if a user is authenticated properly
 function authenticate(req, res, next) {
   const authHeader = req.header("Authorization");
   if (!authHeader) {

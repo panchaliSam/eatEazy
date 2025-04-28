@@ -1,6 +1,8 @@
 const prisma = require("../config/prisma");
 
+//All the DB logic and DB functionalities implemented here
 const DeliveryRepository = {
+  //DB logic for assignDeliveryPerson
   assignDeliveryPerson: async (orderId, deliveryPersonId) => {
     const existingDelivery = await prisma.delivery.findUnique({
       where: {
@@ -20,6 +22,7 @@ const DeliveryRepository = {
     });
   },
 
+  //DB logic for getDeliveryStatus
   getDeliveryStatus: async (orderId) => {
     const delivery = await prisma.delivery.findUnique({
       where: {
@@ -39,6 +42,7 @@ const DeliveryRepository = {
     };
   },
 
+  //DB logic for updateDeliveryStatus
   updateDeliveryStatus: async (deliveryId, status) => {
     return prisma.delivery.update({
       where: {
@@ -50,6 +54,8 @@ const DeliveryRepository = {
     });
   },
 
+  //DB logic for getDeliveryRoute
+  
   getDeliveryRoute: async (deliveryId) => {
     const route = await prisma.deliveryRoutes.findUnique({
       where: {
@@ -73,6 +79,7 @@ const DeliveryRepository = {
     return rows;
   },
 
+  //DB logic for insertRoute
   insertRoute: (deliveryId, startLat, startLng, endLat, endLng) => {
     console.log(
       `Inserting route: startLat=${startLat}, startLng=${startLng}, endLat=${endLat}, endLng=${endLng}`

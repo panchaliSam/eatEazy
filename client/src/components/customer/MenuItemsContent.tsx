@@ -37,7 +37,6 @@ interface MenuItemsContentProps {
 
 export const MenuItemsContent: React.FC<MenuItemsContentProps> = ({
   restaurantId,
-  restaurantName,
 }) => {
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
