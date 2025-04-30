@@ -36,27 +36,41 @@ const getMenuItemPrice = async (restaurantId, menuItemId, token) => {
   return item?.Price;
 };
 
-const processOrder = async (token, items, restaurantId) => {
+const addToCart = async (token, items, restaurantId) => {
   const user = await verifyToken(token);
   const userId = user.id;
 
-  const cart = await orderRepo.createCart(userId, restaurantId, "ACTIVE");
+  let cart = await orderRepo.findActiveCart(userId, restaurantId);
 
-  const cartItems = [];
+  // Create new cart if not exists
+  if (!cart) {
+    cart = await orderRepo.createCart(userId, restaurantId, "ACTIVE");
+  }
 
   for (const item of items) {
-    const price = await getMenuItemPrice(restaurantId, item.menuItemId,token);
+    const price = await getMenuItemPrice(restaurantId, item.menuItemId, token);
     if (!price) throw new Error(`Invalid menu item: ${item.menuItemId}`);
 
-    const cartItem = await orderRepo.createCartItem({
+    await orderRepo.createCartItem({
       CartID: cart.CartID,
       MenuItemID: item.menuItemId,
       Quantity: item.quantity,
       Price: parseFloat(price),
     });
-
-    cartItems.push(cartItem);
   }
+
+  return { message: "Items added to cart", cartId: cart.CartID };
+};
+
+const checkout = async (token, restaurantId) => {
+  const user = await verifyToken(token);
+  const userId = user.id;
+
+  const cart = await orderRepo.findActiveCart(userId, restaurantId);
+  if (!cart) throw new Error("No active cart to checkout");
+
+  const cartItems = await orderRepo.getCartItems(cart.CartID);
+  if (cartItems.length === 0) throw new Error("Cart is empty");
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.Price * item.Quantity,
@@ -82,52 +96,29 @@ const processOrder = async (token, items, restaurantId) => {
   return order;
 };
 
-const updateCartAndOrder = async (cartId, items) => {
+
+//updateCart function
+const updateCart = async (cartId, items) => {
   try {
-    const cartIdInt = parseInt(cartId);
-
-    // Update Cart Items
-    for (const item of items) {
-      if (!item.CartItemsID) {
-        throw new Error("CartItemsID is required.");
-      }
-
-      await prisma.cartItems.update({
-        where: { CartItemsID: item.CartItemsID },
-        data: { Quantity: item.Quantity },
+    await orderRepo.updateCartItems(cartId, items);
+    
+    const order = await orderRepo.getOrderByCartId(cartId);
+    
+    if (order) {
+      const updatedCartItems = await orderRepo.getCartItems(cartId);
+      
+      const total = updatedCartItems.reduce(
+        (sum, item) => sum + item.Price * item.Quantity,
+        0
+      );
+      await prisma.orders.update({
+        where: { OrderID: order.OrderID },
+        data: { TotalAmount: total }
       });
+      return await orderRepo.getOrderByCartId(cartId);
     }
-
-    // Find the associated Order
-    const order = await prisma.orders.findFirst({
-      where: { CartID: cartIdInt },
-    });
-
-    if (!order) {
-      throw new Error("Order not found.");
-    }
-
-    const orderId = order.OrderID;
-
-    // Update Order Items
-    for (const item of items) {
-      const cartItem = await prisma.cartItems.findUnique({
-        where: { CartItemsID: item.CartItemsID },
-      });
-
-      if (!cartItem) continue;
-
-      await prisma.orderItems.updateMany({
-        where: {
-          OrderID: orderId,
-          MenuItemID: cartItem.MenuItemID,
-        },
-        data: { Quantity: item.Quantity },
-      });
-    }
-
-    // Recalculate and Update Order Total
-    return await updateOrderTotal(orderId);
+    
+    return await orderRepo.getCartItems(cartId);
   } catch (error) {
     throw new Error(`Failed to update cart and order: ${error.message}`);
   }
@@ -161,19 +152,34 @@ const getAllOrderbyRestaurantId=async(id)=>{
   if(!order) throw new Error("No orders for restaurant");
   return order;
 }  
-const updatePaymentStatus = async (orderId, status) => {
-  const updatedOrder = await orderRepo.updatePaymentStatus(orderId, status);
+const getAllOrdersForAdmin=async()=>{
+  const order=await orderRepo.getAllOrdersForAdmin();
+  if(!order) throw new Error("No orders for restaurant");
+  return order;
+} 
+const getOrderTotal = async (orderId) => {
+  const order = await orderRepo.getOrderById(parseInt(orderId));
+  if (!order) {
+    throw new Error("Order not found");
+  }
+  return order.TotalAmount;
+
+};
+const updatePaymentStatus = async (orderId, paymentStatus) => {
+  const updatedOrder = await orderRepo.updatePaymentStatus(orderId, paymentStatus);
   return updatedOrder;
 };
-
   
   module.exports = {
-    processOrder,
-    updateCartAndOrder,
-    updatePaymentStatus,
+    addToCart,
+    checkout,
+    updateCart,
     getOrderById,
     getOrderByUserId,
+    getOrderTotal,
     getAllOrderbyRestaurantId,
-    deleteOrder
+    getAllOrdersForAdmin,
+    deleteOrder,
+    updatePaymentStatus
   };
   

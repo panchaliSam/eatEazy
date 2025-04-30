@@ -58,12 +58,9 @@ const OrderModel = {
     }
   },
   // Update payment status of an order
-updatePaymentStatus: async (orderId, status) => {
-  return await OrderRepository.updatePaymentStatus(orderId, status);
-},
-
-
-  
+  updatePaymentStatus: async (orderId, paymentStatus) => {
+    return await OrderRepository.updatePaymentStatus(orderId, paymentStatus);
+  },
 };
 
 module.exports = OrderModel;

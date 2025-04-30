@@ -1,4 +1,6 @@
-const prisma = require('../config/prisma');
+const { PrismaClient } = require('../generated/prisma');
+const prisma = new PrismaClient();
+
 
 const createCart = (userId, restaurantId, status) => {
   return prisma.carts.create({
@@ -11,8 +13,30 @@ const createCartItem = (data) => {
 };
 
 const createOrder = (data) => {
-  return prisma.orders.create({ data, include: { Items: true } });
+  if (!data.Status) {
+    data.Status = 'Pending'; 
+  }
+  
+  return prisma.orders.create({ 
+    data, 
+    include: { Items: true } 
+  });
 };
+const findActiveCart = async (userId, restaurantId) => {
+  return await prisma.carts.findFirst({
+    where: {
+      UserID: userId,
+      RestaurantID: restaurantId,
+      Status: 'ACTIVE'
+    }
+  });
+};
+const getCartItems = async (cartId) => {
+  return await prisma.cartItems.findMany({
+    where: { CartID: cartId }
+  });
+};
+
 
 const getOrderById = async (orderId) => {
   // Ensure orderId is an integer
@@ -50,6 +74,21 @@ const getAllOrderbyRestaurantId = async(restaurantId) =>{
     }
   });
 
+};
+const getAllOrdersForAdmin = async () => {
+  return await prisma.orders.findMany({
+    orderBy: { CreatedAt: 'desc' },
+    include: { Items: true } 
+  });
+};
+
+const getOrderByCartId = async (cartId) => {
+  return await prisma.orders.findFirst({
+    where: { CartID: parseInt(cartId) },
+    include: {
+      Items: true
+    }
+  });
 };
 
 const updateCartStatus = (cartId, status) => {
@@ -143,13 +182,12 @@ const deleteCart = async (cartId) => {
       where: { CartID: cartId },
     });
   };
-
-  const updatePaymentStatus= async (orderId, status) => {
-    return prisma.orders.update({
-      where: { OrderID: parseInt(orderId)  },
-      data: { Status: status }
+const updatePaymentStatus = async (orderId, paymentStatus) => {
+    return await prisma.orders.update({
+      where: { OrderID: parseInt(orderId) },
+      data: { Status: paymentStatus }
     });
-  }
+  };
   
 
   
@@ -161,11 +199,15 @@ module.exports = {
   updateCartItems,
   updateOrder,
   updateOrderTotal,
-  updatePaymentStatus,
+  findActiveCart,
+  getCartItems,
   getOrderById,
   getOrderByUserId,
   getAllOrderbyRestaurantId,
+  getAllOrdersForAdmin,
+  getOrderByCartId,
   deleteOrder,
   deleteCartItems,
-  deleteCart
+  deleteCart,
+  updatePaymentStatus
 };
