@@ -25,7 +25,7 @@ const OrderModel = {
   updateOrder: async (orderId, updatedData) => {
     try {
       // Update the cart items (e.g., update quantity or price)
-      await OrderRepository.updateCartItems(orderId, updatedData.items);
+      await OrderRepository.updateCartItems(cartId, updatedData.items);
 
       // Update the order items as well
       await OrderRepository.updateOrder(orderId, updatedData.items);
@@ -58,12 +58,9 @@ const OrderModel = {
     }
   },
   // Update payment status of an order
-updatePaymentStatus: async (orderId, status) => {
-  return await OrderRepository.updatePaymentStatus(orderId, status);
-},
-
-
-  
+  updatePaymentStatus: async (orderId, paymentStatus) => {
+    return await OrderRepository.updatePaymentStatus(orderId, paymentStatus);
+  },
 };
 
 module.exports = OrderModel;

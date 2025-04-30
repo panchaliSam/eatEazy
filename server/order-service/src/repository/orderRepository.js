@@ -1,5 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient } = require('../generated/prisma');
 const prisma = new PrismaClient();
+
 
 const createCart = (userId, restaurantId, status) => {
   return prisma.carts.create({
@@ -12,8 +13,30 @@ const createCartItem = (data) => {
 };
 
 const createOrder = (data) => {
-  return prisma.orders.create({ data, include: { Items: true } });
+  if (!data.Status) {
+    data.Status = 'Pending'; 
+  }
+  
+  return prisma.orders.create({ 
+    data, 
+    include: { Items: true } 
+  });
 };
+const findActiveCart = async (userId, restaurantId) => {
+  return await prisma.carts.findFirst({
+    where: {
+      UserID: userId,
+      RestaurantID: restaurantId,
+      Status: 'ACTIVE'
+    }
+  });
+};
+const getCartItems = async (cartId) => {
+  return await prisma.cartItems.findMany({
+    where: { CartID: cartId }
+  });
+};
+
 
 const getOrderById = async (orderId) => {
   // Ensure orderId is an integer
@@ -52,6 +75,21 @@ const getAllOrderbyRestaurantId = async(restaurantId) =>{
   });
 
 };
+const getAllOrdersForAdmin = async () => {
+  return await prisma.orders.findMany({
+    orderBy: { CreatedAt: 'desc' },
+    include: { Items: true } 
+  });
+};
+
+const getOrderByCartId = async (cartId) => {
+  return await prisma.orders.findFirst({
+    where: { CartID: parseInt(cartId) },
+    include: {
+      Items: true
+    }
+  });
+};
 
 const updateCartStatus = (cartId, status) => {
   return prisma.carts.update({
@@ -61,30 +99,24 @@ const updateCartStatus = (cartId, status) => {
 };
 
 const updateCartItems = async (cartId, items) => {
-  // First, update the cart items
-  for (const item of items) {
-    console.log("Updating item:", item);
+  try {
+    for (const item of items) {
+      if (!item.CartItemsID) {
+        throw new Error("CartItemsID is required.");
+      }
 
-    if (!item.CartItemsID) {
-      console.log("Missing CartItemsID in:", item);
-      throw new Error("CartItemsID is required to update a cart item.");
+      await prisma.cartItems.update({
+        where: { CartItemsID: item.CartItemsID },
+        data: { Quantity: item.Quantity },
+      });
     }
 
-    await prisma.cartItems.update({
-      where: {
-        CartItemsID: item.CartItemsID, // Ensure this is valid
-      },
-      data: {
-        Quantity: item.Quantity, // Assuming you want to update quantity
-      },
+    return await prisma.cartItems.findMany({
+      where: { CartID: parseInt(cartId) },
     });
-    console.log(`Cart item ${item.CartItemsID} updated with Quantity ${item.Quantity}`);
+  } catch (error) {
+    throw new Error(`Failed to update cart items: ${error.message}`);
   }
-
-  // Fetch the updated cart items
-  const updatedCartItems = await prisma.cartItems.findMany({
-    where: { CartID: parseInt(cartId) },
-  });
 };
 
 const updateOrder = async (orderId, items) => {
@@ -119,9 +151,10 @@ const updateOrderTotal = async (orderId) => {
     where: { OrderID: orderId },
   });
 
-  const totalAmount = updatedOrderItems.reduce((sum, item) => {
-    return sum + item.Price * item.Quantity;
-  }, 0);
+  const totalAmount = updatedOrderItems.reduce(
+    (sum, item) => sum + item.Price * item.Quantity,
+    0
+  );
 
   return await prisma.orders.update({
     where: { OrderID: orderId },
@@ -149,13 +182,12 @@ const deleteCart = async (cartId) => {
       where: { CartID: cartId },
     });
   };
-
-  const updatePaymentStatus= async (orderId, status) => {
-    return prisma.orders.update({
-      where: { OrderID: parseInt(orderId)  },
-      data: { Status: status }
+const updatePaymentStatus = async (orderId, paymentStatus) => {
+    return await prisma.orders.update({
+      where: { OrderID: parseInt(orderId) },
+      data: { Status: paymentStatus }
     });
-  }
+  };
   
 
   
@@ -167,11 +199,15 @@ module.exports = {
   updateCartItems,
   updateOrder,
   updateOrderTotal,
-  updatePaymentStatus,
+  findActiveCart,
+  getCartItems,
   getOrderById,
   getOrderByUserId,
   getAllOrderbyRestaurantId,
+  getAllOrdersForAdmin,
+  getOrderByCartId,
   deleteOrder,
   deleteCartItems,
-  deleteCart
+  deleteCart,
+  updatePaymentStatus
 };

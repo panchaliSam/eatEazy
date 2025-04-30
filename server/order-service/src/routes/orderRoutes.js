@@ -1,23 +1,30 @@
 // orderRoutes.js
 const express = require("express");
 const router = express.Router();
-const { authenticateToken, isRestaurant } = require("../middleware/authMiddleware");
+const { authenticateToken, isRestaurant, isAdmin } = require("../middleware/authMiddleware");
+const serviceAuth = require("../middleware/serviceAuth");
 const {
-    addOrder,
+    addToCart,
+    checkout,
     getOrder,
     getOrderByUserId,
     getAllOrderbyRestaurantId,
+    getAllOrdersForAdmin,
+    getOrderTotal,
     updateCartByCartId,
-    updatePaymentStatus,
-    deleteOrder
+    deleteOrder,
+    updatePaymentStatus
 } = require("../controllers/orderController");
 
-router.post("/addOrder/:restaurantId", addOrder);
+router.post("/addToCart/:restaurantId", addToCart);
+router.post("/checkout/:restaurantId", checkout);
 router.get("/getOrderByOrderId/:id", authenticateToken,getOrder);
 router.get("/getOrderByUserId/:id", authenticateToken,getOrderByUserId);
-router.get("/getAllOrderbyRestaurantId/:id", authenticateToken,isRestaurant,getAllOrderbyRestaurantId);
+router.get("/getAllOrderbyRestaurantId/:id", authenticateToken,getAllOrderbyRestaurantId);
+router.get("/getAllOrdersForAdmin", authenticateToken,isAdmin,getAllOrdersForAdmin);
 router.put("/updateCartByCartId/:cartId", authenticateToken, updateCartByCartId);
-router.put('/:id/payment-status', authenticateToken, updatePaymentStatus);
 router.delete("/deleteOrderByOrderId/:id", authenticateToken, deleteOrder);
+router.put('/:orderId/payment-status', serviceAuth, updatePaymentStatus);
+router.get("/total/:orderId", authenticateToken, getOrderTotal);
 
 module.exports = router;
