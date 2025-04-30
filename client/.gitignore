@@ -25,13 +25,3 @@ dist-ssr
 
 #env
 .env
-
-#App.tsx
-./src/App.tsx
-
-#Dashboard Section
-./src/pages/admin/DashBoardSection.tsx
-./src/pages/customer/DashBoardSection.tsx
-./src/pages/deliveryPerson/DashBoardSection.tsx
-./src/pages/restaurant/DashBoardSection.tsx
-

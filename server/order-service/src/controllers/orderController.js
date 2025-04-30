@@ -1,34 +1,52 @@
 const orderService = require("../services/orderService");
 const OrderRepository = require('../repository/orderRepository');
 
-const addOrder = async (req, res) => {
+const addToCart = async (req, res) => {
   const authHeader = req.headers.authorization;
-
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
 
   const token = authHeader.split(" ")[1];
   const { items } = req.body;
-  const restaurantId = parseInt(req.params.restaurantId); 
+  const restaurantId = parseInt(req.params.restaurantId);
 
   if (isNaN(restaurantId)) {
     return res.status(400).json({ message: "Invalid restaurant ID" });
   }
 
   try {
-    const order = await orderService.processOrder(token, items,restaurantId);
-    res.status(201).json(order);
-  }catch (error) {
-    console.error("Order creation failed:", {
-      message: error.message,
-      responseData: error.response?.data,
-      stack: error.stack
-    });
+    const result = await orderService.addToCart(token, items, restaurantId);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Add to cart failed:", error);
     res.status(500).json({ message: error.message });
   }
-  
 };
+
+const checkout = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Unauthorized: No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  const restaurantId = parseInt(req.params.restaurantId);
+
+  if (isNaN(restaurantId)) {
+    return res.status(400).json({ message: "Invalid restaurant ID" });
+  }
+
+  try {
+    const order = await orderService.checkout(token, restaurantId);
+    res.status(201).json(order);
+  } catch (error) {
+    console.error("Checkout failed:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 const getOrder = async (req, res) => {
   try {
     const order = await orderService.getOrderById(parseInt(req.params.id));
@@ -62,30 +80,48 @@ const getAllOrderbyRestaurantId=async(req,res)=>{
 
   }
 };
+const getAllOrdersForAdmin=async(req,res)=>{
+  try{
+
+    const order=await orderService.getAllOrdersForAdmin();
+    if(!order) return res.status(404).json({message:"No orders for restaurant"});
+    res.json(order);
+  }catch(error){
+    res.status(500).json({message: error.message});
+
+  }
+};
+
+const getOrderTotal = async (req, res) => {
+  try {
+    const orderId = parseInt(req.params.orderId);
+    const total = await orderService.getOrderTotal(orderId);
+    res.status(200).json({ 
+      orderId: orderId,
+      totalAmount: total
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      message: "Failed to get order total", 
+      error: error.message 
+    });
+  }
+};
 
 const updateCartByCartId = async (req, res) => {
   const { cartId } = req.params;
   const { items } = req.body;
-
-  console.log("🔧 [updateCartByCartId] Incoming request to update cartId:", cartId);
-  console.log("📦 Items to update:", JSON.stringify(items, null, 2));
-
+  
   try {
-    const updatedOrder = await orderService.updateCartAndOrder(cartId, items);
-
-    console.log("✅ Cart and Order updated successfully:", updatedOrder);
-
+    const result = await orderService.updateCart(parseInt(cartId), items);
     res.status(200).json({
-      message: "Cart and Order updated successfully",
-      order: updatedOrder,
+      message: "Cart updated successfully",
+      data: result
     });
-
   } catch (error) {
-    console.error("❌ Failed to update cart or order:", error.message);
-
-    res.status(500).json({
-      message: "Failed to update cart or order",
-      error: error.message,
+    res.status(500).json({ 
+      message: "Failed to update cart or order", 
+      error: error.message 
     });
   }
 };
@@ -102,7 +138,7 @@ const deleteOrder = async (req, res) => {
 };
 
 const updatePaymentStatus = async (req, res) => {
-  const { id } = req.params;
+  const { orderId } = req.params;
   const { paymentStatus } = req.body;
 
   if (!paymentStatus) {
@@ -110,9 +146,9 @@ const updatePaymentStatus = async (req, res) => {
   }
 
   try {
-    const updatedOrder = await orderService.updatePaymentStatus(id, paymentStatus);
+    const updatedOrder = await orderService.updatePaymentStatus(orderId, paymentStatus);
     res.status(200).json({ 
-      message: `Payment Status for order ${id} updated to ${paymentStatus}`,
+      message: `Payment Status for order ${orderId} updated to ${paymentStatus}`,
       order: updatedOrder
     });
   } catch (err) {
@@ -122,11 +158,17 @@ const updatePaymentStatus = async (req, res) => {
 };
 
 
+
+
+
 module.exports = {
-  addOrder,
+  addToCart,
+  checkout,
   getOrder,
   getOrderByUserId,
   getAllOrderbyRestaurantId,
+  getAllOrdersForAdmin,
+  getOrderTotal,
   updateCartByCartId,
   updatePaymentStatus,
   deleteOrder,
