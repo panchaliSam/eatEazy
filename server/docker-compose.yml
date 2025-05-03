@@ -1,8 +1,9 @@
+version: "3.8"
+
 services:
+  # API Gateway Service
   api-gateway:
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
+    image: panchalisam/api-gateway:latest
     ports:
       - "4000:4000"
     environment:
@@ -14,10 +15,16 @@ services:
       - restaurant-service
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+
+  # Auth Service
   auth-service:
-    build:
-      context: ./auth-service
-      dockerfile: Dockerfile
+    image: panchalisam/auth-service:latest
     ports:
       - "4001:4001"
     environment:
@@ -28,16 +35,21 @@ services:
       - DATABASE_USER=root
       - DATABASE_PASSWORD=MySQL*123
       - DATABASE_NAME=eatEazy_users
-      - JWT_SECRET=2c22f96cc4f4b71adcb0e10d98749d6996ea89220724c8cad66aa8201a97da81e459198a1ea493819fe0652890b69fe3a009572f17443ae6cde7bd878285bfde9bff26783878b712341df109cd9a13d148dadfda708d65957ec6c357edb8370240146d9b832f1950c4f9deff57f64a45050f5c590fc8c9c3314df8ff32c3dc98fad92e17e12426f2d865d3bdd0dc86891860593039702706919f0cb2d2d3e5fcba699d1bc799f5d0f5f3e699b2b6bc94123f3b819ad48b146ee7a690b7b8633cb3662820bbb554aa06c8bdcd26bf7023f3f63a8a608689149c801486efcf45c7ab13c5e3f13119b1745e8a74987bb0a098e93b8634c7314f128cd5eed65cd08d
+      - JWT_SECRET=your-jwt-secret-here
       - JWT_EXPIRATION=1h
       - REFRESH_TOKEN_EXPIRATION=7d
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
 
+  # Restaurant Service
   restaurant-service:
-    build:
-      context: ./restaurant-service
-      dockerfile: Dockerfile
+    image: panchalisam/restaurant-service:latest
     ports:
       - "4002:4002"
     environment:
@@ -54,6 +66,30 @@ services:
       - auth-service
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+
+  # Frontend Service
+  frontend:
+    image: panchalisam/frontend:latest
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://api-gateway:4000
+    depends_on:
+      - api-gateway
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
 
 networks:
   backend:
