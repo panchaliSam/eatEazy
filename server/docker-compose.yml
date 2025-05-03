@@ -1,8 +1,9 @@
+version: "3.8"
+
 services:
+  # API Gateway Service
   api-gateway:
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
+    image: panchalisam/api-gateway:latest
     ports:
       - "4000:4000"
     environment:
@@ -14,10 +15,16 @@ services:
       - restaurant-service
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+
+  # Auth Service
   auth-service:
-    build:
-      context: ./auth-service
-      dockerfile: Dockerfile
+    image: panchalisam/auth-service:latest
     ports:
       - "4001:4001"
     environment:
@@ -33,11 +40,16 @@ services:
       - REFRESH_TOKEN_EXPIRATION=7d
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
 
+  # Restaurant Service
   restaurant-service:
-    build:
-      context: ./restaurant-service
-      dockerfile: Dockerfile
+    image: panchalisam/restaurant-service:latest
     ports:
       - "4002:4002"
     environment:
@@ -54,6 +66,30 @@ services:
       - auth-service
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+
+  # Frontend Service
+  frontend:
+    image: panchalisam/frontend:latest
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://api-gateway:4000
+    depends_on:
+      - api-gateway
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
 
 networks:
   backend:
