@@ -50,10 +50,6 @@ Follow these steps to install and set up the `restaurant-service`:
    ```
 
 6. **Start the Service**
-   - For production:
-     ```bash
-     npm start
-     ```
    - For development with live reload:
      ```bash
      npm run dev
