@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restaurant-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: restaurant-service
+  template:
+    metadata:
+      labels:
+        app: restaurant-service
+    spec:
+      containers:
+        - name: restaurant-service
+          image: panchalisam/restaurant-service:latest
+          ports:
+            - containerPort: 4002
+          env:
+            - name: PORT
+              value: "4002"
+            - name: DATABASE_URL
+              value: "mysql://root:MySQL*123@host.docker.internal:3306/eatEazy_restaurants"
+            - name: NODE_ENV
+              value: "production"
+            - name: DATABASE_HOST
+              value: "host.docker.internal"
+            - name: DATABASE_USER
+              value: "root"
+            - name: DATABASE_PASSWORD
+              value: "MySQL*123"
+            - name: DATABASE_NAME
+              value: "eatEazy_restaurants"
+            - name: AUTH_SERVICE_VERIFICATION
+              value: "http://auth-service:4001/verify"
+            - name: API_GATEWAY_AUTH_SERVICE_URL
+              value: "http://api-gateway:4000/auth/users"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restaurant-service
+spec:
+  selector:
+    app: restaurant-service
+  ports:
+    - protocol: TCP
+      port: 4002
+      targetPort: 4002
+  type: ClusterIP
