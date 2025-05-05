@@ -57,6 +57,16 @@ const getOrder = async (req, res) => {
   }
 };
 
+const getCartByCartId = async(req,res)=>{
+  try {
+    const order = await orderService.getCartByCartId(parseInt(req.params.id));
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const getOrderByUserId=async(req,res)=>{
   try{
     const order=await orderService.getOrderByUserId(parseInt(req.params.id));
@@ -165,6 +175,7 @@ module.exports = {
   addToCart,
   checkout,
   getOrder,
+  getCartByCartId,
   getOrderByUserId,
   getAllOrderbyRestaurantId,
   getAllOrdersForAdmin,

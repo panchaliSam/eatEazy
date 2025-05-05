@@ -22,6 +22,7 @@ import { getRefreshToken, clearTokens } from "@app_utils/helper/TokenHelper";
 import { AdminDashboardContent } from "@app_components/admin/DashBoardContent";
 import { PeopleContent } from "@app_components/admin/PeopleContent";
 import { RestaurantView } from "@app_components/admin/RestaurantContent";
+import {OrderContent} from "@app_components/admin/OrderContent";
 
 const theme = createTheme({
   palette: {
@@ -177,6 +178,8 @@ export default function DashboardLayoutBasic(props: DemoProps) {
         return <PeopleContent />;
       case "/restaurants":
         return <RestaurantView />;
+      case "/orders":
+          return <OrderContent />;   
       default:
         return <AdminDashboardContent />;
     }

@@ -36,7 +36,12 @@ const getCartItems = async (cartId) => {
     where: { CartID: cartId }
   });
 };
+const getCartByCartId=async(cartId) =>{
+  return await prisma.carts.findUnique({
+    where:{CartID: cartId}
 
+  })
+}
 
 const getOrderById = async (orderId) => {
   // Ensure orderId is an integer
@@ -201,6 +206,7 @@ module.exports = {
   updateOrderTotal,
   findActiveCart,
   getCartItems,
+  getCartByCartId,
   getOrderById,
   getOrderByUserId,
   getAllOrderbyRestaurantId,

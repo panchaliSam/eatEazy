@@ -123,7 +123,11 @@ const updateCart = async (cartId, items) => {
     throw new Error(`Failed to update cart and order: ${error.message}`);
   }
 };
-
+const getCartByCartId=async(id)=>{
+  const cart = await orderRepo.getCartItems(id);
+  if (!cart) throw new Error("Cart not found");
+  return cart;
+};
   
 const getOrderById = async (id) => {
     const order = await orderRepo.getOrderById(id);
@@ -174,6 +178,7 @@ const updatePaymentStatus = async (orderId, paymentStatus) => {
     addToCart,
     checkout,
     updateCart,
+    getCartByCartId,
     getOrderById,
     getOrderByUserId,
     getOrderTotal,

@@ -7,6 +7,7 @@ const {
     addToCart,
     checkout,
     getOrder,
+    getCartByCartId,
     getOrderByUserId,
     getAllOrderbyRestaurantId,
     getAllOrdersForAdmin,
@@ -19,6 +20,7 @@ const {
 router.post("/addToCart/:restaurantId", addToCart);
 router.post("/checkout/:restaurantId", checkout);
 router.get("/getOrderByOrderId/:id", authenticateToken,getOrder);
+router.get("/getCartByCartId/:id",authenticateToken,getCartByCartId);
 router.get("/getOrderByUserId/:id", authenticateToken,getOrderByUserId);
 router.get("/getAllOrderbyRestaurantId/:id", authenticateToken,getAllOrderbyRestaurantId);
 router.get("/getAllOrdersForAdmin", authenticateToken,isAdmin,getAllOrdersForAdmin);
