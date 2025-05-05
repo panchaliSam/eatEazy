@@ -18,6 +18,9 @@ import UserApi from "@app_utils/api/UserApi";
 import { getRefreshToken, clearTokens } from "@app_utils/helper/TokenHelper";
 import { CustomerDashboardContent } from "@app_components/customer/DashBoardContent";
 import { RestaurantView } from "@app_components/customer/RestaurantContent";
+import {CartItemsContent} from "@app_components/customer/CartItemsContent";
+import {CustomerOrderContent} from "@app_components/customer/OrderContent";
+import PaymentPage from "./Payment";
 
 const theme = createTheme({
   palette: {
@@ -150,6 +153,12 @@ export default function DashboardLayoutBasic(props: DemoProps) {
         return <Typography>Page Not Found</Typography>;
       case "/restaurants":
         return <RestaurantView />;
+      case "/orders/cart":
+          return  <CartItemsContent />;
+      case "/orders/order":
+          return  <CustomerOrderContent/>;
+      case "/payments":
+          return <PaymentPage />;    
       default:
         return <CustomerDashboardContent />;
     }
