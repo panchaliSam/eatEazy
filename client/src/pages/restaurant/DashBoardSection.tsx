@@ -22,6 +22,7 @@ import { clearTokens, getRefreshToken } from "@app_utils/helper/TokenHelper";
 import { RestaurantDashboardContent } from "@app_components/restaurant/DashBoardContent";
 import { ManageRestaurantView } from "@app_components/restaurant/ManageRestaurantContent";
 import { RestaurantView } from "@app_components/restaurant/RestaurantContent";
+import { OrderContent } from "@app_components/restaurant/OrderContent";
 
 const theme = createTheme({
   palette: {
@@ -176,6 +177,8 @@ export default function DashboardLayoutBasic(props: DemoProps) {
         return <ManageRestaurantView />;
       case "/menu":
         return <RestaurantView />;
+      case "/orders":
+          return <OrderContent />;  
       default:
         return <RestaurantDashboardContent />;
     }
