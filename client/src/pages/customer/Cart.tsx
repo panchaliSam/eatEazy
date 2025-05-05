@@ -6,21 +6,36 @@ import { CartItemsContent } from "@app_components/customer/CartItemsContent";
 
 export const CartScreen: React.FC = () => {
   const location = useLocation();
-  const { menuItemId, name } = location.state as {
-    menuItemId: string;
-    name: string;
+  console.log("Cart page location state:", location.state);
+  
+  // Extract state with defaults to avoid undefined errors
+  const { menuItemId, menuItemName, menuItemPrice, restaurantId, restaurantName } = (location.state || {}) as {
+    menuItemId?: string;
+    menuItemName?: string;
+    menuItemPrice?: number;
+    restaurantId?: number;
+    restaurantName?: string;
   };
 
-  if (!menuItemId) {
-    return <div>Error: No menu ID provided</div>;
-  } else {
-    console.log("Restaurant ID:", menuItemId);
-  }
+  console.log("Cart page extracted props:", {
+    restaurantId,
+    restaurantName,
+    menuItemId,
+    menuItemName,
+    menuItemPrice
+  });
+
   return (
     <div>
       <CssBaseline />
       <ResponsiveAppBar />
-      <CartItemsContent menuItemId={menuItemId} name={name} />
+      <CartItemsContent 
+        restaurantId={restaurantId}
+        restaurantName={restaurantName}
+        menuItemId={menuItemId} 
+        menuItemName={menuItemName}
+        menuItemPrice={menuItemPrice}
+      />
     </div>
   );
 };
