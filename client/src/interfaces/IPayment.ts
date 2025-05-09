@@ -24,6 +24,7 @@ export interface IPayment {
     address: string;
     city: string;
     country: string;
+    hash: string
   }
   
   
